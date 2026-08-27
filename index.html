@@ -1,0 +1,2657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MATEM - Precálculo</title>
+    <!-- MathJax para texto matemático -->
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [
+                    ['$', '$'],
+                    ['\\(', '\\)']
+                ]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async>
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #F8FAFC;
+            --surface: #FFFFFF;
+            --surface-alt: #F1F5F9;
+            --border: #E2E8F0;
+            --border-strong: #CBD5E1;
+
+            --text-primary: #0F172A;
+            --text-secondary: #334155;
+            --text-muted: #64748B;
+            --text-faint: #94A3B8;
+
+            --accent: #4F46E5;
+            --accent-hover: #4338CA;
+            --accent-light: #EEF2FF;
+
+            --success: #16A34A;
+            --success-hover: #15803D;
+            --success-light: #DCFCE7;
+
+            --danger: #DC2626;
+            --danger-hover: #B91C1C;
+            --danger-light: #FEE2E2;
+
+            --warning: #D97706;
+            --warning-hover: #B45309;
+            --warning-light: #FEF3C7;
+
+            --purple: #7C3AED;
+            --purple-hover: #6D28D9;
+
+            --info: #0284C7;
+
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+
+            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+            --shadow-md: 0 6px 16px -4px rgba(15, 23, 42, 0.08);
+            --shadow-lg: 0 20px 40px -16px rgba(15, 23, 42, 0.18);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-secondary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+
+        /* ---------- Header ---------- */
+        .header {
+            background: var(--text-primary);
+            color: white;
+            padding: 18px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .header h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        /* ---------- Buttons ---------- */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+            font-size: 0.9rem;
+        }
+        .btn:active {
+            opacity: 0.85;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-danger:hover {
+            background: var(--danger-hover);
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        .btn-success:hover {
+            background: var(--success-hover);
+        }
+        .btn-secondary {
+            background: var(--text-primary);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #1E293B;
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .btn-ghost:hover {
+            background: var(--surface-alt);
+            border-color: var(--border-strong);
+        }
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+        .btn-warning:hover {
+            background: var(--warning-hover);
+        }
+        .btn-purple {
+            background: var(--purple);
+            color: white;
+        }
+        .btn-purple:hover {
+            background: var(--purple-hover);
+        }
+
+        /* ---------- Cards ---------- */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+            margin-bottom: 6px;
+        }
+        .card-subtitle {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+            margin-bottom: 22px;
+        }
+
+        /* ---------- Courses ---------- */
+        .course-grid {
+            display: grid;
+            gap: 14px;
+        }
+        .course-item {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+            background: var(--surface);
+        }
+        .course-item:hover {
+            border-color: var(--border-strong);
+            box-shadow: var(--shadow-md);
+        }
+        .course-item.active {
+            border-color: var(--accent);
+            background: var(--accent-light);
+        }
+        .course-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+        .course-icon {
+            font-size: 1.6rem;
+        }
+        .course-info {
+            flex: 1;
+        }
+        .course-title {
+            font-weight: 600;
+            font-size: 1.02rem;
+            color: var(--text-primary);
+        }
+        .course-subtitle {
+            color: var(--text-muted);
+            font-size: 0.87rem;
+        }
+        .course-details {
+            margin-top: 12px;
+        }
+        .course-details p {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+        }
+        .topic-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            background: #E0F2FE;
+            color: var(--info);
+            margin: 3px 4px 3px 0;
+        }
+
+        /* ---------- Exams ---------- */
+        .exam-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: var(--surface-alt);
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+            transition: border-color 0.15s ease;
+        }
+        .exam-item:hover {
+            border-color: var(--border);
+        }
+        .exam-title {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .exam-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* ---------- Forms ---------- */
+        .input-group {
+            margin-bottom: 16px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .input-group input,
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border 0.15s ease, box-shadow 0.15s ease;
+            font-family: inherit;
+            background: var(--surface);
+            color: var(--text-primary);
+        }
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+        .error-msg {
+            background: var(--danger-light);
+            color: var(--danger-hover);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        .success-msg {
+            background: var(--success-light);
+            color: var(--success-hover);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* ---------- Questions ---------- */
+        .question-block {
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            margin-bottom: 12px;
+        }
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .question-header span {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 5px 0;
+        }
+        .option-row input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent);
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .option-row input[type="text"] {
+            flex: 1;
+            padding: 6px 10px;
+            border: none;
+            border-bottom: 1px solid var(--border);
+            background: transparent;
+            outline: none;
+            font-family: inherit;
+        }
+        .option-row input[type="text"]:focus {
+            border-bottom-color: var(--accent);
+        }
+
+        /* ---------- Score / results ---------- */
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+        }
+        .score-circle.passed {
+            border: 4px solid var(--success);
+            background: var(--success-light);
+        }
+        .score-circle.failed {
+            border: 4px solid var(--danger);
+            background: var(--danger-light);
+        }
+        .score-circle.pending {
+            border: 4px solid var(--warning);
+            background: var(--warning-light);
+        }
+        .score-number {
+            font-size: 2.1rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+        .score-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* ---------- Utilities ---------- */
+        .flex {
+            display: flex;
+        }
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .gap-2 { gap: 8px; }
+        .gap-3 { gap: 12px; }
+        .mt-2 { margin-top: 8px; }
+        .mt-3 { margin-top: 12px; }
+        .mt-4 { margin-top: 16px; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-3 { margin-bottom: 12px; }
+        .mb-4 { margin-bottom: 16px; }
+        .text-center { text-align: center; }
+        .text-sm { font-size: 0.88rem; }
+        .text-xs { font-size: 0.75rem; }
+        .text-muted { color: var(--text-muted); }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-primary { color: var(--text-primary); }
+        .text-warning { color: var(--warning-hover); }
+        .hidden { display: none !important; }
+        .w-full { width: 100%; }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+        @media (max-width: 768px) {
+            .grid-2,
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                padding: 14px 20px;
+                flex-direction: column;
+                text-align: center;
+            }
+            .header h1 {
+                font-size: 1.2rem;
+            }
+            .card {
+                padding: 18px;
+            }
+        }
+
+        /* ---------- Loading ---------- */
+        .spinner {
+            border: 3px solid var(--surface-alt);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            animation: spin 0.7s linear infinite;
+            margin: 40px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ---------- Timer ---------- */
+        .timer {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            background: var(--surface-alt);
+            color: var(--text-primary);
+        }
+        .timer-warning {
+            background: var(--danger-light);
+            color: var(--danger-hover);
+            animation: pulse 1s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.55; }
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .radio-option:hover {
+            background: var(--surface-alt);
+        }
+        .short-answer-input {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border 0.15s ease;
+            font-family: inherit;
+            margin-top: 4px;
+        }
+        .short-answer-input:focus {
+            border-color: var(--accent);
+        }
+
+        /* ---------- Badges ---------- */
+        .grade-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .grade-badge.passed {
+            background: var(--success-light);
+            color: var(--success-hover);
+        }
+        .grade-badge.failed {
+            background: var(--danger-light);
+            color: var(--danger-hover);
+        }
+        .grade-badge.pending {
+            background: var(--warning-light);
+            color: var(--warning-hover);
+        }
+
+        .comment-box {
+            background: var(--surface-alt);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-top: 8px;
+            border-left: 3px solid var(--accent);
+        }
+        .comment-box .comment-text {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+        }
+        .comment-box .comment-date {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .student-grade-summary {
+            border-bottom: 1px solid var(--border);
+            padding: 12px 0;
+        }
+        .student-grade-summary:last-child {
+            border-bottom: none;
+        }
+        .profile-section {
+            background: var(--surface-alt);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-top: 16px;
+        }
+        .profile-section h4 {
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+        .math-text {
+            font-size: 1.02rem;
+            padding: 4px 0;
+        }
+        .math-text .math {
+            font-size: 1.05rem;
+        }
+        .teacher-code-hint {
+            background: var(--accent-light);
+            border: 1px dashed #C7D2FE;
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+        .teacher-code-hint code {
+            background: var(--surface);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.88rem;
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js">
+    </script>
+
+    <script>
+        // ============================================
+        // CONFIGURACIÓN DE FIREBASE
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvKlGSfuc7so2XLxh5sMCWnZc-4hf3eaM",
+            authDomain: "matem-examenes.firebaseapp.com",
+            projectId: "matem-examenes",
+            storageBucket: "matem-examenes.firebasestorage.app",
+            messagingSenderId: "869577580827",
+            appId: "1:869577580827:web:d96f639e20f21bc0fbb3be",
+            measurementId: "G-0TWL32GYG2"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Habilitar persistencia offline
+        db.enablePersistence().catch(err => console.warn('Persistencia offline no disponible:', err));
+
+        // ============================================
+        // CÓDIGO ESPECIAL PARA PROFESORES
+        // ============================================
+        const TEACHER_SIGNUP_CODE = "MATEM2024"; // Código para registrarse como profesor
+
+        // ============================================
+        // DATOS DEL CURSO
+        // ============================================
+        const COURSE_PARTS = [{
+            id: 1,
+            title: "Precálculo I",
+            subtitle: "Fundamentos de Álgebra",
+            description: "Álgebra básica, ecuaciones lineales, cuadráticas, sistemas de ecuaciones, funciones y sus gráficas.",
+            topics: [
+                "Propiedades de los números reales",
+                "Ecuaciones y desigualdades",
+                "Funciones y sus gráficas",
+                "Funciones lineales y cuadráticas",
+                "Sistemas de ecuaciones"
+            ],
+            color: "#0284C7",
+            icon: "📚"
+        }, {
+            id: 2,
+            title: "Precálculo II",
+            subtitle: "Funciones Avanzadas",
+            description: "Funciones polinomiales, racionales, exponenciales, logarítmicas y trigonometría básica.",
+            topics: [
+                "Funciones polinomiales",
+                "Funciones racionales",
+                "Funciones exponenciales",
+                "Funciones logarítmicas",
+                "Introducción a la trigonometría"
+            ],
+            color: "#22C55E",
+            icon: "📖"
+        }, {
+            id: 3,
+            title: "Precálculo III",
+            subtitle: "Trigonometría y Geometría",
+            description: "Trigonometría avanzada, identidades, ecuaciones trigonométricas, geometría analítica y secciones cónicas.",
+            topics: [
+                "Identidades trigonométricas",
+                "Ecuaciones trigonométricas",
+                "Ley de senos y cosenos",
+                "Secciones cónicas",
+                "Geometría analítica"
+            ],
+            color: "#4F46E5",
+            icon: "📐"
+        }, {
+            id: 4,
+            title: "Precálculo IV",
+            subtitle: "Matemáticas Discretas y Probabilidad",
+            description: "Sucesiones, series, matrices, probabilidad, estadística y fundamentos del cálculo.",
+            topics: [
+                "Sucesiones y series",
+                "Matrices y determinantes",
+                "Probabilidad básica",
+                "Estadística descriptiva",
+                "Introducción al cálculo"
+            ],
+            color: "#8B5CF6",
+            icon: "📊"
+        }];
+
+        // ============================================
+        // UTILIDADES
+        // ============================================
+        function genId() {
+            return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+        }
+
+        function sanitize(str) {
+            return (str || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").slice(0, 60) || "anon";
+        }
+
+        function formatDate(ts) {
+            if (!ts) return '';
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toLocaleString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function renderMath() {
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch(err => console.warn('MathJax error:', err));
+            }
+        }
+
+        // ============================================
+        // SERVICIOS DE FIREBASE
+        // ============================================
+        const FirebaseService = {
+            // --- Exámenes ---
+            async getExams() {
+                try {
+                    const snapshot = await db.collection('exams')
+                        .orderBy('createdAt', 'desc')
+                        .get();
+                    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } catch (error) {
+                    console.error('Error obteniendo exámenes:', error);
+                    return [];
+                }
+            },
+
+            async getExam(examId) {
+                try {
+                    const doc = await db.collection('exams').doc(examId).get();
+                    if (!doc.exists) return null;
+                    return { id: doc.id, ...doc.data() };
+                } catch (error) {
+                    console.error('Error obteniendo examen:', error);
+                    return null;
+                }
+            },
+
+            async saveExam(examData) {
+                try {
+                    const docRef = await db.collection('exams').add({
+                        ...examData,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    return docRef.id;
+                } catch (error) {
+                    console.error('Error guardando examen:', error);
+                    throw error;
+                }
+            },
+
+            async deleteExam(examId) {
+                try {
+                    await db.collection('exams').doc(examId).delete();
+                    const attempts = await db.collection('attempts')
+                        .where('examId', '==', examId)
+                        .get();
+                    const batch = db.batch();
+                    attempts.docs.forEach(doc => {
+                        batch.delete(doc.ref);
+                    });
+                    await batch.commit();
+                    return true;
+                } catch (error) {
+                    console.error('Error eliminando examen:', error);
+                    throw error;
+                }
+            },
+
+            // --- Intentos ---
+            async saveAttempt(attemptData) {
+                try {
+                    const docRef = await db.collection('attempts').add({
+                        ...attemptData,
+                        submittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        gradingStatus: 'pending',
+                        finalGrade: null,
+                        teacherComments: []
+                    });
+                    return docRef.id;
+                } catch (error) {
+                    console.error('Error guardando intento:', error);
+                    throw error;
+                }
+            },
+
+            async getAttemptsByExam(examId) {
+                try {
+                    const snapshot = await db.collection('attempts')
+                        .where('examId', '==', examId)
+                        .orderBy('submittedAt', 'desc')
+                        .get();
+                    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } catch (error) {
+                    console.error('Error obteniendo intentos:', error);
+                    return [];
+                }
+            },
+
+            async getAttemptsByStudent(studentId) {
+                try {
+                    const snapshot = await db.collection('attempts')
+                        .where('studentId', '==', studentId)
+                        .orderBy('submittedAt', 'desc')
+                        .get();
+                    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } catch (error) {
+                    console.error('Error obteniendo intentos del estudiante:', error);
+                    return [];
+                }
+            },
+
+            async getAttempt(attemptId) {
+                try {
+                    const doc = await db.collection('attempts').doc(attemptId).get();
+                    if (!doc.exists) return null;
+                    return { id: doc.id, ...doc.data() };
+                } catch (error) {
+                    console.error('Error obteniendo intento:', error);
+                    return null;
+                }
+            },
+
+            async updateAttempt(attemptId, data) {
+                try {
+                    await db.collection('attempts').doc(attemptId).update({
+                        ...data,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    return true;
+                } catch (error) {
+                    console.error('Error actualizando intento:', error);
+                    throw error;
+                }
+            },
+
+            async addCommentToAttempt(attemptId, comment, teacherName) {
+                try {
+                    const attemptRef = db.collection('attempts').doc(attemptId);
+                    await attemptRef.update({
+                        teacherComments: firebase.firestore.FieldValue.arrayUnion({
+                            id: genId(),
+                            text: comment,
+                            teacherName: teacherName,
+                            date: firebase.firestore.FieldValue.serverTimestamp()
+                        })
+                    });
+                    return true;
+                } catch (error) {
+                    console.error('Error agregando comentario:', error);
+                    throw error;
+                }
+            },
+
+            // --- Estudiantes ---
+            async getStudent(studentId) {
+                try {
+                    const doc = await db.collection('students').doc(studentId).get();
+                    if (!doc.exists) return null;
+                    return { id: doc.id, ...doc.data() };
+                } catch (error) {
+                    console.error('Error obteniendo estudiante:', error);
+                    return null;
+                }
+            },
+
+            async saveStudent(studentData) {
+                try {
+                    await db.collection('students').doc(studentData.id).set({
+                        ...studentData,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                    return studentData.id;
+                } catch (error) {
+                    console.error('Error guardando estudiante:', error);
+                    throw error;
+                }
+            },
+
+            // --- Profesores ---
+            async getTeacher(uid) {
+                try {
+                    const doc = await db.collection('teachers').doc(uid).get();
+                    if (!doc.exists) return null;
+                    return { id: doc.id, ...doc.data() };
+                } catch (error) {
+                    console.error('Error obteniendo profesor:', error);
+                    return null;
+                }
+            },
+
+            async saveTeacher(teacherData) {
+                try {
+                    await db.collection('teachers').doc(teacherData.uid).set({
+                        ...teacherData,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                    return teacherData.uid;
+                } catch (error) {
+                    console.error('Error guardando profesor:', error);
+                    throw error;
+                }
+            },
+
+            async getAllTeachers() {
+                try {
+                    const snapshot = await db.collection('teachers').get();
+                    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                } catch (error) {
+                    console.error('Error obteniendo profesores:', error);
+                    return [];
+                }
+            },
+
+            // --- Autenticación ---
+            async login(email, password) {
+                try {
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    return userCredential.user;
+                } catch (error) {
+                    console.error('Error de autenticación:', error);
+                    throw error;
+                }
+            },
+
+            async register(email, password) {
+                try {
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    return userCredential.user;
+                } catch (error) {
+                    console.error('Error registrando usuario:', error);
+                    throw error;
+                }
+            },
+
+            async logout() {
+                try {
+                    await auth.signOut();
+                } catch (error) {
+                    console.error('Error cerrando sesión:', error);
+                }
+            },
+
+            // Suscripciones en tiempo real
+            subscribeToExams(callback) {
+                return db.collection('exams')
+                    .orderBy('createdAt', 'desc')
+                    .onSnapshot((snapshot) => {
+                        const exams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        callback(exams);
+                    }, (error) => {
+                        console.error('Error en suscripción:', error);
+                    });
+            },
+
+            subscribeToAttemptsByExam(examId, callback) {
+                return db.collection('attempts')
+                    .where('examId', '==', examId)
+                    .orderBy('submittedAt', 'desc')
+                    .onSnapshot((snapshot) => {
+                        const attempts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        callback(attempts);
+                    }, (error) => {
+                        console.error('Error en suscripción:', error);
+                    });
+            },
+
+            subscribeToStudentAttempts(studentId, callback) {
+                return db.collection('attempts')
+                    .where('studentId', '==', studentId)
+                    .orderBy('submittedAt', 'desc')
+                    .onSnapshot((snapshot) => {
+                        const attempts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        callback(attempts);
+                    }, (error) => {
+                        console.error('Error en suscripción:', error);
+                    });
+            }
+        };
+
+        // ============================================
+        // APLICACIÓN PRINCIPAL
+        // ============================================
+        class App {
+            constructor() {
+                this.state = {
+                    view: 'home',
+                    error: '',
+                    success: '',
+                    selectedPart: null,
+
+                    // Auth
+                    authUser: null,
+                    userRole: null, // 'teacher' | 'student'
+
+                    // Teacher
+                    teacherEmail: '',
+                    teacherPass: '',
+                    teacherName: '',
+                    teacherSignupCode: '',
+                    isTeacher: false,
+                    teacherData: null,
+                    exams: [],
+                    examUnsubscribe: null,
+
+                    // Student
+                    studentEmail: '',
+                    studentPass: '',
+                    studentName: '',
+                    studentId: '',
+                    loggedStudent: null,
+                    attemptsOfStudent: [],
+                    studentUnsubscribe: null,
+
+                    // Exam creation
+                    draftTitle: '',
+                    draftQuestions: [],
+                    draftTimeLimit: 30,
+                    draftPart: 1,
+
+                    // Taking exam
+                    activeExam: null,
+                    answers: {},
+                    result: null,
+                    timeRemaining: 0,
+                    examTimer: null,
+
+                    // Results
+                    resultsExam: null,
+                    resultsList: [],
+                    openAttempt: null,
+                    stats: null,
+                    resultsUnsubscribe: null,
+
+                    // Grading
+                    gradingAttempt: null,
+                    gradingQuestions: [],
+
+                    busy: false
+                };
+
+                // Escuchar cambios de autenticación
+                auth.onAuthStateChanged(async (user) => {
+                    if (user) {
+                        this.state.authUser = user;
+                        // Verificar si es profesor
+                        const teacherData = await FirebaseService.getTeacher(user.uid);
+                        if (teacherData) {
+                            this.state.isTeacher = true;
+                            this.state.teacherData = teacherData;
+                            this.state.userRole = 'teacher';
+                            await this.loadExams();
+                            this.setState({ view: 'teacher-dashboard', error: '', success: '' });
+                        } else {
+                            // Verificar si es estudiante
+                            const studentData = await FirebaseService.getStudent(user.uid);
+                            if (studentData) {
+                                this.state.loggedStudent = {
+                                    ...studentData,
+                                    uid: user.uid,
+                                    email: user.email
+                                };
+                                this.state.userRole = 'student';
+                                await this.loadStudentAttempts(user.uid);
+                                this.setState({ view: 'student-list', error: '', success: '' });
+                            } else {
+                                // Usuario autenticado pero sin rol - redirigir a home
+                                this.setState({ view: 'home', error: '', success: '' });
+                            }
+                        }
+                    } else {
+                        this.state.authUser = null;
+                        this.state.userRole = null;
+                        this.state.isTeacher = false;
+                        this.state.teacherData = null;
+                        this.state.loggedStudent = null;
+                        if (!['teacher-login', 'student-login', 'student-register', 'teacher-register'].includes(this
+                                .state.view)) {
+                            this.setState({ view: 'home', error: '', success: '' });
+                        }
+                    }
+                    this.render();
+                    // Renderizar math después de renderizar
+                    setTimeout(renderMath, 300);
+                });
+
+                this.render();
+            }
+
+            // ============================================
+            // MÉTODOS DE ESTADO
+            // ============================================
+            setState(newState) {
+                Object.assign(this.state, newState);
+                this.render();
+                setTimeout(renderMath, 300);
+            }
+
+            setError(msg) {
+                this.setState({ error: msg, success: '' });
+            }
+
+            setSuccess(msg) {
+                this.setState({ success: msg, error: '' });
+            }
+
+            setBusy(busy) {
+                this.setState({ busy: busy });
+            }
+
+            // ============================================
+            // CARGA DE DATOS
+            // ============================================
+            async loadExams() {
+                try {
+                    const exams = await FirebaseService.getExams();
+                    this.state.exams = exams;
+                    return exams;
+                } catch (error) {
+                    console.error('Error cargando exámenes:', error);
+                    return [];
+                }
+            }
+
+            async loadStudentAttempts(uid) {
+                try {
+                    const attempts = await FirebaseService.getAttemptsByStudent(uid);
+                    this.state.attemptsOfStudent = attempts;
+                    return attempts;
+                } catch (error) {
+                    console.error('Error cargando intentos:', error);
+                    return [];
+                }
+            }
+
+            // ============================================
+            // RENDER
+            // ============================================
+            render() {
+                const app = document.getElementById('app');
+                const { view } = this.state;
+
+                let html = '';
+
+                switch (view) {
+                    case 'home':
+                        html = this.renderHome();
+                        break;
+                    case 'teacher-login':
+                        html = this.renderTeacherLogin();
+                        break;
+                    case 'teacher-register':
+                        html = this.renderTeacherRegister();
+                        break;
+                    case 'teacher-dashboard':
+                        html = this.renderTeacherDashboard();
+                        break;
+                    case 'teacher-create':
+                        html = this.renderTeacherCreate();
+                        break;
+                    case 'teacher-results':
+                        html = this.renderTeacherResults();
+                        break;
+                    case 'teacher-grade':
+                        html = this.renderTeacherGrade();
+                        break;
+                    case 'student-login':
+                        html = this.renderStudentLogin();
+                        break;
+                    case 'student-register':
+                        html = this.renderStudentRegister();
+                        break;
+                    case 'student-list':
+                        html = this.renderStudentList();
+                        break;
+                    case 'student-exam':
+                        html = this.renderStudentExam();
+                        break;
+                    case 'student-result':
+                        html = this.renderStudentResult();
+                        break;
+                    case 'student-grades':
+                        html = this.renderStudentGrades();
+                        break;
+                    default:
+                        html = this.renderHome();
+                }
+
+                app.innerHTML = html;
+                setTimeout(renderMath, 400);
+            }
+
+            // ============================================
+            // VISTAS
+            // ============================================
+
+            // --- HOME ---
+            renderHome() {
+                const { selectedPart, isTeacher, authUser } = this.state;
+
+                return `
+                    <div class="header">
+                        <h1>🎓 MATEM</h1>
+                        <div class="header-buttons">
+                            ${isTeacher ? `
+                                <span style="color:#F8FAFC;font-size:0.9rem;">👨‍🏫 ${this.state.teacherData?.name || 'Profesor'}</span>
+                                <button class="btn btn-primary" onclick="app.goToTeacherDashboard()">📊 Panel</button>
+                                <button class="btn btn-outline" onclick="app.logout()">🚪 Salir</button>
+                            ` : authUser ? `
+                                <button class="btn btn-outline" onclick="app.logout()">🚪 Salir</button>
+                            ` : `
+                                <button class="btn btn-outline" onclick="app.goToTeacherLogin()">👨‍🏫 Profesor</button>
+                                <button class="btn btn-primary" onclick="app.goToStudentLogin()">👨‍🎓 Estudiante</button>
+                            `}
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <h2 style="font-size:2rem;font-weight:700;color:#0F172A;">Curso de Precálculo</h2>
+                        <p style="color:#64748B;font-size:1.1rem;margin-bottom:24px;">4 partes para dominar las matemáticas previas al cálculo</p>
+
+                        <div class="course-grid">
+                            ${COURSE_PARTS.map(part => `
+                                <div class="course-item ${selectedPart === part.id ? 'active' : ''}" onclick="app.togglePart(${part.id})">
+                                    <div class="course-header">
+                                        <span class="course-icon">${part.icon}</span>
+                                        <div class="course-info">
+                                            <div class="course-title">${part.title}</div>
+                                            <div class="course-subtitle">${part.subtitle}</div>
+                                            ${selectedPart === part.id ? `
+                                                <div class="course-details">
+                                                    <p>${part.description}</p>
+                                                    <div style="margin-top:10px;">
+                                                        ${part.topics.map(t => `<span class="topic-tag">${t}</span>`).join('')}
+                                                    </div>
+                                                    ${this.state.isTeacher ? `
+                                                        <div style="margin-top:12px;">
+                                                            <button class="btn btn-primary" onclick="event.stopPropagation();app.goToCreateExam(${part.id})">📝 Crear examen</button>
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                        <span style="color:#94A3B8;font-size:1.2rem;">›</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEACHER LOGIN ---
+            renderTeacherLogin() {
+                const { error, success, busy, teacherEmail, teacherPass } = this.state;
+
+                return `
+                    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#F8FAFC;">
+                        <div class="card" style="max-width:420px;width:100%;">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
+                                <button class="btn btn-ghost" onclick="app.goToHome()" style="padding:8px 12px;">←</button>
+                                <h2 class="card-title" style="margin-bottom:0;">Acceso Profesor</h2>
+                            </div>
+                            <p class="card-subtitle">Inicia sesión con tu cuenta de profesor</p>
+
+                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
+                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
+
+                            <div class="input-group">
+                                <label>Email</label>
+                                <input type="email" value="${teacherEmail}" oninput="app.state.teacherEmail = this.value" placeholder="profesor@email.com" />
+                            </div>
+                            <div class="input-group">
+                                <label>Contraseña</label>
+                                <input type="password" value="${teacherPass}" oninput="app.state.teacherPass = this.value" placeholder="••••••••" />
+                            </div>
+
+                            <button class="btn btn-primary w-full" onclick="app.handleTeacherLogin()" ${busy ? 'disabled' : ''}>
+                                ${busy ? '⏳ Cargando...' : '🚪 Entrar'}
+                            </button>
+
+                            <div style="margin-top:12px;text-align:center;">
+                                <span style="color:#64748B;font-size:0.9rem;">¿No tienes cuenta de profesor?</span>
+                                <button class="btn btn-purple" onclick="app.goToTeacherRegister()" style="padding:6px 16px;font-size:0.85rem;margin-left:8px;">Registrarse</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEACHER REGISTER ---
+            renderTeacherRegister() {
+                const { error, success, busy, teacherEmail, teacherPass, teacherName, teacherSignupCode } = this.state;
+
+                return `
+                    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#F8FAFC;">
+                        <div class="card" style="max-width:420px;width:100%;">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
+                                <button class="btn btn-ghost" onclick="app.goToTeacherLogin()" style="padding:8px 12px;">←</button>
+                                <h2 class="card-title" style="margin-bottom:0;">Registro Profesor</h2>
+                            </div>
+                            <p class="card-subtitle">Crea tu cuenta de profesor</p>
+
+                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
+                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
+
+                            <div class="teacher-code-hint">
+                                <span style="font-size:0.85rem;">🔑 Necesitas el código especial para registrarte como profesor</span>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Nombre completo</label>
+                                <input type="text" value="${teacherName}" oninput="app.state.teacherName = this.value" placeholder="Dr. Juan Pérez" />
+                            </div>
+                            <div class="input-group">
+                                <label>Email</label>
+                                <input type="email" value="${teacherEmail}" oninput="app.state.teacherEmail = this.value" placeholder="profesor@email.com" />
+                            </div>
+                            <div class="input-group">
+                                <label>Contraseña</label>
+                                <input type="password" value="${teacherPass}" oninput="app.state.teacherPass = this.value" placeholder="Mínimo 6 caracteres" />
+                            </div>
+                            <div class="input-group">
+                                <label>Código de verificación de profesor</label>
+                                <input type="text" value="${teacherSignupCode}" oninput="app.state.teacherSignupCode = this.value" placeholder="Ingresa el código especial" />
+                                <div style="font-size:0.75rem;color:#64748B;margin-top:4px;">
+                                    💡 Pista: El código es <strong>MATEM2024</strong>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-purple w-full" onclick="app.handleTeacherRegister()" ${busy ? 'disabled' : ''}>
+                                ${busy ? '⏳ Cargando...' : '📝 Registrarse como profesor'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- STUDENT LOGIN ---
+            renderStudentLogin() {
+                const { error, success, busy, studentEmail, studentPass } = this.state;
+
+                return `
+                    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#F8FAFC;">
+                        <div class="card" style="max-width:420px;width:100%;">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
+                                <button class="btn btn-ghost" onclick="app.goToHome()" style="padding:8px 12px;">←</button>
+                                <h2 class="card-title" style="margin-bottom:0;">Acceso Estudiante</h2>
+                            </div>
+                            <p class="card-subtitle">Inicia sesión con tu cuenta</p>
+
+                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
+                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
+
+                            <div class="input-group">
+                                <label>Email</label>
+                                <input type="email" value="${studentEmail}" oninput="app.state.studentEmail = this.value" placeholder="estudiante@email.com" />
+                            </div>
+                            <div class="input-group">
+                                <label>Contraseña</label>
+                                <input type="password" value="${studentPass}" oninput="app.state.studentPass = this.value" placeholder="••••••••" />
+                            </div>
+
+                            <button class="btn btn-primary w-full" onclick="app.handleStudentLogin()" ${busy ? 'disabled' : ''}>
+                                ${busy ? '⏳ Cargando...' : '🚪 Entrar'}
+                            </button>
+
+                            <div style="margin-top:12px;text-align:center;">
+                                <span style="color:#64748B;font-size:0.9rem;">¿No tienes cuenta?</span>
+                                <button class="btn btn-secondary" onclick="app.goToStudentRegister()" style="padding:6px 16px;font-size:0.85rem;margin-left:8px;">Registrarse</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- STUDENT REGISTER ---
+            renderStudentRegister() {
+                const { error, success, busy, studentEmail, studentPass, studentName, studentId } = this.state;
+
+                return `
+                    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#F8FAFC;">
+                        <div class="card" style="max-width:420px;width:100%;">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
+                                <button class="btn btn-ghost" onclick="app.goToStudentLogin()" style="padding:8px 12px;">←</button>
+                                <h2 class="card-title" style="margin-bottom:0;">Registro Estudiante</h2>
+                            </div>
+                            <p class="card-subtitle">Crea tu cuenta para acceder a los exámenes</p>
+
+                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
+                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
+
+                            <div class="input-group">
+                                <label>Nombre completo</label>
+                                <input type="text" value="${studentName}" oninput="app.state.studentName = this.value" placeholder="Juan Pérez" />
+                            </div>
+                            <div class="input-group">
+                                <label>ID de estudiante (carné)</label>
+                                <input type="text" value="${studentId}" oninput="app.state.studentId = this.value" placeholder="2024-0001" />
+                            </div>
+                            <div class="input-group">
+                                <label>Email</label>
+                                <input type="email" value="${studentEmail}" oninput="app.state.studentEmail = this.value" placeholder="estudiante@email.com" />
+                            </div>
+                            <div class="input-group">
+                                <label>Contraseña</label>
+                                <input type="password" value="${studentPass}" oninput="app.state.studentPass = this.value" placeholder="Mínimo 6 caracteres" />
+                            </div>
+
+                            <button class="btn btn-primary w-full" onclick="app.handleStudentRegister()" ${busy ? 'disabled' : ''}>
+                                ${busy ? '⏳ Cargando...' : '📝 Registrarse'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEACHER DASHBOARD ---
+            renderTeacherDashboard() {
+                const { exams, error, success, teacherData } = this.state;
+
+                const grouped = {};
+                exams.forEach(e => {
+                    const p = e.part || 1;
+                    if (!grouped[p]) grouped[p] = [];
+                    grouped[p].push(e);
+                });
+
+                return `
+                    <div class="header">
+                        <h1>📊 MATEM</h1>
+                        <div class="header-buttons">
+                            <span style="color:#F8FAFC;font-size:0.9rem;">👨‍🏫 ${teacherData?.name || 'Profesor'}</span>
+                            <button class="btn btn-primary" onclick="app.goToCreateExam()">➕ Nuevo examen</button>
+                            <button class="btn btn-outline" onclick="app.goToHome()">🏠 Inicio</button>
+                            <button class="btn btn-danger" onclick="app.logout()">🚪 Salir</button>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="card">
+                            <div class="flex-between">
+                                <div>
+                                    <h2 class="card-title">Panel del Profesor</h2>
+                                    <p class="card-subtitle">${exams.length} exámenes creados</p>
+                                </div>
+                            </div>
+
+                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
+                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
+
+                            ${exams.length === 0 ? `
+                                <div class="text-center" style="padding:40px 0;">
+                                    <div style="font-size:4rem;">📄</div>
+                                    <p style="color:#64748B;">No hay exámenes creados todavía.</p>
+                                    <button class="btn btn-primary mt-3" onclick="app.goToCreateExam()">Crear primer examen</button>
+                                </div>
+                            ` : `
+                                ${Object.entries(grouped).map(([partId, partExams]) => {
+                                    const part = COURSE_PARTS.find(p => p.id === parseInt(partId));
+                                    return `
+                                        <div style="margin-bottom:20px;">
+                                            <h3 style="font-weight:600;color:#0F172A;margin-bottom:10px;">${part ? part.title : `Parte ${partId}`}</h3>
+                                            ${partExams.map(e => `
+                                                <div class="exam-item">
+                                                    <div>
+                                                        <div class="exam-title">${e.title}</div>
+                                                        <div class="exam-meta">${e.questions?.length || 0} preguntas · ${e.timeLimit || 30} min</div>
+                                                    </div>
+                                                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                                        <button class="btn btn-secondary" onclick="app.openResults('${e.id}')" style="padding:6px 16px;font-size:0.85rem;">📊 Resultados</button>
+                                                        <button class="btn btn-danger" onclick="app.deleteExam('${e.id}')" style="padding:6px 16px;font-size:0.85rem;">🗑️</button>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEACHER CREATE ---
+            renderTeacherCreate() {
+                const { error, busy, draftTitle, draftQuestions, draftTimeLimit, draftPart } = this.state;
+                const part = COURSE_PARTS.find(p => p.id === draftPart);
+
+                return `
+                    <div class="header">
+                        <h1>📝 MATEM</h1>
+                        <div class="header-buttons">
+                            <button class="btn btn-outline" onclick="app.goToTeacherDashboard()">← Volver</button>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="card">
+                            <h2 class="card-title">Crear Examen</h2>
+                            <p class="card-subtitle">${part ? `Parte ${part.id}: ${part.title}` : 'Nuevo examen'}</p>
+
+                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
+
+                            <div class="grid-2">
+                                <div class="input-group">
+                                    <label>Título del examen</label>
+                                    <input type="text" value="${draftTitle}" oninput="app.state.draftTitle = this.value" placeholder="Ej: Examen de Álgebra" />
+                                </div>
+                                <div class="input-group">
+                                    <label>Parte del curso</label>
+                                    <select onchange="app.state.draftPart = parseInt(this.value)">
+                                        ${COURSE_PARTS.map(p => `
+                                            <option value="${p.id}" ${p.id === draftPart ? 'selected' : ''}>${p.title}</option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label>Tiempo límite (minutos)</label>
+                                    <input type="number" value="${draftTimeLimit}" oninput="app.state.draftTimeLimit = parseInt(this.value) || 1" min="1" max="180" />
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom:12px;padding:12px 16px;background:#F8FAFC;border-radius:8px;border:1px solid #E2E8F0;">
+                                <span style="font-size:0.85rem;color:#64748B;">📐 Puedes usar <strong>MathJax</strong> para ecuaciones: <code>\$x^2 + y^2 = r^2\$</code></span>
+                            </div>
+
+                            ${draftQuestions.map((q, qi) => `
+                                <div class="question-block">
+                                    <div class="question-header">
+                                        <span>PREGUNTA ${qi + 1} · ${q.type === 'tf' ? 'Verdadero/Falso' : q.type === 'sa' ? 'Respuesta Corta' : 'Opción múltiple'}</span>
+                                        <button class="btn btn-danger" onclick="app.removeDraftQuestion('${q.id}')" style="padding:4px 12px;font-size:0.8rem;">🗑️</button>
+                                    </div>
+                                    <div class="input-group" style="margin-bottom:8px;">
+                                        <label style="font-size:0.8rem;">Enunciado (puedes usar \$...\$ para matemáticas)</label>
+                                        <input type="text" value="${q.text}" oninput="app.updateDraftQuestion('${q.id}', { text: this.value })" placeholder="Ej: Resuelve la ecuación \$2x + 3 = 7\$" style="width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;outline:none;font-size:1rem;background:white;" />
+                                    </div>
+                                    
+                                    ${q.type === 'sa' ? `
+                                        <div style="padding:8px 12px;background:#EEF2FF;border-radius:6px;border:1px dashed #E2E8F0;">
+                                            <span style="font-size:0.85rem;color:#64748B;">📝 Respuesta corta</span>
+                                            <div style="margin-top:8px;">
+                                                <label style="font-size:0.75rem;color:#64748B;">Respuesta correcta (el sistema validará automáticamente):</label>
+                                                <input type="text" value="${q.correctAnswer || ''}" oninput="app.updateDraftQuestion('${q.id}', { correctAnswer: this.value })" placeholder="Ej: x = 2" style="width:100%;padding:6px 12px;border:1px solid #E2E8F0;border-radius:4px;margin-top:4px;font-size:0.9rem;" />
+                                            </div>
+                                            <div style="margin-top:6px;">
+                                                <label style="font-size:0.75rem;color:#64748B;">Palabras clave adicionales (separadas por coma):</label>
+                                                <input type="text" value="${q.keywords || ''}" oninput="app.updateDraftQuestion('${q.id}', { keywords: this.value })" placeholder="Ej: función, lineal, pendiente" style="width:100%;padding:6px 12px;border:1px solid #E2E8F0;border-radius:4px;margin-top:4px;font-size:0.9rem;" />
+                                            </div>
+                                            <div style="font-size:0.7rem;color:#64748B;margin-top:4px;">💡 La respuesta se valida comparando con la respuesta correcta (ignorando espacios y mayúsculas)</div>
+                                        </div>
+                                    ` : q.options.map((opt, oi) => `
+                                        <div class="option-row">
+                                            <input type="radio" ${q.correctIndex === oi ? 'checked' : ''} onchange="app.updateDraftQuestion('${q.id}', { correctIndex: ${oi} })" />
+                                            <input type="text" value="${opt}" oninput="app.updateOption('${q.id}', ${oi}, this.value)" placeholder="Opción ${oi + 1}" />
+                                        </div>
+                                    `).join('')}
+                                    
+                                    ${q.type !== 'sa' ? `
+                                        <div style="font-size:0.7rem;color:#64748B;font-family:monospace;margin-top:4px;">Marca el círculo de la respuesta correcta</div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+
+                            <div style="display:flex;gap:10px;margin:16px 0;flex-wrap:wrap;">
+                                <button class="btn btn-secondary" onclick="app.addDraftQuestion('mc')">➕ Opción múltiple</button>
+                                <button class="btn btn-secondary" onclick="app.addDraftQuestion('tf')">➕ Verdadero/Falso</button>
+                                <button class="btn btn-secondary" onclick="app.addDraftQuestion('sa')">➕ Respuesta corta</button>
+                            </div>
+
+                            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                                <button class="btn btn-primary" onclick="app.saveDraftExam()" ${busy ? 'disabled' : ''}>
+                                    ${busy ? '⏳ Guardando...' : '💾 Guardar examen'}
+                                </button>
+                                <button class="btn btn-ghost" onclick="app.goToTeacherDashboard()">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEACHER RESULTS ---
+            renderTeacherResults() {
+                const { resultsExam, resultsList, stats, openAttempt } = this.state;
+
+                if (!resultsExam) {
+                    return `
+                        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+                            <div class="spinner"></div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="header">
+                        <h1>📊 MATEM</h1>
+                        <div class="header-buttons">
+                            <button class="btn btn-outline" onclick="app.goToTeacherDashboard()">← Volver</button>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="card">
+                            <h2 class="card-title">Resultados: ${resultsExam.title}</h2>
+                            <p class="card-subtitle">${resultsList.length} intentos ${stats ? `· Promedio provisional: ${stats.avg.toFixed(1)}% · Aprobados: ${stats.passRate.toFixed(1)}%` : ''}</p>
+
+                            ${resultsList.length === 0 ? `
+                                <div class="text-center" style="padding:40px 0;">
+                                    <div style="font-size:4rem;">👥</div>
+                                    <p style="color:#64748B;">Nadie ha respondido este examen todavía.</p>
+                                </div>
+                            ` : `
+                                ${resultsList.map(r => {
+                                    const pct = (r.score / r.total * 100);
+                                    const isGraded = r.gradingStatus === 'graded';
+                                    const finalPct = isGraded ? (r.finalGrade / r.total * 100) : null;
+                                    const passed = isGraded ? finalPct >= 60 : pct >= 60;
+                                    const id = r.id || r.studentId || 'unknown';
+                                    return `
+                                        <div style="margin-bottom:4px;">
+                                            <div class="exam-item" style="cursor:pointer;background:${openAttempt === id ? '#EEF2FF' : '#F8FAFC'};" onclick="app.toggleAttempt('${id}')">
+                                                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                                                    <span>${isGraded ? (passed ? '✅' : '❌') : '⏳'}</span>
+                                                    <div>
+                                                        <div style="font-weight:500;color:#0F172A;">${r.studentName}</div>
+                                                        <div style="font-size:0.75rem;color:#64748B;">${formatDate(r.submittedAt)}</div>
+                                                    </div>
+                                                    <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                                                        <span style="font-family:monospace;font-size:0.85rem;color:#64748B;">
+                                                            Provisional: ${r.score}/${r.total} (${pct.toFixed(0)}%)
+                                                        </span>
+                                                        ${isGraded ? `
+                                                            <span style="font-family:monospace;font-size:0.85rem;font-weight:600;${passed ? 'color:#16A34A;' : 'color:#DC2626;'}">
+                                                                Final: ${r.finalGrade}/${r.total} (${finalPct.toFixed(0)}%)
+                                                            </span>
+                                                        ` : `
+                                                            <span class="grade-badge pending">Pendiente</span>
+                                                        `}
+                                                    </div>
+                                                </div>
+                                                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                                    ${!isGraded ? `
+                                                        <button class="btn btn-warning" onclick="event.stopPropagation();app.goToGrade('${r.id}')" style="padding:4px 12px;font-size:0.8rem;">✏️ Calificar</button>
+                                                    ` : `
+                                                        <button class="btn btn-secondary" onclick="event.stopPropagation();app.goToGrade('${r.id}')" style="padding:4px 12px;font-size:0.8rem;">📝 Revisar</button>
+                                                    `}
+                                                </div>
+                                            </div>
+                                            ${openAttempt === id ? `
+                                                <div style="padding:12px 16px 12px 32px;border-left:3px solid #4F46E5;background:#EEF2FF;border-radius:0 0 8px 8px;">
+                                                    ${r.details.map((d, i) => `
+                                                        <div style="display:flex;align-items:flex-start;gap:8px;padding:3px 0;">
+                                                            <span>${d.correct ? '✅' : '❌'}</span>
+                                                            <div style="font-size:0.9rem;color:#334155;">
+                                                                <div class="math-text">${d.text}</div>
+                                                                <div style="font-size:0.75rem;color:#64748B;font-family:monospace;">
+                                                                    ${d.type === 'sa' ? `Respondió: ${d.shortAnswer || '—'}` : `Respondió: ${d.options?.[d.chosen] || '—'}`}
+                                                                    ${!d.correct && d.correctIndex !== undefined ? ` · Correcta: ${d.options?.[d.correctIndex] || d.correctAnswer || '—'}` : ''}
+                                                                    ${d.type === 'sa' && d.correctAnswer ? ` · Respuesta esperada: ${d.correctAnswer}` : ''}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    `).join('')}
+                                                    
+                                                    ${r.teacherComments && r.teacherComments.length > 0 ? `
+                                                        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #E2E8F0;">
+                                                            <div style="font-size:0.85rem;font-weight:600;color:#0F172A;">💬 Comentarios del profesor:</div>
+                                                            ${r.teacherComments.map(c => `
+                                                                <div class="comment-box">
+                                                                    <div class="comment-text">${c.text}</div>
+                                                                    <div class="comment-date">${c.teacherName} · ${formatDate(c.date)}</div>
+                                                                </div>
+                                                            `).join('')}
+                                                        </div>
+                                                    ` : ''}
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEACHER GRADE ---
+            renderTeacherGrade() {
+                const { gradingAttempt, gradingQuestions, error, success, busy } = this.state;
+
+                if (!gradingAttempt) {
+                    return `
+                        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+                            <div class="spinner"></div>
+                        </div>
+                    `;
+                }
+
+                return `
+                    <div class="header">
+                        <h1>✏️ MATEM</h1>
+                        <div class="header-buttons">
+                            <button class="btn btn-outline" onclick="app.goToTeacherResults()">← Volver</button>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="card">
+                            <h2 class="card-title">Calificar: ${gradingAttempt.examTitle}</h2>
+                            <p class="card-subtitle">Estudiante: ${gradingAttempt.studentName} · Provisional: ${gradingAttempt.score}/${gradingAttempt.total}</p>
+
+                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
+                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
+
+                            ${gradingQuestions.map((q, qi) => `
+                                <div style="margin-bottom:16px;padding:16px;background:#F8FAFC;border-radius:10px;border:1px solid #E2E8F0;">
+                                    <div style="font-weight:500;color:#0F172A;margin-bottom:8px;" class="math-text">${qi + 1}. ${q.text}</div>
+                                    <div style="font-size:0.9rem;color:#334155;padding:8px 12px;background:white;border-radius:6px;margin-bottom:8px;">
+                                        <strong>Respuesta del estudiante:</strong> ${q.type === 'sa' ? (q.shortAnswer || '—') : (q.options?.[q.chosen] || '—')}
+                                    </div>
+                                    ${q.type === 'sa' ? `
+                                        <div style="margin-bottom:8px;">
+                                            <label style="font-size:0.85rem;color:#64748B;">Respuesta correcta esperada: <strong>${q.correctAnswer || 'No definida'}</strong></label>
+                                        </div>
+                                        <div class="input-group" style="margin-bottom:8px;">
+                                            <label style="font-size:0.85rem;color:#64748B;">¿Es correcta?</label>
+                                            <select onchange="app.updateGradingQuestion(${qi}, this.value === 'true')">
+                                                <option value="true" ${q.gradingCorrect === true ? 'selected' : ''}>✅ Correcta</option>
+                                                <option value="false" ${q.gradingCorrect === false ? 'selected' : ''}>❌ Incorrecta</option>
+                                            </select>
+                                        </div>
+                                    ` : `
+                                        <div style="font-size:0.85rem;color:#64748B;">
+                                            Correcta: ${q.options?.[q.correctIndex] || '—'}
+                                        </div>
+                                        <div style="margin-top:4px;">
+                                            <span style="font-size:0.85rem;font-weight:600;${q.correct ? 'color:#16A34A;' : 'color:#DC2626;'}">
+                                                ${q.correct ? '✅ Correcta' : '❌ Incorrecta'}
+                                            </span>
+                                        </div>
+                                    `}
+                                </div>
+                            `).join('')}
+
+                            <div class="input-group">
+                                <label>Comentario para el estudiante</label>
+                                <textarea rows="3" id="teacherCommentInput" placeholder="Escribe aquí tus observaciones sobre el examen..." style="width:100%;padding:12px 16px;border:1px solid #E2E8F0;border-radius:8px;font-family:inherit;font-size:1rem;resize:vertical;"></textarea>
+                            </div>
+
+                            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                                <button class="btn btn-success" onclick="app.saveGrade()" ${busy ? 'disabled' : ''}>
+                                    ${busy ? '⏳ Guardando...' : '💾 Guardar calificación final'}
+                                </button>
+                                <button class="btn btn-ghost" onclick="app.goToTeacherResults()">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- STUDENT LIST ---
+            renderStudentList() {
+                const { exams, loggedStudent, attemptsOfStudent } = this.state;
+
+                const available = exams.filter(e => !attemptsOfStudent.some(a => a.examId === e.id));
+                const completed = exams.filter(e => attemptsOfStudent.some(a => a.examId === e.id));
+
+                return `
+                    <div class="header">
+                        <h1>🎓 MATEM</h1>
+                        <div class="header-buttons">
+                            <span style="color:#F8FAFC;font-size:0.9rem;">👨‍🎓 ${loggedStudent?.name || 'Estudiante'}</span>
+                            <button class="btn btn-outline" onclick="app.goToStudentGrades()" style="border-color:#D97706;color:#D97706;">📊 Mis notas</button>
+                            <button class="btn btn-outline" onclick="app.goToHome()">🏠 Inicio</button>
+                            <button class="btn btn-danger" onclick="app.logout()">🚪 Salir</button>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="card">
+                            <div class="flex-between">
+                                <div>
+                                    <h2 class="card-title">Hola, ${loggedStudent?.name || 'Estudiante'}</h2>
+                                    <p class="card-subtitle">${available.length} exámenes disponibles · ${completed.length} completados</p>
+                                </div>
+                            </div>
+
+                            <h3 style="font-weight:600;color:#0F172A;margin:16px 0 10px;">📝 Exámenes disponibles</h3>
+                            ${available.length === 0 ? `
+                                <div class="text-center" style="padding:20px 0;">
+                                    <p style="color:#64748B;">🎉 ¡Has completado todos los exámenes!</p>
+                                </div>
+                            ` : `
+                                ${available.map(e => {
+                                    const part = COURSE_PARTS.find(p => p.id === e.part);
+                                    return `
+                                        <div class="exam-item">
+                                            <div>
+                                                <div class="exam-title">${e.title}</div>
+                                                <div class="exam-meta">${part?.title || `Parte ${e.part}`} · ${e.questions?.length || 0} preguntas · ${e.timeLimit || 30} min</div>
+                                            </div>
+                                            <button class="btn btn-primary" onclick="app.startExam('${e.id}')">▶️ Empezar</button>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            `}
+
+                            ${completed.length > 0 ? `
+                                <h3 style="font-weight:600;color:#0F172A;margin:20px 0 10px;">✅ Exámenes completados</h3>
+                                ${completed.map(e => {
+                                    const attempt = attemptsOfStudent.find(a => a.examId === e.id);
+                                    if (!attempt) return '';
+                                    const pct = (attempt.score / attempt.total * 100);
+                                    const isGraded = attempt.gradingStatus === 'graded';
+                                    const finalPct = isGraded ? (attempt.finalGrade / attempt.total * 100) : null;
+                                    const passed = isGraded ? finalPct >= 60 : pct >= 60;
+                                    return `
+                                        <div class="exam-item">
+                                            <div>
+                                                <div class="exam-title">${e.title}</div>
+                                                <div style="font-family:monospace;font-size:0.9rem;">
+                                                    <span style="color:#64748B;">Provisional: ${attempt.score}/${attempt.total} (${pct.toFixed(0)}%)</span>
+                                                    ${isGraded ? `
+                                                        <span style="margin-left:12px;font-weight:600;${passed ? 'color:#16A34A;' : 'color:#DC2626;'}">
+                                                            Final: ${attempt.finalGrade}/${attempt.total} (${finalPct.toFixed(0)}%) ${passed ? '✅' : '❌'}
+                                                        </span>
+                                                    ` : `
+                                                        <span class="grade-badge pending" style="margin-left:12px;">⏳ Pendiente de calificar</span>
+                                                    `}
+                                                </div>
+                                            </div>
+                                            <span style="font-size:1.5rem;">${isGraded ? (passed ? '🎉' : '📚') : '⏳'}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- STUDENT EXAM ---
+            renderStudentExam() {
+                const { activeExam, answers, error, timeRemaining, busy } = this.state;
+
+                if (!activeExam) {
+                    return `
+                        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+                            <div class="spinner"></div>
+                        </div>
+                    `;
+                }
+
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                const isLow = timeRemaining < 60;
+
+                return `
+                    <div class="header">
+                        <h1>📝 MATEM</h1>
+                        <div class="header-buttons">
+                            <div class="timer ${isLow ? 'timer-warning' : ''}">
+                                ⏱️ ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="card">
+                            <div class="flex-between">
+                                <div>
+                                    <h2 class="card-title">${activeExam.title}</h2>
+                                    <p class="card-subtitle">${Object.keys(answers).length}/${activeExam.questions.length} respondidas</p>
+                                </div>
+                            </div>
+
+                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
+
+                            ${activeExam.questions.map((q, qi) => `
+                                <div style="margin-bottom:16px;padding:16px;background:#F8FAFC;border-radius:10px;">
+                                    <div style="font-weight:500;color:#0F172A;margin-bottom:8px;" class="math-text">${qi + 1}. ${q.text}</div>
+                                    
+                                    ${q.type === 'sa' ? `
+                                        <div>
+                                            <textarea class="short-answer-input" rows="2" placeholder="Escribe tu respuesta aquí..." oninput="app.setShortAnswer('${q.id}', this.value)">${answers[q.id] || ''}</textarea>
+                                            <div style="font-size:0.7rem;color:#64748B;margin-top:4px;">📝 Respuesta corta - Escribe tu respuesta en detalle</div>
+                                        </div>
+                                    ` : q.options.map((opt, oi) => `
+                                        <label class="radio-option">
+                                            <input type="radio" name="q_${q.id}" ${answers[q.id] === oi ? 'checked' : ''} onchange="app.setAnswer('${q.id}', ${oi})" />
+                                            <span>${opt}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            `).join('')}
+
+                            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
+                                <button class="btn btn-primary" onclick="app.submitExam()" ${busy ? 'disabled' : ''}>
+                                    ${busy ? '⏳ Enviando...' : '📤 Enviar examen'}
+                                </button>
+                                <button class="btn btn-ghost" onclick="if(confirm('¿Seguro que quieres salir? Perderás tu progreso.')) app.cancelExam()">Cancelar</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- STUDENT RESULT ---
+            renderStudentResult() {
+                const { result } = this.state;
+
+                if (!result) {
+                    return `
+                        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
+                            <div class="spinner"></div>
+                        </div>
+                    `;
+                }
+
+                const pct = (result.score / result.total * 100);
+                const passed = pct >= 60;
+
+                return `
+                    <div class="header">
+                        <h1>🎓 MATEM</h1>
+                        <div class="header-buttons">
+                            <button class="btn btn-outline" onclick="app.goToStudentList()">← Volver</button>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="card">
+                            <h2 class="card-title">📊 Resultado Provisional</h2>
+                            <p class="card-subtitle">${result.examTitle}</p>
+
+                            <div class="text-center">
+                                <div class="score-circle ${passed ? 'passed' : 'failed'}">
+                                    <span class="score-number ${passed ? 'text-success' : 'text-danger'}">${pct.toFixed(0)}%</span>
+                                    <span class="score-label ${passed ? 'text-success' : 'text-danger'}">${result.score}/${result.total}</span>
+                                </div>
+                                <div style="font-size:1.2rem;font-weight:600;${passed ? 'color:#16A34A;' : 'color:#DC2626;'}">
+                                    ${passed ? '🎉 ¡Aprobado!' : '📚 Reprobado - Sigue practicando'}
+                                </div>
+                                <div style="font-size:0.85rem;color:#64748B;margin-top:8px;">
+                                    ⏳ Este resultado es provisional. El profesor lo revisará y dará una nota final.
+                                </div>
+                            </div>
+
+                            <div style="margin-top:20px;">
+                                ${result.details.map((d, i) => `
+                                    <div style="display:flex;align-items:flex-start;gap:8px;padding:4px 0;">
+                                        <span>${d.correct ? '✅' : '❌'}</span>
+                                        <div style="font-size:0.9rem;color:#334155;">
+                                            <div class="math-text">${d.text}</div>
+                                            <div style="font-size:0.75rem;color:#64748B;font-family:monospace;">
+                                                ${d.type === 'sa' ? `Tu respuesta: ${d.shortAnswer || '—'}` : `Tu respuesta: ${d.options?.[d.chosen] || '—'}`}
+                                                ${!d.correct && d.correctIndex !== undefined ? ` · Correcta: ${d.options?.[d.correctIndex] || d.correctAnswer || '—'}` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <button class="btn btn-primary mt-4" onclick="app.goToStudentList()">← Volver a exámenes</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- STUDENT GRADES ---
+            renderStudentGrades() {
+                const { attemptsOfStudent, loggedStudent } = this.state;
+
+                return `
+                    <div class="header">
+                        <h1>📊 MATEM</h1>
+                        <div class="header-buttons">
+                            <span style="color:#F8FAFC;font-size:0.9rem;">👨‍🎓 ${loggedStudent?.name || 'Estudiante'}</span>
+                            <button class="btn btn-outline" onclick="app.goToStudentList()">← Volver</button>
+                            <button class="btn btn-danger" onclick="app.logout()">🚪 Salir</button>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        <div class="card">
+                            <h2 class="card-title">📊 Mis Calificaciones</h2>
+                            <p class="card-subtitle">Resumen de todas tus notas y comentarios</p>
+
+                            ${attemptsOfStudent.length === 0 ? `
+                                <div class="text-center" style="padding:40px 0;">
+                                    <div style="font-size:4rem;">📄</div>
+                                    <p style="color:#64748B;">Aún no has completado ningún examen.</p>
+                                </div>
+                            ` : `
+                                ${attemptsOfStudent.map((attempt, index) => {
+                                    const pct = (attempt.score / attempt.total * 100);
+                                    const isGraded = attempt.gradingStatus === 'graded';
+                                    const finalPct = isGraded ? (attempt.finalGrade / attempt.total * 100) : null;
+                                    const passed = isGraded ? finalPct >= 60 : pct >= 60;
+                                    const part = COURSE_PARTS.find(p => p.id === attempt.part);
+                                    
+                                    return `
+                                        <div class="student-grade-summary" style="${index > 0 ? 'border-top:1px solid #E2E8F0;padding-top:16px;' : ''}">
+                                            <div class="flex-between">
+                                                <div>
+                                                    <div style="font-weight:600;color:#0F172A;">${attempt.examTitle}</div>
+                                                    <div style="font-size:0.85rem;color:#64748B;">${part?.title || `Parte ${attempt.part}`} · ${formatDate(attempt.submittedAt)}</div>
+                                                </div>
+                                                <div style="text-align:right;">
+                                                    <div style="font-size:0.85rem;color:#64748B;">
+                                                        Provisional: ${attempt.score}/${attempt.total} (${pct.toFixed(0)}%)
+                                                    </div>
+                                                    ${isGraded ? `
+                                                        <div style="font-size:1.1rem;font-weight:700;${passed ? 'color:#16A34A;' : 'color:#DC2626;'}">
+                                                            Final: ${attempt.finalGrade}/${attempt.total} (${finalPct.toFixed(0)}%) ${passed ? '✅' : '❌'}
+                                                        </div>
+                                                    ` : `
+                                                        <div class="grade-badge pending">⏳ Pendiente de calificar</div>
+                                                    `}
+                                                </div>
+                                            </div>
+                                            
+                                            ${isGraded && attempt.teacherComments && attempt.teacherComments.length > 0 ? `
+                                                <div style="margin-top:8px;">
+                                                    <div style="font-size:0.85rem;font-weight:600;color:#0F172A;">💬 Comentarios del profesor:</div>
+                                                    ${attempt.teacherComments.map(c => `
+                                                        <div class="comment-box">
+                                                            <div class="comment-text">${c.text}</div>
+                                                            <div class="comment-date">${c.teacherName} · ${formatDate(c.date)}</div>
+                                                        </div>
+                                                    `).join('')}
+                                                </div>
+                                            ` : isGraded ? `
+                                                <div style="margin-top:8px;font-size:0.85rem;color:#64748B;">Sin comentarios adicionales.</div>
+                                            ` : ''}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ============================================
+            // ACCIONES
+            // ============================================
+
+            // --- Navegación ---
+            goToHome() {
+                this.setState({ view: 'home', error: '', success: '' });
+            }
+
+            goToTeacherLogin() {
+                this.setState({ view: 'teacher-login', error: '', success: '', teacherEmail: '', teacherPass: '' });
+            }
+
+            goToTeacherRegister() {
+                this.setState({ view: 'teacher-register', error: '', success: '', teacherEmail: '', teacherPass: '',
+                    teacherName: '', teacherSignupCode: '' });
+            }
+
+            goToTeacherDashboard() {
+                this.loadExams();
+                this.setState({ view: 'teacher-dashboard', error: '', success: '' });
+            }
+
+            goToCreateExam(partId) {
+                if (partId) this.state.draftPart = partId;
+                this.setState({
+                    view: 'teacher-create',
+                    error: '',
+                    success: '',
+                    draftTitle: '',
+                    draftQuestions: [],
+                    draftTimeLimit: 30
+                });
+            }
+
+            goToTeacherResults() {
+                this.setState({ view: 'teacher-results', error: '', success: '' });
+            }
+
+            goToStudentLogin() {
+                this.setState({ view: 'student-login', error: '', success: '', studentEmail: '', studentPass: '' });
+            }
+
+            goToStudentRegister() {
+                this.setState({ view: 'student-register', error: '', success: '', studentEmail: '', studentPass: '',
+                    studentName: '', studentId: '' });
+            }
+
+            goToStudentList() {
+                this.loadExams();
+                if (this.state.loggedStudent) {
+                    this.loadStudentAttempts(this.state.loggedStudent.uid);
+                }
+                this.setState({ view: 'student-list', error: '', success: '' });
+            }
+
+            goToStudentGrades() {
+                if (this.state.loggedStudent) {
+                    this.loadStudentAttempts(this.state.loggedStudent.uid);
+                }
+                this.setState({ view: 'student-grades', error: '', success: '' });
+            }
+
+            togglePart(id) {
+                this.setState({
+                    selectedPart: this.state.selectedPart === id ? null : id
+                });
+            }
+
+            toggleAttempt(id) {
+                this.setState({
+                    openAttempt: this.state.openAttempt === id ? null : id
+                });
+            }
+
+            // --- Autenticación ---
+            async handleTeacherLogin() {
+                const { teacherEmail, teacherPass } = this.state;
+                if (!teacherEmail || !teacherPass) {
+                    return this.setError('Ingresa email y contraseña.');
+                }
+
+                this.setBusy(true);
+                this.setError('');
+                this.setSuccess('');
+
+                try {
+                    await FirebaseService.login(teacherEmail, teacherPass);
+                    // El estado se actualizará en el listener de auth
+                } catch (error) {
+                    if (error.code === 'auth/user-not-found') {
+                        this.setError('Usuario no encontrado. Regístrate primero.');
+                    } else if (error.code === 'auth/wrong-password') {
+                        this.setError('Contraseña incorrecta.');
+                    } else {
+                        this.setError('Error al iniciar sesión. Intenta nuevamente.');
+                    }
+                }
+
+                this.setBusy(false);
+            }
+
+            async handleTeacherRegister() {
+                const { teacherEmail, teacherPass, teacherName, teacherSignupCode } = this.state;
+
+                if (!teacherName.trim() || !teacherEmail || !teacherPass) {
+                    return this.setError('Completa todos los campos.');
+                }
+                if (teacherPass.length < 6) {
+                    return this.setError('La contraseña debe tener al menos 6 caracteres.');
+                }
+                if (teacherSignupCode !== TEACHER_SIGNUP_CODE) {
+                    return this.setError('❌ Código de verificación incorrecto. El código es: ' + TEACHER_SIGNUP_CODE);
+                }
+
+                this.setBusy(true);
+                this.setError('');
+                this.setSuccess('');
+
+                try {
+                    const user = await FirebaseService.register(teacherEmail, teacherPass);
+                    await FirebaseService.saveTeacher({
+                        uid: user.uid,
+                        email: teacherEmail,
+                        name: teacherName.trim(),
+                        role: 'teacher'
+                    });
+                    this.setSuccess('✅ ¡Registro exitoso! Ahora puedes iniciar sesión.');
+                    setTimeout(() => {
+                        this.setState({ view: 'teacher-login', teacherEmail: '', teacherPass: '' });
+                    }, 1500);
+                } catch (error) {
+                    if (error.code === 'auth/email-already-in-use') {
+                        this.setError('Este email ya está registrado. Inicia sesión.');
+                    } else {
+                        this.setError('Error al registrarse. Intenta nuevamente.');
+                    }
+                }
+
+                this.setBusy(false);
+            }
+
+            async handleStudentLogin() {
+                const { studentEmail, studentPass } = this.state;
+                if (!studentEmail || !studentPass) {
+                    return this.setError('Completa todos los campos.');
+                }
+
+                this.setBusy(true);
+                this.setError('');
+                this.setSuccess('');
+
+                try {
+                    await FirebaseService.login(studentEmail, studentPass);
+                    // El estado se actualizará en el listener de auth
+                } catch (error) {
+                    if (error.code === 'auth/user-not-found') {
+                        this.setError('Usuario no encontrado. Regístrate primero.');
+                    } else if (error.code === 'auth/wrong-password') {
+                        this.setError('Contraseña incorrecta.');
+                    } else {
+                        this.setError('Error al iniciar sesión. Intenta nuevamente.');
+                    }
+                }
+
+                this.setBusy(false);
+            }
+
+            async handleStudentRegister() {
+                const { studentEmail, studentPass, studentName, studentId } = this.state;
+
+                if (!studentName.trim() || !studentId.trim() || !studentEmail || !studentPass) {
+                    return this.setError('Completa todos los campos.');
+                }
+                if (studentPass.length < 6) {
+                    return this.setError('La contraseña debe tener al menos 6 caracteres.');
+                }
+
+                this.setBusy(true);
+                this.setError('');
+                this.setSuccess('');
+
+                try {
+                    const user = await FirebaseService.register(studentEmail, studentPass);
+                    await FirebaseService.saveStudent({
+                        id: user.uid,
+                        name: studentName.trim(),
+                        displayId: studentId.trim(),
+                        email: studentEmail,
+                        uid: user.uid,
+                        role: 'student'
+                    });
+                    this.setSuccess('✅ ¡Registro exitoso! Ahora puedes iniciar sesión.');
+                    setTimeout(() => {
+                        this.setState({ view: 'student-login', studentEmail: '', studentPass: '' });
+                    }, 1500);
+                } catch (error) {
+                    if (error.code === 'auth/email-already-in-use') {
+                        this.setError('Este email ya está registrado. Inicia sesión.');
+                    } else {
+                        this.setError('Error al registrarse. Intenta nuevamente.');
+                    }
+                }
+
+                this.setBusy(false);
+            }
+
+            async logout() {
+                try {
+                    await FirebaseService.logout();
+                    this.state.isTeacher = false;
+                    this.state.teacherData = null;
+                    this.state.loggedStudent = null;
+                    this.state.attemptsOfStudent = [];
+                    this.state.authUser = null;
+                    this.state.userRole = null;
+                    if (this.state.examTimer) {
+                        clearInterval(this.state.examTimer);
+                        this.state.examTimer = null;
+                    }
+                    this.setState({ view: 'home', error: '', success: '' });
+                } catch (error) {
+                    console.error('Error al cerrar sesión:', error);
+                }
+            }
+
+            // --- Teacher exam creation ---
+            addDraftQuestion(type) {
+                const newQ = { id: genId(), type: type, text: '' };
+                if (type === 'tf') {
+                    newQ.options = ['Verdadero', 'Falso'];
+                    newQ.correctIndex = 0;
+                } else if (type === 'sa') {
+                    newQ.correctAnswer = '';
+                    newQ.keywords = '';
+                    newQ.correctIndex = null;
+                } else {
+                    newQ.options = ['', '', '', ''];
+                    newQ.correctIndex = 0;
+                }
+                this.state.draftQuestions.push(newQ);
+                this.render();
+            }
+
+            updateDraftQuestion(id, patch) {
+                const q = this.state.draftQuestions.find(q => q.id === id);
+                if (q) Object.assign(q, patch);
+                this.render();
+            }
+
+            updateOption(id, i, value) {
+                const q = this.state.draftQuestions.find(q => q.id === id);
+                if (q && q.options) q.options[i] = value;
+                this.render();
+            }
+
+            removeDraftQuestion(id) {
+                this.state.draftQuestions = this.state.draftQuestions.filter(q => q.id !== id);
+                this.render();
+            }
+
+            async saveDraftExam() {
+                const { draftTitle, draftQuestions, draftTimeLimit, draftPart } = this.state;
+
+                if (!draftTitle.trim()) return this.setError('Ponle un título al examen.');
+                if (draftQuestions.length === 0) return this.setError('Agrega al menos una pregunta.');
+                for (const q of draftQuestions) {
+                    if (!q.text.trim()) return this.setError('Hay una pregunta sin enunciado.');
+                    if (q.type !== 'sa' && q.options && q.options.some(o => !o.trim())) {
+                        return this.setError('Hay una opción vacía.');
+                    }
+                    if (q.type === 'sa' && !q.correctAnswer?.trim()) {
+                        return this.setError('La pregunta de respuesta corta debe tener una respuesta correcta definida.');
+                    }
+                }
+
+                this.setBusy(true);
+                this.setError('');
+                this.setSuccess('');
+
+                try {
+                    await FirebaseService.saveExam({
+                        title: draftTitle.trim(),
+                        part: draftPart,
+                        questions: draftQuestions,
+                        timeLimit: draftTimeLimit,
+                        createdBy: this.state.teacherData?.email || 'teacher',
+                        createdByName: this.state.teacherData?.name || 'Profesor'
+                    });
+                    await this.loadExams();
+                    this.state.draftTitle = '';
+                    this.state.draftQuestions = [];
+                    this.state.draftTimeLimit = 30;
+                    this.setState({ view: 'teacher-dashboard', error: '', success: '✅ Examen guardado exitosamente.' });
+                } catch (error) {
+                    this.setError('Error al guardar el examen.');
+                }
+
+                this.setBusy(false);
+            }
+
+            // --- Exam taking ---
+            async startExam(examId) {
+                this.setBusy(true);
+                try {
+                    const exam = await FirebaseService.getExam(examId);
+                    if (!exam) {
+                        this.setError('El examen no existe.');
+                        this.setBusy(false);
+                        return;
+                    }
+                    this.state.activeExam = exam;
+                    this.state.answers = {};
+                    this.state.result = null;
+                    this.state.timeRemaining = (exam.timeLimit || 30) * 60;
+                    this.setState({ view: 'student-exam', error: '', success: '' });
+
+                    if (this.state.examTimer) clearInterval(this.state.examTimer);
+                    this.state.examTimer = setInterval(() => {
+                        this.state.timeRemaining--;
+                        if (this.state.timeRemaining <= 0) {
+                            clearInterval(this.state.examTimer);
+                            this.state.examTimer = null;
+                            this.submitExam(true);
+                        }
+                        this.render();
+                    }, 1000);
+                } catch (error) {
+                    this.setError('Error al cargar el examen.');
+                }
+                this.setBusy(false);
+            }
+
+            setAnswer(qId, value) {
+                this.state.answers[qId] = value;
+                this.render();
+            }
+
+            setShortAnswer(qId, value) {
+                this.state.answers[qId] = value;
+                this.render();
+            }
+
+            async submitExam(autoSubmit = false) {
+                const { activeExam, answers, loggedStudent } = this.state;
+
+                if (!autoSubmit && Object.keys(answers).length < activeExam.questions.length) {
+                    return this.setError('Responde todas las preguntas antes de enviar.');
+                }
+
+                if (this.state.examTimer) {
+                    clearInterval(this.state.examTimer);
+                    this.state.examTimer = null;
+                }
+
+                this.setBusy(true);
+                this.setError('');
+                this.setSuccess('');
+
+                let score = 0;
+                const details = activeExam.questions.map(q => {
+                    const chosen = answers[q.id];
+                    let correct = false;
+
+                    if (q.type === 'sa') {
+                        // Validar respuesta corta comparando con la respuesta correcta
+                        const correctAnswer = (q.correctAnswer || '').trim().toLowerCase();
+                        const studentAnswer = (chosen || '').trim().toLowerCase();
+                        // Limpiar espacios extra y comparar
+                        const cleanCorrect = correctAnswer.replace(/\s+/g, ' ');
+                        const cleanStudent = studentAnswer.replace(/\s+/g, ' ');
+                        correct = cleanStudent === cleanCorrect;
+
+                        // Si no coincide exactamente, verificar palabras clave
+                        if (!correct && q.keywords) {
+                            const keywords = q.keywords.split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
+                            correct = keywords.some(k => cleanStudent.includes(k));
+                        }
+                    } else {
+                        correct = chosen === q.correctIndex;
+                    }
+
+                    if (correct) score++;
+                    return {
+                        questionId: q.id,
+                        text: q.text,
+                        type: q.type,
+                        options: q.options || [],
+                        correctIndex: q.correctIndex,
+                        correctAnswer: q.correctAnswer || '',
+                        keywords: q.keywords || '',
+                        chosen: q.type === 'sa' ? null : chosen,
+                        shortAnswer: q.type === 'sa' ? chosen || '' : null,
+                        correct
+                    };
+                });
+
+                const attempt = {
+                    studentName: loggedStudent.name,
+                    studentId: loggedStudent.id || loggedStudent.uid,
+                    examId: activeExam.id,
+                    examTitle: activeExam.title,
+                    part: activeExam.part,
+                    score,
+                    total: activeExam.questions.length,
+                    details,
+                    autoSubmitted: autoSubmit,
+                    gradingStatus: 'pending',
+                    finalGrade: null,
+                    teacherComments: []
+                };
+
+                try {
+                    await FirebaseService.saveAttempt(attempt);
+                    await this.loadStudentAttempts(loggedStudent.uid);
+                    this.state.result = attempt;
+                    this.setState({ view: 'student-result', error: '', success: '¡Examen enviado exitosamente!' });
+                } catch (error) {
+                    this.setError('Error al guardar el intento.');
+                }
+
+                this.setBusy(false);
+            }
+
+            cancelExam() {
+                if (this.state.examTimer) {
+                    clearInterval(this.state.examTimer);
+                    this.state.examTimer = null;
+                }
+                this.setState({ view: 'student-list', error: '', success: '' });
+            }
+
+            // --- Teacher grading ---
+            async goToGrade(attemptId) {
+                this.setBusy(true);
+                try {
+                    const attempt = await FirebaseService.getAttempt(attemptId);
+                    if (!attempt) {
+                        this.setError('No se encontró el intento.');
+                        this.setBusy(false);
+                        return;
+                    }
+
+                    const questions = attempt.details.map((d, i) => ({
+                        ...d,
+                        index: i,
+                        gradingCorrect: d.correct
+                    }));
+
+                    this.state.gradingAttempt = attempt;
+                    this.state.gradingQuestions = questions;
+                    this.setState({ view: 'teacher-grade', error: '', success: '' });
+                } catch (error) {
+                    this.setError('Error al cargar el intento.');
+                }
+                this.setBusy(false);
+            }
+
+            updateGradingQuestion(index, isCorrect) {
+                const q = this.state.gradingQuestions[index];
+                if (q) {
+                    q.gradingCorrect = isCorrect;
+                    this.render();
+                }
+            }
+
+            async saveGrade() {
+                const { gradingAttempt, gradingQuestions } = this.state;
+
+                if (!gradingAttempt) return;
+
+                const commentInput = document.getElementById('teacherCommentInput');
+                const comment = commentInput ? commentInput.value.trim() : '';
+
+                let finalScore = 0;
+                const updatedDetails = gradingAttempt.details.map((d, i) => {
+                    const q = gradingQuestions.find(g => g.index === i);
+                    const isCorrect = q ? q.gradingCorrect : d.correct;
+                    if (isCorrect) finalScore++;
+                    return {
+                        ...d,
+                        correct: isCorrect
+                    };
+                });
+
+                this.setBusy(true);
+                this.setError('');
+                this.setSuccess('');
+
+                try {
+                    await FirebaseService.updateAttempt(gradingAttempt.id, {
+                        finalGrade: finalScore,
+                        gradingStatus: 'graded',
+                        details: updatedDetails
+                    });
+
+                    if (comment) {
+                        await FirebaseService.addCommentToAttempt(
+                            gradingAttempt.id,
+                            comment,
+                            this.state.teacherData?.name || 'Profesor'
+                        );
+                    }
+
+                    this.setSuccess('✅ Calificación guardada exitosamente.');
+                    setTimeout(() => {
+                        this.goToTeacherResults();
+                    }, 1000);
+                } catch (error) {
+                    this.setError('Error al guardar la calificación.');
+                }
+
+                this.setBusy(false);
+            }
+
+            // --- Results ---
+            async openResults(examId) {
+                this.setBusy(true);
+                try {
+                    const exam = await FirebaseService.getExam(examId);
+                    const attempts = await FirebaseService.getAttemptsByExam(examId);
+
+                    let stats = null;
+                    if (attempts.length > 0) {
+                        const scores = attempts.map(a => (a.score / a.total) * 100);
+                        const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+                        const passRate = (scores.filter(s => s >= 60).length / scores.length) * 100;
+                        stats = { avg, passRate, total: attempts.length };
+                    }
+
+                    this.state.resultsExam = exam;
+                    this.state.resultsList = attempts;
+                    this.state.stats = stats;
+                    this.state.openAttempt = null;
+                    this.setState({ view: 'teacher-results', error: '', success: '' });
+                } catch (error) {
+                    this.setError('Error al cargar resultados.');
+                }
+                this.setBusy(false);
+            }
+
+            async deleteExam(examId) {
+                if (!confirm('¿Eliminar este examen y todos sus resultados?')) return;
+                this.setBusy(true);
+                try {
+                    await FirebaseService.deleteExam(examId);
+                    await this.loadExams();
+                    this.setSuccess('✅ Examen eliminado.');
+                    this.render();
+                } catch (error) {
+                    this.setError('Error al eliminar el examen.');
+                }
+                this.setBusy(false);
+            }
+        }
+
+        // ============================================
+        // INICIALIZAR
+        // ============================================
+        const app = new App();
+        window.app = app;
+    </script>
+
+</body>
+</html>
