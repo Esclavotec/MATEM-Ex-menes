@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MATEM - Precálculo</title>
+    <title>MATEM - Pizarra Digital</title>
     <!-- MathJax para texto matemático -->
     <script>
         MathJax = {
@@ -22,48 +22,31 @@
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Schoolbell&family=Patrick+Hand&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ============================================================
+           ESTILO PIZARRA DE TIZA
+           ============================================================ */
         :root {
-            --bg: #F8FAFC;
-            --surface: #FFFFFF;
-            --surface-alt: #F1F5F9;
-            --border: #E2E8F0;
-            --border-strong: #CBD5E1;
-
-            --text-primary: #0F172A;
-            --text-secondary: #334155;
-            --text-muted: #64748B;
-            --text-faint: #94A3B8;
-
-            --accent: #4F46E5;
-            --accent-hover: #4338CA;
-            --accent-light: #EEF2FF;
-
-            --success: #16A34A;
-            --success-hover: #15803D;
-            --success-light: #DCFCE7;
-
-            --danger: #DC2626;
-            --danger-hover: #B91C1C;
-            --danger-light: #FEE2E2;
-
-            --warning: #D97706;
-            --warning-hover: #B45309;
-            --warning-light: #FEF3C7;
-
-            --purple: #7C3AED;
-            --purple-hover: #6D28D9;
-
-            --info: #0284C7;
-
-            --radius-sm: 6px;
-            --radius-md: 10px;
-            --radius-lg: 16px;
-
-            --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
-            --shadow-md: 0 6px 16px -4px rgba(15, 23, 42, 0.08);
-            --shadow-lg: 0 20px 40px -16px rgba(15, 23, 42, 0.18);
+            --board-bg: #2A4A3A;
+            --board-bg-dark: #1A3A2A;
+            --board-bg-light: #3A5A4A;
+            --chalk: #F5F0E8;
+            --chalk-dim: #C5C0B8;
+            --chalk-bright: #FFFFFF;
+            --chalk-yellow: #F5D76E;
+            --chalk-green: #82E0AA;
+            --chalk-blue: #85C1E9;
+            --chalk-pink: #F1948A;
+            --chalk-orange: #F8C471;
+            --chalk-purple: #BB8FCE;
+            --chalk-red: #F1948A;
+            --wood: #8D6E63;
+            --wood-dark: #5D4037;
+            --wood-light: #A1887F;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            --radius: 12px;
+            --chalk-font: 'Patrick Hand', 'Caveat', 'Schoolbell', cursive;
         }
 
         * {
@@ -71,366 +54,479 @@
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-            font-family: 'Inter', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text-secondary);
+            font-family: var(--chalk-font);
+            background: var(--board-bg-dark);
+            color: var(--chalk);
             min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            line-height: 1.5;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px 20px;
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+            position: relative;
         }
 
-        /* ---------- Header ---------- */
-        .header {
-            background: var(--text-primary);
-            color: white;
-            padding: 18px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-            position: sticky;
+        /* Efecto de pizarra con textura */
+        body::before {
+            content: '';
+            position: fixed;
             top: 0;
-            z-index: 50;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 255, 255, 0.005) 2px,
+                    rgba(255, 255, 255, 0.005) 4px),
+                repeating-linear-gradient(90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 255, 255, 0.005) 2px,
+                    rgba(255, 255, 255, 0.005) 4px);
+            pointer-events: none;
+            z-index: 0;
         }
-        .header h1 {
-            font-size: 1.35rem;
+
+        /* Marco de madera */
+        .board-frame {
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 25px 25px 30px;
+            background: var(--wood-dark);
+            border-radius: var(--radius);
+            box-shadow:
+                inset 0 0 20px rgba(0, 0, 0, 0.5),
+                0 20px 60px rgba(0, 0, 0, 0.7);
+            position: relative;
+            z-index: 1;
+            border: 6px solid var(--wood);
+        }
+
+        .board-frame::before {
+            content: '';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 12px;
+            background: linear-gradient(to bottom, var(--wood-light), var(--wood-dark));
+            border-radius: 4px 4px 0 0;
+        }
+
+        .board-frame::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 12px;
+            background: linear-gradient(to top, var(--wood-light), var(--wood-dark));
+            border-radius: 0 0 4px 4px;
+        }
+
+        .board-content {
+            background: var(--board-bg);
+            border-radius: 8px;
+            padding: 30px 35px;
+            min-height: 85vh;
+            position: relative;
+            box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        /* Borde de tiza decorativo */
+        .board-content::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px dashed rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        /* ============================================================
+           TIPOGRAFÍA DE TIZA
+           ============================================================ */
+        .chalk-title {
+            font-family: var(--chalk-font);
+            font-size: 4rem;
             font-weight: 700;
-            letter-spacing: -0.01em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
+            color: var(--chalk-bright);
+            text-shadow: 0 2px 10px rgba(255, 255, 255, 0.1);
+            letter-spacing: 4px;
+            line-height: 1.1;
         }
 
-        /* ---------- Buttons ---------- */
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            font-family: inherit;
-            cursor: pointer;
-            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
-            font-size: 0.9rem;
-        }
-        .btn:active {
-            opacity: 0.85;
-        }
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-        .btn-primary:hover {
-            background: var(--accent-hover);
-        }
-        .btn-outline {
-            background: transparent;
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-        }
-        .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: white;
-        }
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-        .btn-danger:hover {
-            background: var(--danger-hover);
-        }
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-        .btn-success:hover {
-            background: var(--success-hover);
-        }
-        .btn-secondary {
-            background: var(--text-primary);
-            color: white;
-        }
-        .btn-secondary:hover {
-            background: #1E293B;
-        }
-        .btn-ghost {
-            background: transparent;
-            color: var(--text-muted);
-            border: 1px solid var(--border);
-        }
-        .btn-ghost:hover {
-            background: var(--surface-alt);
-            border-color: var(--border-strong);
-        }
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
-        .btn-warning:hover {
-            background: var(--warning-hover);
-        }
-        .btn-purple {
-            background: var(--purple);
-            color: white;
-        }
-        .btn-purple:hover {
-            background: var(--purple-hover);
-        }
-
-        /* ---------- Cards ---------- */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            padding: 28px;
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 20px;
-        }
-        .card-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            letter-spacing: -0.01em;
-            margin-bottom: 6px;
-        }
-        .card-subtitle {
-            color: var(--text-muted);
-            font-size: 0.92rem;
-            margin-bottom: 22px;
-        }
-
-        /* ---------- Courses ---------- */
-        .course-grid {
-            display: grid;
-            gap: 14px;
-        }
-        .course-item {
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 18px 20px;
-            cursor: pointer;
-            transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-            background: var(--surface);
-        }
-        .course-item:hover {
-            border-color: var(--border-strong);
-            box-shadow: var(--shadow-md);
-        }
-        .course-item.active {
-            border-color: var(--accent);
-            background: var(--accent-light);
-        }
-        .course-header {
-            display: flex;
-            align-items: flex-start;
-            gap: 14px;
-        }
-        .course-icon {
+        .chalk-subtitle {
+            font-family: var(--chalk-font);
             font-size: 1.6rem;
-        }
-        .course-info {
-            flex: 1;
-        }
-        .course-title {
-            font-weight: 600;
-            font-size: 1.02rem;
-            color: var(--text-primary);
-        }
-        .course-subtitle {
-            color: var(--text-muted);
-            font-size: 0.87rem;
-        }
-        .course-details {
-            margin-top: 12px;
-        }
-        .course-details p {
-            color: var(--text-secondary);
-            font-size: 0.92rem;
-        }
-        .topic-tag {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.72rem;
-            font-weight: 600;
-            background: #E0F2FE;
-            color: var(--info);
-            margin: 3px 4px 3px 0;
+            color: var(--chalk-dim);
+            font-weight: 400;
         }
 
-        /* ---------- Exams ---------- */
-        .exam-item {
+        .chalk-text {
+            font-family: var(--chalk-font);
+            font-size: 1.2rem;
+            color: var(--chalk);
+        }
+
+        .chalk-small {
+            font-family: var(--chalk-font);
+            font-size: 0.95rem;
+            color: var(--chalk-dim);
+        }
+
+        /* ============================================================
+           BOTONES DE TIZA
+           ============================================================ */
+        .btn-chalk {
+            font-family: var(--chalk-font);
+            padding: 12px 28px;
+            border: 2px solid var(--chalk-dim);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--chalk);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            letter-spacing: 1px;
+        }
+
+        .btn-chalk:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--chalk-bright);
+            color: var(--chalk-bright);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-chalk:active {
+            transform: scale(0.97);
+        }
+
+        .btn-chalk-primary {
+            border-color: var(--chalk-yellow);
+            color: var(--chalk-yellow);
+        }
+
+        .btn-chalk-primary:hover {
+            background: rgba(245, 215, 110, 0.15);
+            border-color: var(--chalk-yellow);
+            color: var(--chalk-yellow);
+        }
+
+        .btn-chalk-success {
+            border-color: var(--chalk-green);
+            color: var(--chalk-green);
+        }
+
+        .btn-chalk-success:hover {
+            background: rgba(130, 224, 170, 0.15);
+            border-color: var(--chalk-green);
+            color: var(--chalk-green);
+        }
+
+        .btn-chalk-danger {
+            border-color: var(--chalk-red);
+            color: var(--chalk-red);
+        }
+
+        .btn-chalk-danger:hover {
+            background: rgba(241, 148, 138, 0.15);
+            border-color: var(--chalk-red);
+            color: var(--chalk-red);
+        }
+
+        .btn-chalk-blue {
+            border-color: var(--chalk-blue);
+            color: var(--chalk-blue);
+        }
+
+        .btn-chalk-blue:hover {
+            background: rgba(133, 193, 233, 0.15);
+            border-color: var(--chalk-blue);
+            color: var(--chalk-blue);
+        }
+
+        .btn-chalk-purple {
+            border-color: var(--chalk-purple);
+            color: var(--chalk-purple);
+        }
+
+        .btn-chalk-purple:hover {
+            background: rgba(187, 143, 206, 0.15);
+            border-color: var(--chalk-purple);
+            color: var(--chalk-purple);
+        }
+
+        .btn-chalk-orange {
+            border-color: var(--chalk-orange);
+            color: var(--chalk-orange);
+        }
+
+        .btn-chalk-orange:hover {
+            background: rgba(248, 196, 113, 0.15);
+            border-color: var(--chalk-orange);
+            color: var(--chalk-orange);
+        }
+
+        /* ============================================================
+           TARJETAS (Pizarra)
+           ============================================================ */
+        .chalk-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+
+        .chalk-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .chalk-card.active {
+            border-color: var(--chalk-yellow);
+            background: rgba(245, 215, 110, 0.08);
+        }
+
+        .chalk-card .card-title {
+            font-family: var(--chalk-font);
+            font-size: 1.5rem;
+            color: var(--chalk-bright);
+        }
+
+        .chalk-card .card-sub {
+            font-family: var(--chalk-font);
+            font-size: 1rem;
+            color: var(--chalk-dim);
+        }
+
+        /* ============================================================
+           CURSOS (4 parciales)
+           ============================================================ */
+        .partial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin: 20px 0;
+        }
+
+        .partial-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius);
+            padding: 24px 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .partial-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-4px);
+        }
+
+        .partial-card .partial-number {
+            font-family: var(--chalk-font);
+            font-size: 2.8rem;
+            color: var(--chalk-yellow);
+            opacity: 0.6;
+        }
+
+        .partial-card .partial-title {
+            font-family: var(--chalk-font);
+            font-size: 1.2rem;
+            color: var(--chalk-bright);
+            margin: 6px 0;
+        }
+
+        .partial-card .partial-desc {
+            font-family: var(--chalk-font);
+            font-size: 0.85rem;
+            color: var(--chalk-dim);
+        }
+
+        /* ============================================================
+           INPUTS (estilo tiza)
+           ============================================================ */
+        .input-chalk {
+            font-family: var(--chalk-font);
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            padding: 12px 18px;
+            color: var(--chalk-bright);
+            font-size: 1.1rem;
+            width: 100%;
+            outline: none;
+            transition: border 0.2s ease;
+        }
+
+        .input-chalk:focus {
+            border-color: var(--chalk-yellow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .input-chalk::placeholder {
+            color: var(--chalk-dim);
+            opacity: 0.6;
+        }
+
+        .input-chalk-label {
+            font-family: var(--chalk-font);
+            color: var(--chalk-dim);
+            font-size: 0.95rem;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        select.input-chalk option {
+            background: var(--board-bg-dark);
+            color: var(--chalk);
+        }
+
+        textarea.input-chalk {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* ============================================================
+           EXÁMENES
+           ============================================================ */
+        .exam-item-chalk {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 16px;
-            background: var(--surface-alt);
-            border: 1px solid transparent;
-            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
             margin-bottom: 10px;
+            border-left: 3px solid var(--chalk-yellow);
             flex-wrap: wrap;
             gap: 10px;
-            transition: border-color 0.15s ease;
-        }
-        .exam-item:hover {
-            border-color: var(--border);
-        }
-        .exam-title {
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        .exam-meta {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
         }
 
-        /* ---------- Forms ---------- */
-        .input-group {
-            margin-bottom: 16px;
-        }
-        .input-group label {
-            display: block;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-        }
-        .input-group input,
-        .input-group select,
-        .input-group textarea {
-            width: 100%;
-            padding: 11px 14px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            outline: none;
-            transition: border 0.15s ease, box-shadow 0.15s ease;
-            font-family: inherit;
-            background: var(--surface);
-            color: var(--text-primary);
-        }
-        .input-group input:focus,
-        .input-group select:focus,
-        .input-group textarea:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-light);
-        }
-        .error-msg {
-            background: var(--danger-light);
-            color: var(--danger-hover);
-            padding: 12px 16px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-        .success-msg {
-            background: var(--success-light);
-            color: var(--success-hover);
-            padding: 12px 16px;
-            border-radius: var(--radius-sm);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
+        .exam-item-chalk .exam-title {
+            font-family: var(--chalk-font);
+            font-size: 1.15rem;
+            color: var(--chalk-bright);
         }
 
-        /* ---------- Questions ---------- */
-        .question-block {
-            background: var(--surface-alt);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
+        .exam-item-chalk .exam-meta {
+            font-family: var(--chalk-font);
+            font-size: 0.85rem;
+            color: var(--chalk-dim);
+        }
+
+        /* ============================================================
+           QUESTION BLOCK
+           ============================================================ */
+        .question-block-chalk {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius);
             padding: 18px;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
-        .question-header {
+
+        .question-block-chalk .q-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
         }
-        .question-header span {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
+
+        .question-block-chalk .q-header span {
+            font-family: var(--chalk-font);
+            font-size: 0.8rem;
+            color: var(--chalk-dim);
         }
-        .option-row {
+
+        .option-row-chalk {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 5px 0;
+            gap: 12px;
+            padding: 4px 0;
         }
-        .option-row input[type="radio"] {
+
+        .option-row-chalk input[type="radio"] {
             width: 18px;
             height: 18px;
-            accent-color: var(--accent);
+            accent-color: var(--chalk-yellow);
             cursor: pointer;
             flex-shrink: 0;
         }
-        .option-row input[type="text"] {
+
+        .option-row-chalk input[type="text"] {
             flex: 1;
             padding: 6px 10px;
             border: none;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             background: transparent;
             outline: none;
-            font-family: inherit;
-        }
-        .option-row input[type="text"]:focus {
-            border-bottom-color: var(--accent);
+            font-family: var(--chalk-font);
+            color: var(--chalk);
+            font-size: 1rem;
         }
 
-        /* ---------- Score / results ---------- */
-        .score-circle {
-            width: 120px;
-            height: 120px;
+        .option-row-chalk input[type="text"]:focus {
+            border-bottom-color: var(--chalk-yellow);
+        }
+
+        /* ============================================================
+           RESULTADOS / SCORE
+           ============================================================ */
+        .score-circle-chalk {
+            width: 140px;
+            height: 140px;
             border-radius: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             margin: 20px auto;
-        }
-        .score-circle.passed {
-            border: 4px solid var(--success);
-            background: var(--success-light);
-        }
-        .score-circle.failed {
-            border: 4px solid var(--danger);
-            background: var(--danger-light);
-        }
-        .score-circle.pending {
-            border: 4px solid var(--warning);
-            background: var(--warning-light);
-        }
-        .score-number {
-            font-size: 2.1rem;
-            font-weight: 800;
-            color: var(--text-primary);
-        }
-        .score-label {
-            font-size: 0.78rem;
-            color: var(--text-muted);
+            border: 4px solid var(--chalk-dim);
         }
 
-        /* ---------- Utilities ---------- */
+        .score-circle-chalk.passed {
+            border-color: var(--chalk-green);
+        }
+
+        .score-circle-chalk.failed {
+            border-color: var(--chalk-red);
+        }
+
+        .score-circle-chalk .score-num {
+            font-family: var(--chalk-font);
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--chalk-bright);
+        }
+
+        .score-circle-chalk .score-label {
+            font-family: var(--chalk-font);
+            font-size: 0.9rem;
+            color: var(--chalk-dim);
+        }
+
+        /* ============================================================
+           UTILITY
+           ============================================================ */
         .flex {
             display: flex;
         }
@@ -439,25 +535,30 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .flex-col {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
         .gap-2 { gap: 8px; }
-        .gap-3 { gap: 12px; }
+        .gap-3 { gap: 14px; }
+        .gap-4 { gap: 20px; }
         .mt-2 { margin-top: 8px; }
-        .mt-3 { margin-top: 12px; }
-        .mt-4 { margin-top: 16px; }
+        .mt-3 { margin-top: 14px; }
+        .mt-4 { margin-top: 20px; }
         .mb-2 { margin-bottom: 8px; }
-        .mb-3 { margin-bottom: 12px; }
-        .mb-4 { margin-bottom: 16px; }
+        .mb-3 { margin-bottom: 14px; }
+        .mb-4 { margin-bottom: 20px; }
         .text-center { text-align: center; }
-        .text-sm { font-size: 0.88rem; }
-        .text-xs { font-size: 0.75rem; }
-        .text-muted { color: var(--text-muted); }
-        .text-success { color: var(--success); }
-        .text-danger { color: var(--danger); }
-        .text-primary { color: var(--text-primary); }
-        .text-warning { color: var(--warning-hover); }
-        .hidden { display: none !important; }
+        .text-left { text-align: left; }
         .w-full { width: 100%; }
         .grid-2 {
             display: grid;
@@ -469,167 +570,165 @@
             grid-template-columns: 1fr 1fr 1fr;
             gap: 16px;
         }
+
         @media (max-width: 768px) {
             .grid-2,
             .grid-3 {
                 grid-template-columns: 1fr;
             }
-            .header {
-                padding: 14px 20px;
-                flex-direction: column;
-                text-align: center;
+            .board-content {
+                padding: 18px 16px;
             }
-            .header h1 {
+            .chalk-title {
+                font-size: 2.8rem;
+            }
+            .chalk-subtitle {
                 font-size: 1.2rem;
             }
-            .card {
-                padding: 18px;
+            .btn-chalk {
+                padding: 10px 20px;
+                font-size: 1rem;
             }
         }
 
-        /* ---------- Loading ---------- */
-        .spinner {
-            border: 3px solid var(--surface-alt);
-            border-top: 3px solid var(--accent);
+        /* ============================================================
+           SPINNER
+           ============================================================ */
+        .spinner-chalk {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--chalk-yellow);
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            animation: spin 0.7s linear infinite;
-            margin: 40px auto;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+            margin: 30px auto;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
-        /* ---------- Timer ---------- */
-        .timer {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.1rem;
-            font-weight: 600;
-            padding: 8px 16px;
-            border-radius: var(--radius-sm);
-            background: var(--surface-alt);
-            color: var(--text-primary);
+        /* ============================================================
+           TIMER
+           ============================================================ */
+        .timer-chalk {
+            font-family: var(--chalk-font);
+            font-size: 1.4rem;
+            padding: 8px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            color: var(--chalk);
         }
-        .timer-warning {
-            background: var(--danger-light);
-            color: var(--danger-hover);
+
+        .timer-chalk.warning {
+            border-color: var(--chalk-red);
+            color: var(--chalk-red);
             animation: pulse 1s ease-in-out infinite;
         }
+
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.55; }
+            0%,
+            100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
-        .radio-option {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: background 0.15s ease;
-        }
-        .radio-option:hover {
-            background: var(--surface-alt);
-        }
-        .short-answer-input {
-            width: 100%;
-            padding: 9px 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem;
-            outline: none;
-            transition: border 0.15s ease;
-            font-family: inherit;
-            margin-top: 4px;
-        }
-        .short-answer-input:focus {
-            border-color: var(--accent);
+        /* ============================================================
+           ERROR / SUCCESS
+           ============================================================ */
+        .msg-chalk {
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-family: var(--chalk-font);
+            font-size: 1rem;
+            margin-bottom: 14px;
+            border: 1px solid transparent;
         }
 
-        /* ---------- Badges ---------- */
-        .grade-badge {
+        .msg-chalk.error {
+            background: rgba(241, 148, 138, 0.15);
+            border-color: var(--chalk-red);
+            color: var(--chalk-red);
+        }
+
+        .msg-chalk.success {
+            background: rgba(130, 224, 170, 0.15);
+            border-color: var(--chalk-green);
+            color: var(--chalk-green);
+        }
+
+        /* ============================================================
+           BORRADOR / DECORACIONES
+           ============================================================ */
+        .chalk-dust {
+            position: absolute;
+            bottom: 0;
+            right: 20px;
+            font-size: 3rem;
+            opacity: 0.1;
+            pointer-events: none;
+            user-select: none;
+            font-family: var(--chalk-font);
+        }
+
+        .divider-chalk {
+            border: none;
+            border-top: 2px dashed rgba(255, 255, 255, 0.08);
+            margin: 20px 0;
+        }
+
+        .badge-chalk {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 4px 14px;
             border-radius: 20px;
-            font-weight: 600;
+            font-family: var(--chalk-font);
             font-size: 0.8rem;
-        }
-        .grade-badge.passed {
-            background: var(--success-light);
-            color: var(--success-hover);
-        }
-        .grade-badge.failed {
-            background: var(--danger-light);
-            color: var(--danger-hover);
-        }
-        .grade-badge.pending {
-            background: var(--warning-light);
-            color: var(--warning-hover);
+            border: 1px solid;
         }
 
-        .comment-box {
-            background: var(--surface-alt);
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            margin-top: 8px;
-            border-left: 3px solid var(--accent);
+        .badge-chalk.passed {
+            border-color: var(--chalk-green);
+            color: var(--chalk-green);
         }
-        .comment-box .comment-text {
-            font-size: 0.92rem;
-            color: var(--text-secondary);
+
+        .badge-chalk.failed {
+            border-color: var(--chalk-red);
+            color: var(--chalk-red);
         }
-        .comment-box .comment-date {
-            font-size: 0.72rem;
-            color: var(--text-muted);
-            margin-top: 4px;
+
+        .badge-chalk.pending {
+            border-color: var(--chalk-orange);
+            color: var(--chalk-orange);
         }
-        .student-grade-summary {
-            border-bottom: 1px solid var(--border);
-            padding: 12px 0;
+
+        /* Scrollbar estilo tiza */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        .student-grade-summary:last-child {
-            border-bottom: none;
-        }
-        .profile-section {
-            background: var(--surface-alt);
-            border-radius: var(--radius-md);
-            padding: 16px;
-            margin-top: 16px;
-        }
-        .profile-section h4 {
-            color: var(--text-primary);
-            margin-bottom: 12px;
-        }
-        .math-text {
-            font-size: 1.02rem;
-            padding: 4px 0;
-        }
-        .math-text .math {
-            font-size: 1.05rem;
-        }
-        .teacher-code-hint {
-            background: var(--accent-light);
-            border: 1px dashed #C7D2FE;
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            margin-bottom: 12px;
-        }
-        .teacher-code-hint code {
-            background: var(--surface);
-            padding: 2px 8px;
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.04);
             border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.88rem;
-            color: var(--accent);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
         }
     </style>
 </head>
 <body>
 
-    <div id="app"></div>
+    <div class="board-frame">
+        <div class="board-content" id="app">
+            <!-- El contenido se renderiza aquí -->
+            <div class="flex-center" style="min-height:70vh;">
+                <div class="spinner-chalk"></div>
+                <span class="chalk-text">Cargando pizarra...</span>
+            </div>
+        </div>
+        <div class="chalk-dust">✦</div>
+    </div>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
@@ -640,9 +739,9 @@
     </script>
 
     <script>
-        // ============================================
+        // ============================================================
         // CONFIGURACIÓN DE FIREBASE
-        // ============================================
+        // ============================================================
         const firebaseConfig = {
             apiKey: "AIzaSyAvKlGSfuc7so2XLxh5sMCWnZc-4hf3eaM",
             authDomain: "matem-examenes.firebaseapp.com",
@@ -661,81 +760,38 @@
         // Habilitar persistencia offline
         db.enablePersistence().catch(err => console.warn('Persistencia offline no disponible:', err));
 
-        // ============================================
+        // ============================================================
         // CÓDIGO ESPECIAL PARA PROFESORES
-        // ============================================
-        const TEACHER_SIGNUP_CODE = "MATEM2024"; // Código para registrarse como profesor
+        // ============================================================
+        const TEACHER_SIGNUP_CODE = "MATEM2024";
 
-        // ============================================
-        // DATOS DEL CURSO
-        // ============================================
-        const COURSE_PARTS = [{
-            id: 1,
-            title: "Precálculo I",
-            subtitle: "Fundamentos de Álgebra",
-            description: "Álgebra básica, ecuaciones lineales, cuadráticas, sistemas de ecuaciones, funciones y sus gráficas.",
-            topics: [
-                "Propiedades de los números reales",
-                "Ecuaciones y desigualdades",
-                "Funciones y sus gráficas",
-                "Funciones lineales y cuadráticas",
-                "Sistemas de ecuaciones"
-            ],
-            color: "#0284C7",
-            icon: "📚"
+        // ============================================================
+        // DATOS DE CURSOS Y PARCIALES
+        // ============================================================
+        const COURSES = [{
+            id: 'precalculo',
+            name: 'Precálculo',
+            icon: '📐',
+            description: 'Fundamentos de matemáticas para cálculo'
         }, {
-            id: 2,
-            title: "Precálculo II",
-            subtitle: "Funciones Avanzadas",
-            description: "Funciones polinomiales, racionales, exponenciales, logarítmicas y trigonometría básica.",
-            topics: [
-                "Funciones polinomiales",
-                "Funciones racionales",
-                "Funciones exponenciales",
-                "Funciones logarítmicas",
-                "Introducción a la trigonometría"
-            ],
-            color: "#22C55E",
-            icon: "📖"
-        }, {
-            id: 3,
-            title: "Precálculo III",
-            subtitle: "Trigonometría y Geometría",
-            description: "Trigonometría avanzada, identidades, ecuaciones trigonométricas, geometría analítica y secciones cónicas.",
-            topics: [
-                "Identidades trigonométricas",
-                "Ecuaciones trigonométricas",
-                "Ley de senos y cosenos",
-                "Secciones cónicas",
-                "Geometría analítica"
-            ],
-            color: "#4F46E5",
-            icon: "📐"
-        }, {
-            id: 4,
-            title: "Precálculo IV",
-            subtitle: "Matemáticas Discretas y Probabilidad",
-            description: "Sucesiones, series, matrices, probabilidad, estadística y fundamentos del cálculo.",
-            topics: [
-                "Sucesiones y series",
-                "Matrices y determinantes",
-                "Probabilidad básica",
-                "Estadística descriptiva",
-                "Introducción al cálculo"
-            ],
-            color: "#8B5CF6",
-            icon: "📊"
+            id: 'expresiones',
+            name: 'Expresiones Algebraicas',
+            icon: '✏️',
+            description: 'Álgebra, ecuaciones y polinomios'
         }];
 
-        // ============================================
+        const PARTIALS = [
+            { id: 1, name: 'Primer Parcial', icon: '❶' },
+            { id: 2, name: 'Segundo Parcial', icon: '❷' },
+            { id: 3, name: 'Tercer Parcial', icon: '❸' },
+            { id: 4, name: 'Cuarto Parcial', icon: '❹' }
+        ];
+
+        // ============================================================
         // UTILIDADES
-        // ============================================
+        // ============================================================
         function genId() {
             return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-        }
-
-        function sanitize(str) {
-            return (str || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").slice(0, 60) || "anon";
         }
 
         function formatDate(ts) {
@@ -756,16 +812,17 @@
             }
         }
 
-        // ============================================
+        // ============================================================
         // SERVICIOS DE FIREBASE
-        // ============================================
+        // ============================================================
         const FirebaseService = {
             // --- Exámenes ---
-            async getExams() {
+            async getExams(courseId, partialId) {
                 try {
-                    const snapshot = await db.collection('exams')
-                        .orderBy('createdAt', 'desc')
-                        .get();
+                    let query = db.collection('exams');
+                    if (courseId) query = query.where('courseId', '==', courseId);
+                    if (partialId) query = query.where('partialId', '==', partialId);
+                    const snapshot = await query.orderBy('createdAt', 'desc').get();
                     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 } catch (error) {
                     console.error('Error obteniendo exámenes:', error);
@@ -800,13 +857,12 @@
             async deleteExam(examId) {
                 try {
                     await db.collection('exams').doc(examId).delete();
+                    // Eliminar intentos asociados
                     const attempts = await db.collection('attempts')
                         .where('examId', '==', examId)
                         .get();
                     const batch = db.batch();
-                    attempts.docs.forEach(doc => {
-                        batch.delete(doc.ref);
-                    });
+                    attempts.docs.forEach(doc => batch.delete(doc.ref));
                     await batch.commit();
                     return true;
                 } catch (error) {
@@ -884,8 +940,7 @@
 
             async addCommentToAttempt(attemptId, comment, teacherName) {
                 try {
-                    const attemptRef = db.collection('attempts').doc(attemptId);
-                    await attemptRef.update({
+                    await db.collection('attempts').doc(attemptId).update({
                         teacherComments: firebase.firestore.FieldValue.arrayUnion({
                             id: genId(),
                             text: comment,
@@ -950,16 +1005,6 @@
                 }
             },
 
-            async getAllTeachers() {
-                try {
-                    const snapshot = await db.collection('teachers').get();
-                    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                } catch (error) {
-                    console.error('Error obteniendo profesores:', error);
-                    return [];
-                }
-            },
-
             // --- Autenticación ---
             async login(email, password) {
                 try {
@@ -987,181 +1032,134 @@
                 } catch (error) {
                     console.error('Error cerrando sesión:', error);
                 }
-            },
-
-            // Suscripciones en tiempo real
-            subscribeToExams(callback) {
-                return db.collection('exams')
-                    .orderBy('createdAt', 'desc')
-                    .onSnapshot((snapshot) => {
-                        const exams = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        callback(exams);
-                    }, (error) => {
-                        console.error('Error en suscripción:', error);
-                    });
-            },
-
-            subscribeToAttemptsByExam(examId, callback) {
-                return db.collection('attempts')
-                    .where('examId', '==', examId)
-                    .orderBy('submittedAt', 'desc')
-                    .onSnapshot((snapshot) => {
-                        const attempts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        callback(attempts);
-                    }, (error) => {
-                        console.error('Error en suscripción:', error);
-                    });
-            },
-
-            subscribeToStudentAttempts(studentId, callback) {
-                return db.collection('attempts')
-                    .where('studentId', '==', studentId)
-                    .orderBy('submittedAt', 'desc')
-                    .onSnapshot((snapshot) => {
-                        const attempts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        callback(attempts);
-                    }, (error) => {
-                        console.error('Error en suscripción:', error);
-                    });
             }
         };
 
-        // ============================================
+        // ============================================================
         // APLICACIÓN PRINCIPAL
-        // ============================================
+        // ============================================================
         class App {
             constructor() {
                 this.state = {
-                    view: 'home',
+                    view: 'home', // home, teacher-login, teacher-register, teacher-courses, teacher-partials, 
+                    // teacher-create-exam, teacher-grade-exam, student-login, student-register, student-courses,
+                    // student-exams, student-taking-exam, student-result, student-grades
                     error: '',
                     success: '',
-                    selectedPart: null,
+                    busy: false,
 
                     // Auth
                     authUser: null,
                     userRole: null, // 'teacher' | 'student'
-
-                    // Teacher
-                    teacherEmail: '',
-                    teacherPass: '',
-                    teacherName: '',
-                    teacherSignupCode: '',
-                    isTeacher: false,
                     teacherData: null,
-                    exams: [],
-                    examUnsubscribe: null,
-
-                    // Student
-                    studentEmail: '',
-                    studentPass: '',
-                    studentName: '',
-                    studentId: '',
                     loggedStudent: null,
-                    attemptsOfStudent: [],
-                    studentUnsubscribe: null,
 
-                    // Exam creation
-                    draftTitle: '',
-                    draftQuestions: [],
-                    draftTimeLimit: 30,
-                    draftPart: 1,
+                    // Cursos seleccionados
+                    selectedCourse: null,
+                    selectedPartial: null,
 
-                    // Taking exam
+                    // Exámenes
+                    exams: [],
                     activeExam: null,
                     answers: {},
                     result: null,
                     timeRemaining: 0,
                     examTimer: null,
+                    attemptsOfStudent: [],
 
-                    // Results
-                    resultsExam: null,
-                    resultsList: [],
-                    openAttempt: null,
-                    stats: null,
-                    resultsUnsubscribe: null,
+                    // Creación de examen
+                    draftTitle: '',
+                    draftQuestions: [],
+                    draftTimeLimit: 30,
 
-                    // Grading
+                    // Calificación
                     gradingAttempt: null,
                     gradingQuestions: [],
 
-                    busy: false
+                    // Registro profesor
+                    teacherEmail: '',
+                    teacherPass: '',
+                    teacherName: '',
+                    teacherSignupCode: '',
+
+                    // Registro estudiante
+                    studentEmail: '',
+                    studentPass: '',
+                    studentName: '',
+                    studentId: '',
+                    studentCourse: '',
+
+                    // Resultados
+                    resultsExam: null,
+                    resultsList: [],
+                    openAttempt: null,
+                    stats: null
                 };
 
                 // Escuchar cambios de autenticación
                 auth.onAuthStateChanged(async (user) => {
                     if (user) {
                         this.state.authUser = user;
-                        // Verificar si es profesor
                         const teacherData = await FirebaseService.getTeacher(user.uid);
                         if (teacherData) {
-                            this.state.isTeacher = true;
-                            this.state.teacherData = teacherData;
                             this.state.userRole = 'teacher';
-                            await this.loadExams();
-                            this.setState({ view: 'teacher-dashboard', error: '', success: '' });
-                        } else {
-                            // Verificar si es estudiante
-                            const studentData = await FirebaseService.getStudent(user.uid);
-                            if (studentData) {
-                                this.state.loggedStudent = {
-                                    ...studentData,
-                                    uid: user.uid,
-                                    email: user.email
-                                };
-                                this.state.userRole = 'student';
-                                await this.loadStudentAttempts(user.uid);
-                                this.setState({ view: 'student-list', error: '', success: '' });
-                            } else {
-                                // Usuario autenticado pero sin rol - redirigir a home
-                                this.setState({ view: 'home', error: '', success: '' });
-                            }
+                            this.state.teacherData = teacherData;
+                            this.state.view = 'teacher-courses';
+                            this.state.selectedCourse = null;
+                            this.state.selectedPartial = null;
+                            this.render();
+                            return;
                         }
+                        const studentData = await FirebaseService.getStudent(user.uid);
+                        if (studentData) {
+                            this.state.userRole = 'student';
+                            this.state.loggedStudent = studentData;
+                            this.state.selectedCourse = studentData.courseId || null;
+                            this.loadStudentAttempts(user.uid);
+                            this.state.view = 'student-exams';
+                            this.render();
+                            return;
+                        }
+                        // Usuario sin rol
+                        this.state.authUser = null;
+                        this.state.userRole = null;
+                        this.state.view = 'home';
+                        this.render();
                     } else {
                         this.state.authUser = null;
                         this.state.userRole = null;
-                        this.state.isTeacher = false;
                         this.state.teacherData = null;
                         this.state.loggedStudent = null;
-                        if (!['teacher-login', 'student-login', 'student-register', 'teacher-register'].includes(this
-                                .state.view)) {
-                            this.setState({ view: 'home', error: '', success: '' });
+                        if (!['home', 'teacher-login', 'teacher-register', 'student-login', 'student-register'].includes(
+                                this.state.view)) {
+                            this.state.view = 'home';
+                            this.render();
                         }
                     }
-                    this.render();
-                    // Renderizar math después de renderizar
-                    setTimeout(renderMath, 300);
                 });
 
                 this.render();
             }
 
-            // ============================================
+            // ============================================================
             // MÉTODOS DE ESTADO
-            // ============================================
+            // ============================================================
             setState(newState) {
                 Object.assign(this.state, newState);
                 this.render();
                 setTimeout(renderMath, 300);
             }
 
-            setError(msg) {
-                this.setState({ error: msg, success: '' });
-            }
+            setError(msg) { this.setState({ error: msg, success: '' }); }
+            setSuccess(msg) { this.setState({ success: msg, error: '' }); }
+            setBusy(busy) { this.setState({ busy: busy }); }
 
-            setSuccess(msg) {
-                this.setState({ success: msg, error: '' });
-            }
-
-            setBusy(busy) {
-                this.setState({ busy: busy });
-            }
-
-            // ============================================
+            // ============================================================
             // CARGA DE DATOS
-            // ============================================
-            async loadExams() {
+            // ============================================================
+            async loadExams(courseId, partialId) {
                 try {
-                    const exams = await FirebaseService.getExams();
+                    const exams = await FirebaseService.getExams(courseId, partialId);
                     this.state.exams = exams;
                     return exams;
                 } catch (error) {
@@ -1181,15 +1179,14 @@
                 }
             }
 
-            // ============================================
+            // ============================================================
             // RENDER
-            // ============================================
+            // ============================================================
             render() {
                 const app = document.getElementById('app');
                 const { view } = this.state;
 
                 let html = '';
-
                 switch (view) {
                     case 'home':
                         html = this.renderHome();
@@ -1200,17 +1197,20 @@
                     case 'teacher-register':
                         html = this.renderTeacherRegister();
                         break;
-                    case 'teacher-dashboard':
-                        html = this.renderTeacherDashboard();
+                    case 'teacher-courses':
+                        html = this.renderTeacherCourses();
                         break;
-                    case 'teacher-create':
-                        html = this.renderTeacherCreate();
+                    case 'teacher-partials':
+                        html = this.renderTeacherPartials();
+                        break;
+                    case 'teacher-create-exam':
+                        html = this.renderTeacherCreateExam();
+                        break;
+                    case 'teacher-grade-exam':
+                        html = this.renderTeacherGradeExam();
                         break;
                     case 'teacher-results':
                         html = this.renderTeacherResults();
-                        break;
-                    case 'teacher-grade':
-                        html = this.renderTeacherGrade();
                         break;
                     case 'student-login':
                         html = this.renderStudentLogin();
@@ -1218,11 +1218,11 @@
                     case 'student-register':
                         html = this.renderStudentRegister();
                         break;
-                    case 'student-list':
-                        html = this.renderStudentList();
+                    case 'student-exams':
+                        html = this.renderStudentExams();
                         break;
-                    case 'student-exam':
-                        html = this.renderStudentExam();
+                    case 'student-taking-exam':
+                        html = this.renderStudentTakingExam();
                         break;
                     case 'student-result':
                         html = this.renderStudentResult();
@@ -1238,61 +1238,33 @@
                 setTimeout(renderMath, 400);
             }
 
-            // ============================================
+            // ============================================================
             // VISTAS
-            // ============================================
+            // ============================================================
 
-            // --- HOME ---
+            // --- HOME (Pantalla de inicio) ---
             renderHome() {
-                const { selectedPart, isTeacher, authUser } = this.state;
-
                 return `
-                    <div class="header">
-                        <h1>🎓 MATEM</h1>
-                        <div class="header-buttons">
-                            ${isTeacher ? `
-                                <span style="color:#F8FAFC;font-size:0.9rem;">👨‍🏫 ${this.state.teacherData?.name || 'Profesor'}</span>
-                                <button class="btn btn-primary" onclick="app.goToTeacherDashboard()">📊 Panel</button>
-                                <button class="btn btn-outline" onclick="app.logout()">🚪 Salir</button>
-                            ` : authUser ? `
-                                <button class="btn btn-outline" onclick="app.logout()">🚪 Salir</button>
-                            ` : `
-                                <button class="btn btn-outline" onclick="app.goToTeacherLogin()">👨‍🏫 Profesor</button>
-                                <button class="btn btn-primary" onclick="app.goToStudentLogin()">👨‍🎓 Estudiante</button>
-                            `}
+                    <div class="text-center" style="padding:30px 0;">
+                        <div style="font-size:6rem;margin-bottom:10px;">🎓</div>
+                        <h1 class="chalk-title" style="font-size:6rem;">MATEM</h1>
+                        <p class="chalk-subtitle" style="font-size:2rem;margin-bottom:30px;">Pizarra Digital</p>
+                        <div class="flex-center" style="gap:20px;flex-wrap:wrap;justify-content:center;">
+                            <button class="btn-chalk btn-chalk-primary" onclick="app.goToTeacherLogin()" style="font-size:1.4rem;padding:16px 40px;">
+                                👨‍🏫 Profesor
+                            </button>
+                            <button class="btn-chalk btn-chalk-blue" onclick="app.goToStudentLogin()" style="font-size:1.4rem;padding:16px 40px;">
+                                👨‍🎓 Estudiante
+                            </button>
                         </div>
-                    </div>
-
-                    <div class="container">
-                        <h2 style="font-size:2rem;font-weight:700;color:#0F172A;">Curso de Precálculo</h2>
-                        <p style="color:#64748B;font-size:1.1rem;margin-bottom:24px;">4 partes para dominar las matemáticas previas al cálculo</p>
-
-                        <div class="course-grid">
-                            ${COURSE_PARTS.map(part => `
-                                <div class="course-item ${selectedPart === part.id ? 'active' : ''}" onclick="app.togglePart(${part.id})">
-                                    <div class="course-header">
-                                        <span class="course-icon">${part.icon}</span>
-                                        <div class="course-info">
-                                            <div class="course-title">${part.title}</div>
-                                            <div class="course-subtitle">${part.subtitle}</div>
-                                            ${selectedPart === part.id ? `
-                                                <div class="course-details">
-                                                    <p>${part.description}</p>
-                                                    <div style="margin-top:10px;">
-                                                        ${part.topics.map(t => `<span class="topic-tag">${t}</span>`).join('')}
-                                                    </div>
-                                                    ${this.state.isTeacher ? `
-                                                        <div style="margin-top:12px;">
-                                                            <button class="btn btn-primary" onclick="event.stopPropagation();app.goToCreateExam(${part.id})">📝 Crear examen</button>
-                                                        </div>
-                                                    ` : ''}
-                                                </div>
-                                            ` : ''}
-                                        </div>
-                                        <span style="color:#94A3B8;font-size:1.2rem;">›</span>
-                                    </div>
-                                </div>
-                            `).join('')}
+                        <div style="margin-top:40px;opacity:0.3;font-size:0.9rem;color:var(--chalk-dim);">
+                            <span>✦</span>
+                            <span style="margin:0 12px;">|</span>
+                            <span>Precálculo</span>
+                            <span style="margin:0 12px;">|</span>
+                            <span>Expresiones Algebraicas</span>
+                            <span style="margin:0 12px;">|</span>
+                            <span>✦</span>
                         </div>
                     </div>
                 `;
@@ -1301,37 +1273,24 @@
             // --- TEACHER LOGIN ---
             renderTeacherLogin() {
                 const { error, success, busy, teacherEmail, teacherPass } = this.state;
-
                 return `
-                    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#F8FAFC;">
-                        <div class="card" style="max-width:420px;width:100%;">
-                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
-                                <button class="btn btn-ghost" onclick="app.goToHome()" style="padding:8px 12px;">←</button>
-                                <h2 class="card-title" style="margin-bottom:0;">Acceso Profesor</h2>
-                            </div>
-                            <p class="card-subtitle">Inicia sesión con tu cuenta de profesor</p>
-
-                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
-                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
-
-                            <div class="input-group">
-                                <label>Email</label>
-                                <input type="email" value="${teacherEmail}" oninput="app.state.teacherEmail = this.value" placeholder="profesor@email.com" />
-                            </div>
-                            <div class="input-group">
-                                <label>Contraseña</label>
-                                <input type="password" value="${teacherPass}" oninput="app.state.teacherPass = this.value" placeholder="••••••••" />
-                            </div>
-
-                            <button class="btn btn-primary w-full" onclick="app.handleTeacherLogin()" ${busy ? 'disabled' : ''}>
-                                ${busy ? '⏳ Cargando...' : '🚪 Entrar'}
-                            </button>
-
-                            <div style="margin-top:12px;text-align:center;">
-                                <span style="color:#64748B;font-size:0.9rem;">¿No tienes cuenta de profesor?</span>
-                                <button class="btn btn-purple" onclick="app.goToTeacherRegister()" style="padding:6px 16px;font-size:0.85rem;margin-left:8px;">Registrarse</button>
-                            </div>
+                    <div class="flex-center flex-col" style="max-width:420px;margin:20px auto;">
+                        <h2 class="chalk-title" style="font-size:2.8rem;">👨‍🏫 Profesor</h2>
+                        <p class="chalk-subtitle" style="font-size:1.2rem;">Inicia sesión en tu pizarra</p>
+                        ${error ? `<div class="msg-chalk error">⚠️ ${error}</div>` : ''}
+                        ${success ? `<div class="msg-chalk success">✅ ${success}</div>` : ''}
+                        <div class="input-chalk-label">Email</div>
+                        <input class="input-chalk" type="email" value="${teacherEmail}" oninput="app.state.teacherEmail = this.value" placeholder="profesor@email.com" />
+                        <div class="input-chalk-label">Contraseña</div>
+                        <input class="input-chalk" type="password" value="${teacherPass}" oninput="app.state.teacherPass = this.value" placeholder="••••••••" />
+                        <button class="btn-chalk btn-chalk-primary w-full" onclick="app.handleTeacherLogin()" ${busy ? 'disabled' : ''}>
+                            ${busy ? '⏳ Cargando...' : '🚪 Entrar'}
+                        </button>
+                        <div class="text-center" style="margin-top:8px;">
+                            <span class="chalk-small">¿No tienes cuenta?</span>
+                            <button class="btn-chalk btn-chalk-purple" onclick="app.goToTeacherRegister()" style="padding:8px 20px;font-size:1rem;">Registrarse</button>
                         </div>
+                        <button class="btn-chalk" onclick="app.goToHome()" style="padding:8px 20px;font-size:0.9rem;margin-top:4px;">← Volver</button>
                     </div>
                 `;
             }
@@ -1339,47 +1298,294 @@
             // --- TEACHER REGISTER ---
             renderTeacherRegister() {
                 const { error, success, busy, teacherEmail, teacherPass, teacherName, teacherSignupCode } = this.state;
+                return `
+                    <div class="flex-center flex-col" style="max-width:420px;margin:20px auto;">
+                        <h2 class="chalk-title" style="font-size:2.4rem;">📝 Registro Profesor</h2>
+                        <p class="chalk-subtitle" style="font-size:1rem;">Crea tu cuenta con el código especial</p>
+                        ${error ? `<div class="msg-chalk error">⚠️ ${error}</div>` : ''}
+                        ${success ? `<div class="msg-chalk success">✅ ${success}</div>` : ''}
+                        <div class="teacher-code-hint" style="background:rgba(245,215,110,0.1);border:1px dashed var(--chalk-yellow);border-radius:8px;padding:12px 16px;width:100%;text-align:center;">
+                            <span class="chalk-small">🔑 Código: <strong style="color:var(--chalk-yellow);">MATEM2024</strong></span>
+                        </div>
+                        <div class="input-chalk-label">Nombre completo</div>
+                        <input class="input-chalk" type="text" value="${teacherName}" oninput="app.state.teacherName = this.value" placeholder="Dr. Juan Pérez" />
+                        <div class="input-chalk-label">Email</div>
+                        <input class="input-chalk" type="email" value="${teacherEmail}" oninput="app.state.teacherEmail = this.value" placeholder="profesor@email.com" />
+                        <div class="input-chalk-label">Contraseña</div>
+                        <input class="input-chalk" type="password" value="${teacherPass}" oninput="app.state.teacherPass = this.value" placeholder="Mínimo 6 caracteres" />
+                        <div class="input-chalk-label">Código de verificación</div>
+                        <input class="input-chalk" type="text" value="${teacherSignupCode}" oninput="app.state.teacherSignupCode = this.value" placeholder="Ingresa el código especial" />
+                        <button class="btn-chalk btn-chalk-purple w-full" onclick="app.handleTeacherRegister()" ${busy ? 'disabled' : ''}>
+                            ${busy ? '⏳ Cargando...' : '📝 Registrarse'}
+                        </button>
+                        <button class="btn-chalk" onclick="app.goToTeacherLogin()" style="padding:8px 20px;font-size:0.9rem;margin-top:4px;">← Volver</button>
+                    </div>
+                `;
+            }
+
+            // --- TEACHER COURSES (Selección de curso) ---
+            renderTeacherCourses() {
+                const { teacherData } = this.state;
+                return `
+                    <div>
+                        <div class="flex-between" style="margin-bottom:24px;">
+                            <div>
+                                <h2 class="chalk-title" style="font-size:2.4rem;">📚 Cursos</h2>
+                                <p class="chalk-subtitle" style="font-size:1rem;">👨‍🏫 ${teacherData?.name || 'Profesor'}</p>
+                            </div>
+                            <button class="btn-chalk" onclick="app.logout()" style="padding:8px 18px;font-size:0.9rem;">🚪 Salir</button>
+                        </div>
+                        <div class="grid-2" style="margin-top:10px;">
+                            ${COURSES.map(course => `
+                                <div class="chalk-card" onclick="app.selectTeacherCourse('${course.id}')" style="text-align:center;padding:30px 20px;">
+                                    <div style="font-size:3.5rem;">${course.icon}</div>
+                                    <div class="card-title" style="font-size:1.8rem;">${course.name}</div>
+                                    <div class="card-sub">${course.description}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEACHER PARTIALS (4 parciales) ---
+            renderTeacherPartials() {
+                const { selectedCourse } = this.state;
+                const course = COURSES.find(c => c.id === selectedCourse);
 
                 return `
-                    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#F8FAFC;">
-                        <div class="card" style="max-width:420px;width:100%;">
-                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
-                                <button class="btn btn-ghost" onclick="app.goToTeacherLogin()" style="padding:8px 12px;">←</button>
-                                <h2 class="card-title" style="margin-bottom:0;">Registro Profesor</h2>
+                    <div>
+                        <div class="flex-between" style="margin-bottom:20px;">
+                            <div>
+                                <button class="btn-chalk" onclick="app.goToTeacherCourses()" style="padding:6px 16px;font-size:0.9rem;">← Volver</button>
+                                <h2 class="chalk-title" style="font-size:2.4rem;margin-top:6px;">${course?.icon || '📚'} ${course?.name || 'Curso'}</h2>
                             </div>
-                            <p class="card-subtitle">Crea tu cuenta de profesor</p>
-
-                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
-                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
-
-                            <div class="teacher-code-hint">
-                                <span style="font-size:0.85rem;">🔑 Necesitas el código especial para registrarte como profesor</span>
-                            </div>
-
-                            <div class="input-group">
-                                <label>Nombre completo</label>
-                                <input type="text" value="${teacherName}" oninput="app.state.teacherName = this.value" placeholder="Dr. Juan Pérez" />
-                            </div>
-                            <div class="input-group">
-                                <label>Email</label>
-                                <input type="email" value="${teacherEmail}" oninput="app.state.teacherEmail = this.value" placeholder="profesor@email.com" />
-                            </div>
-                            <div class="input-group">
-                                <label>Contraseña</label>
-                                <input type="password" value="${teacherPass}" oninput="app.state.teacherPass = this.value" placeholder="Mínimo 6 caracteres" />
-                            </div>
-                            <div class="input-group">
-                                <label>Código de verificación de profesor</label>
-                                <input type="text" value="${teacherSignupCode}" oninput="app.state.teacherSignupCode = this.value" placeholder="Ingresa el código especial" />
-                                <div style="font-size:0.75rem;color:#64748B;margin-top:4px;">
-                                    💡 Pista: El código es <strong>MATEM2024</strong>
-                                </div>
-                            </div>
-
-                            <button class="btn btn-purple w-full" onclick="app.handleTeacherRegister()" ${busy ? 'disabled' : ''}>
-                                ${busy ? '⏳ Cargando...' : '📝 Registrarse como profesor'}
-                            </button>
+                            <button class="btn-chalk" onclick="app.logout()" style="padding:8px 18px;font-size:0.9rem;">🚪 Salir</button>
                         </div>
+                        <p class="chalk-subtitle">Selecciona un parcial para gestionar</p>
+                        <div class="partial-grid">
+                            ${PARTIALS.map(p => `
+                                <div class="partial-card" onclick="app.selectTeacherPartial(${p.id})">
+                                    <div class="partial-number">${p.icon}</div>
+                                    <div class="partial-title">${p.name}</div>
+                                    <div class="partial-desc">Gestiona exámenes y calificaciones</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEACHER CREATE EXAM ---
+            renderTeacherCreateExam() {
+                const { error, busy, draftTitle, draftQuestions, draftTimeLimit, selectedCourse, selectedPartial, teacherData } =
+                    this.state;
+                const course = COURSES.find(c => c.id === selectedCourse);
+                const partial = PARTIALS.find(p => p.id === selectedPartial);
+
+                return `
+                    <div>
+                        <div class="flex-between" style="margin-bottom:16px;">
+                            <div>
+                                <button class="btn-chalk" onclick="app.goToTeacherPartials()" style="padding:6px 16px;font-size:0.9rem;">← Volver</button>
+                                <h2 class="chalk-title" style="font-size:2rem;margin-top:6px;">✏️ Crear Examen</h2>
+                                <p class="chalk-subtitle">${course?.name || ''} · ${partial?.name || ''}</p>
+                            </div>
+                            <button class="btn-chalk" onclick="app.logout()" style="padding:8px 18px;font-size:0.9rem;">🚪 Salir</button>
+                        </div>
+
+                        ${error ? `<div class="msg-chalk error">⚠️ ${error}</div>` : ''}
+
+                        <div class="grid-2">
+                            <div>
+                                <div class="input-chalk-label">Título del examen</div>
+                                <input class="input-chalk" type="text" value="${draftTitle}" oninput="app.state.draftTitle = this.value" placeholder="Ej: Examen de Álgebra" />
+                            </div>
+                            <div>
+                                <div class="input-chalk-label">Tiempo límite (minutos)</div>
+                                <input class="input-chalk" type="number" value="${draftTimeLimit}" oninput="app.state.draftTimeLimit = parseInt(this.value) || 1" min="1" max="180" />
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:12px;padding:12px 16px;background:rgba(255,255,255,0.04);border-radius:8px;border:1px solid rgba(255,255,255,0.06);">
+                            <span class="chalk-small">📐 Usa <strong>MathJax</strong> para ecuaciones: <code style="color:var(--chalk-yellow);">\$x^2 + y^2 = r^2\$</code></span>
+                        </div>
+
+                        ${draftQuestions.map((q, qi) => `
+                            <div class="question-block-chalk">
+                                <div class="q-header">
+                                    <span>PREGUNTA ${qi + 1} · ${q.type === 'tf' ? 'Verdadero/Falso' : q.type === 'sa' ? 'Respuesta Corta' : 'Opción múltiple'}</span>
+                                    <button class="btn-chalk btn-chalk-danger" onclick="app.removeDraftQuestion('${q.id}')" style="padding:4px 14px;font-size:0.8rem;">🗑️</button>
+                                </div>
+                                <div style="margin-bottom:8px;">
+                                    <div class="input-chalk-label" style="font-size:0.8rem;">Enunciado (usa \$...\$ para matemáticas)</div>
+                                    <input class="input-chalk" type="text" value="${q.text}" oninput="app.updateDraftQuestion('${q.id}', { text: this.value })" placeholder="Ej: Resuelve la ecuación \$2x + 3 = 7\$" style="font-size:1rem;" />
+                                </div>
+                                ${q.type === 'sa' ? `
+                                    <div style="padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:6px;border:1px dashed rgba(255,255,255,0.1);">
+                                        <span class="chalk-small">📝 Respuesta corta</span>
+                                        <div style="margin-top:6px;">
+                                            <div class="input-chalk-label" style="font-size:0.75rem;">Respuesta correcta (validación automática):</div>
+                                            <input class="input-chalk" type="text" value="${q.correctAnswer || ''}" oninput="app.updateDraftQuestion('${q.id}', { correctAnswer: this.value })" placeholder="Ej: x = 2" style="font-size:0.9rem;padding:6px 12px;" />
+                                        </div>
+                                        <div style="margin-top:4px;">
+                                            <div class="input-chalk-label" style="font-size:0.75rem;">Palabras clave (separadas por coma):</div>
+                                            <input class="input-chalk" type="text" value="${q.keywords || ''}" oninput="app.updateDraftQuestion('${q.id}', { keywords: this.value })" placeholder="Ej: función, lineal, pendiente" style="font-size:0.9rem;padding:6px 12px;" />
+                                        </div>
+                                    </div>
+                                ` : q.options.map((opt, oi) => `
+                                    <div class="option-row-chalk">
+                                        <input type="radio" ${q.correctIndex === oi ? 'checked' : ''} onchange="app.updateDraftQuestion('${q.id}', { correctIndex: ${oi} })" />
+                                        <input type="text" value="${opt}" oninput="app.updateOption('${q.id}', ${oi}, this.value)" placeholder="Opción ${oi + 1}" />
+                                    </div>
+                                `).join('')}
+                                ${q.type !== 'sa' ? `
+                                    <div class="chalk-small" style="margin-top:4px;opacity:0.5;">Marca el círculo de la respuesta correcta</div>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+
+                        <div class="flex" style="gap:10px;margin:16px 0;flex-wrap:wrap;">
+                            <button class="btn-chalk btn-chalk-secondary" onclick="app.addDraftQuestion('mc')" style="border-color:var(--chalk-blue);color:var(--chalk-blue);">➕ Opción múltiple</button>
+                            <button class="btn-chalk btn-chalk-secondary" onclick="app.addDraftQuestion('tf')" style="border-color:var(--chalk-green);color:var(--chalk-green);">➕ Verdadero/Falso</button>
+                            <button class="btn-chalk btn-chalk-secondary" onclick="app.addDraftQuestion('sa')" style="border-color:var(--chalk-orange);color:var(--chalk-orange);">➕ Respuesta corta</button>
+                        </div>
+
+                        <div class="flex" style="gap:12px;flex-wrap:wrap;">
+                            <button class="btn-chalk btn-chalk-primary" onclick="app.saveDraftExam()" ${busy ? 'disabled' : ''}>
+                                ${busy ? '⏳ Guardando...' : '💾 Guardar examen'}
+                            </button>
+                            <button class="btn-chalk" onclick="app.goToTeacherPartials()">Cancelar</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // --- TEACHER GRADE EXAM (Calificar intentos) ---
+            renderTeacherGradeExam() {
+                const { selectedCourse, selectedPartial, exams, teacherData } = this.state;
+
+                return `
+                    <div>
+                        <div class="flex-between" style="margin-bottom:16px;">
+                            <div>
+                                <button class="btn-chalk" onclick="app.goToTeacherPartials()" style="padding:6px 16px;font-size:0.9rem;">← Volver</button>
+                                <h2 class="chalk-title" style="font-size:2rem;margin-top:6px;">📊 Calificar Exámenes</h2>
+                                <p class="chalk-subtitle">Revisa y califica los exámenes de los estudiantes</p>
+                            </div>
+                            <button class="btn-chalk" onclick="app.logout()" style="padding:8px 18px;font-size:0.9rem;">🚪 Salir</button>
+                        </div>
+
+                        ${exams.length === 0 ? `
+                            <div class="text-center" style="padding:40px 0;">
+                                <div style="font-size:4rem;opacity:0.3;">📄</div>
+                                <p class="chalk-text">No hay exámenes creados en este parcial.</p>
+                                <button class="btn-chalk btn-chalk-primary mt-3" onclick="app.goToCreateExam()">Crear examen</button>
+                            </div>
+                        ` : `
+                            ${exams.map(exam => `
+                                <div class="exam-item-chalk" onclick="app.openResults('${exam.id}')" style="cursor:pointer;">
+                                    <div>
+                                        <div class="exam-title">${exam.title}</div>
+                                        <div class="exam-meta">${exam.questions?.length || 0} preguntas · ${exam.timeLimit || 30} min</div>
+                                    </div>
+                                    <button class="btn-chalk btn-chalk-blue" onclick="event.stopPropagation();app.openResults('${exam.id}')" style="padding:6px 18px;font-size:0.9rem;">📊 Ver resultados</button>
+                                </div>
+                            `).join('')}
+                        `}
+                    </div>
+                `;
+            }
+
+            // --- TEACHER RESULTS (Detalle de intentos) ---
+            renderTeacherResults() {
+                const { resultsExam, resultsList, stats, openAttempt } = this.state;
+
+                if (!resultsExam) {
+                    return `<div class="flex-center" style="min-height:50vh;"><div class="spinner-chalk"></div></div>`;
+                }
+
+                return `
+                    <div>
+                        <div class="flex-between" style="margin-bottom:16px;">
+                            <div>
+                                <button class="btn-chalk" onclick="app.goToTeacherGradeExam()" style="padding:6px 16px;font-size:0.9rem;">← Volver</button>
+                                <h2 class="chalk-title" style="font-size:2rem;margin-top:6px;">📊 Resultados: ${resultsExam.title}</h2>
+                                <p class="chalk-subtitle">${resultsList.length} intentos ${stats ? `· Promedio: ${stats.avg.toFixed(1)}%` : ''}</p>
+                            </div>
+                        </div>
+
+                        ${resultsList.length === 0 ? `
+                            <div class="text-center" style="padding:40px 0;">
+                                <div style="font-size:4rem;opacity:0.3;">👥</div>
+                                <p class="chalk-text">Nadie ha respondido este examen todavía.</p>
+                            </div>
+                        ` : `
+                            ${resultsList.map(r => {
+                                const pct = (r.score / r.total * 100);
+                                const isGraded = r.gradingStatus === 'graded';
+                                const finalPct = isGraded ? (r.finalGrade / r.total * 100) : null;
+                                const passed = isGraded ? finalPct >= 60 : pct >= 60;
+                                const id = r.id || r.studentId || 'unknown';
+                                return `
+                                    <div style="margin-bottom:4px;">
+                                        <div class="exam-item-chalk" style="cursor:pointer;border-left-color:${isGraded ? (passed ? 'var(--chalk-green)' : 'var(--chalk-red)') : 'var(--chalk-orange)'};background:${openAttempt === id ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)'};" onclick="app.toggleAttempt('${id}')">
+                                            <div class="flex" style="align-items:center;gap:12px;flex-wrap:wrap;">
+                                                <span>${isGraded ? (passed ? '✅' : '❌') : '⏳'}</span>
+                                                <div>
+                                                    <div class="exam-title" style="font-size:1rem;">${r.studentName}</div>
+                                                    <div class="exam-meta">${formatDate(r.submittedAt)}</div>
+                                                </div>
+                                                <div class="flex" style="gap:12px;flex-wrap:wrap;">
+                                                    <span class="chalk-small">Provisional: ${r.score}/${r.total} (${pct.toFixed(0)}%)</span>
+                                                    ${isGraded ? `
+                                                        <span class="chalk-small" style="color:${passed ? 'var(--chalk-green)' : 'var(--chalk-red)'};font-weight:bold;">
+                                                            Final: ${r.finalGrade}/${r.total} (${finalPct.toFixed(0)}%)
+                                                        </span>
+                                                    ` : `
+                                                        <span class="badge-chalk pending">Pendiente</span>
+                                                    `}
+                                                </div>
+                                            </div>
+                                            <div class="flex" style="gap:6px;">
+                                                ${!isGraded ? `
+                                                    <button class="btn-chalk btn-chalk-warning" onclick="event.stopPropagation();app.goToGrade('${r.id}')" style="padding:4px 14px;font-size:0.8rem;border-color:var(--chalk-orange);color:var(--chalk-orange);">✏️ Calificar</button>
+                                                ` : `
+                                                    <button class="btn-chalk btn-chalk-blue" onclick="event.stopPropagation();app.goToGrade('${r.id}')" style="padding:4px 14px;font-size:0.8rem;">📝 Revisar</button>
+                                                `}
+                                            </div>
+                                        </div>
+                                        ${openAttempt === id ? `
+                                            <div style="padding:12px 16px 12px 32px;border-left:3px solid var(--chalk-yellow);background:rgba(255,255,255,0.03);border-radius:0 0 8px 8px;">
+                                                ${r.details.map((d, i) => `
+                                                    <div class="flex" style="align-items:flex-start;gap:8px;padding:3px 0;">
+                                                        <span>${d.correct ? '✅' : '❌'}</span>
+                                                        <div>
+                                                            <div class="math-text" style="font-size:0.95rem;">${d.text}</div>
+                                                            <div class="chalk-small" style="font-family:monospace;">
+                                                                ${d.type === 'sa' ? `Respondió: ${d.shortAnswer || '—'}` : `Respondió: ${d.options?.[d.chosen] || '—'}`}
+                                                                ${!d.correct && d.correctIndex !== undefined ? ` · Correcta: ${d.options?.[d.correctIndex] || d.correctAnswer || '—'}` : ''}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                `).join('')}
+                                                ${r.teacherComments && r.teacherComments.length > 0 ? `
+                                                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);">
+                                                        <div class="chalk-small" style="font-weight:bold;">💬 Comentarios del profesor:</div>
+                                                        ${r.teacherComments.map(c => `
+                                                            <div class="comment-box" style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px 14px;margin-top:4px;border-left:2px solid var(--chalk-yellow);">
+                                                                <div class="comment-text" style="font-size:0.9rem;">${c.text}</div>
+                                                                <div class="comment-date" style="font-size:0.7rem;opacity:0.5;">${c.teacherName} · ${formatDate(c.date)}</div>
+                                                            </div>
+                                                        `).join('')}
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        `}
                     </div>
                 `;
             }
@@ -1387,567 +1593,180 @@
             // --- STUDENT LOGIN ---
             renderStudentLogin() {
                 const { error, success, busy, studentEmail, studentPass } = this.state;
-
                 return `
-                    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#F8FAFC;">
-                        <div class="card" style="max-width:420px;width:100%;">
-                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
-                                <button class="btn btn-ghost" onclick="app.goToHome()" style="padding:8px 12px;">←</button>
-                                <h2 class="card-title" style="margin-bottom:0;">Acceso Estudiante</h2>
-                            </div>
-                            <p class="card-subtitle">Inicia sesión con tu cuenta</p>
-
-                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
-                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
-
-                            <div class="input-group">
-                                <label>Email</label>
-                                <input type="email" value="${studentEmail}" oninput="app.state.studentEmail = this.value" placeholder="estudiante@email.com" />
-                            </div>
-                            <div class="input-group">
-                                <label>Contraseña</label>
-                                <input type="password" value="${studentPass}" oninput="app.state.studentPass = this.value" placeholder="••••••••" />
-                            </div>
-
-                            <button class="btn btn-primary w-full" onclick="app.handleStudentLogin()" ${busy ? 'disabled' : ''}>
-                                ${busy ? '⏳ Cargando...' : '🚪 Entrar'}
-                            </button>
-
-                            <div style="margin-top:12px;text-align:center;">
-                                <span style="color:#64748B;font-size:0.9rem;">¿No tienes cuenta?</span>
-                                <button class="btn btn-secondary" onclick="app.goToStudentRegister()" style="padding:6px 16px;font-size:0.85rem;margin-left:8px;">Registrarse</button>
-                            </div>
+                    <div class="flex-center flex-col" style="max-width:420px;margin:20px auto;">
+                        <h2 class="chalk-title" style="font-size:2.8rem;">👨‍🎓 Estudiante</h2>
+                        <p class="chalk-subtitle" style="font-size:1.2rem;">Inicia sesión en tu pizarra</p>
+                        ${error ? `<div class="msg-chalk error">⚠️ ${error}</div>` : ''}
+                        ${success ? `<div class="msg-chalk success">✅ ${success}</div>` : ''}
+                        <div class="input-chalk-label">Email</div>
+                        <input class="input-chalk" type="email" value="${studentEmail}" oninput="app.state.studentEmail = this.value" placeholder="estudiante@email.com" />
+                        <div class="input-chalk-label">Contraseña</div>
+                        <input class="input-chalk" type="password" value="${studentPass}" oninput="app.state.studentPass = this.value" placeholder="••••••••" />
+                        <button class="btn-chalk btn-chalk-blue w-full" onclick="app.handleStudentLogin()" ${busy ? 'disabled' : ''}>
+                            ${busy ? '⏳ Cargando...' : '🚪 Entrar'}
+                        </button>
+                        <div class="text-center" style="margin-top:8px;">
+                            <span class="chalk-small">¿No tienes cuenta?</span>
+                            <button class="btn-chalk btn-chalk-purple" onclick="app.goToStudentRegister()" style="padding:8px 20px;font-size:1rem;">Registrarse</button>
                         </div>
+                        <button class="btn-chalk" onclick="app.goToHome()" style="padding:8px 20px;font-size:0.9rem;margin-top:4px;">← Volver</button>
                     </div>
                 `;
             }
 
             // --- STUDENT REGISTER ---
             renderStudentRegister() {
-                const { error, success, busy, studentEmail, studentPass, studentName, studentId } = this.state;
-
+                const { error, success, busy, studentEmail, studentPass, studentName, studentId, studentCourse } = this.state;
                 return `
-                    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:#F8FAFC;">
-                        <div class="card" style="max-width:420px;width:100%;">
-                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
-                                <button class="btn btn-ghost" onclick="app.goToStudentLogin()" style="padding:8px 12px;">←</button>
-                                <h2 class="card-title" style="margin-bottom:0;">Registro Estudiante</h2>
-                            </div>
-                            <p class="card-subtitle">Crea tu cuenta para acceder a los exámenes</p>
-
-                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
-                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
-
-                            <div class="input-group">
-                                <label>Nombre completo</label>
-                                <input type="text" value="${studentName}" oninput="app.state.studentName = this.value" placeholder="Juan Pérez" />
-                            </div>
-                            <div class="input-group">
-                                <label>ID de estudiante (carné)</label>
-                                <input type="text" value="${studentId}" oninput="app.state.studentId = this.value" placeholder="2024-0001" />
-                            </div>
-                            <div class="input-group">
-                                <label>Email</label>
-                                <input type="email" value="${studentEmail}" oninput="app.state.studentEmail = this.value" placeholder="estudiante@email.com" />
-                            </div>
-                            <div class="input-group">
-                                <label>Contraseña</label>
-                                <input type="password" value="${studentPass}" oninput="app.state.studentPass = this.value" placeholder="Mínimo 6 caracteres" />
-                            </div>
-
-                            <button class="btn btn-primary w-full" onclick="app.handleStudentRegister()" ${busy ? 'disabled' : ''}>
-                                ${busy ? '⏳ Cargando...' : '📝 Registrarse'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // --- TEACHER DASHBOARD ---
-            renderTeacherDashboard() {
-                const { exams, error, success, teacherData } = this.state;
-
-                const grouped = {};
-                exams.forEach(e => {
-                    const p = e.part || 1;
-                    if (!grouped[p]) grouped[p] = [];
-                    grouped[p].push(e);
-                });
-
-                return `
-                    <div class="header">
-                        <h1>📊 MATEM</h1>
-                        <div class="header-buttons">
-                            <span style="color:#F8FAFC;font-size:0.9rem;">👨‍🏫 ${teacherData?.name || 'Profesor'}</span>
-                            <button class="btn btn-primary" onclick="app.goToCreateExam()">➕ Nuevo examen</button>
-                            <button class="btn btn-outline" onclick="app.goToHome()">🏠 Inicio</button>
-                            <button class="btn btn-danger" onclick="app.logout()">🚪 Salir</button>
-                        </div>
-                    </div>
-
-                    <div class="container">
-                        <div class="card">
-                            <div class="flex-between">
-                                <div>
-                                    <h2 class="card-title">Panel del Profesor</h2>
-                                    <p class="card-subtitle">${exams.length} exámenes creados</p>
-                                </div>
-                            </div>
-
-                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
-                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
-
-                            ${exams.length === 0 ? `
-                                <div class="text-center" style="padding:40px 0;">
-                                    <div style="font-size:4rem;">📄</div>
-                                    <p style="color:#64748B;">No hay exámenes creados todavía.</p>
-                                    <button class="btn btn-primary mt-3" onclick="app.goToCreateExam()">Crear primer examen</button>
-                                </div>
-                            ` : `
-                                ${Object.entries(grouped).map(([partId, partExams]) => {
-                                    const part = COURSE_PARTS.find(p => p.id === parseInt(partId));
-                                    return `
-                                        <div style="margin-bottom:20px;">
-                                            <h3 style="font-weight:600;color:#0F172A;margin-bottom:10px;">${part ? part.title : `Parte ${partId}`}</h3>
-                                            ${partExams.map(e => `
-                                                <div class="exam-item">
-                                                    <div>
-                                                        <div class="exam-title">${e.title}</div>
-                                                        <div class="exam-meta">${e.questions?.length || 0} preguntas · ${e.timeLimit || 30} min</div>
-                                                    </div>
-                                                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                                                        <button class="btn btn-secondary" onclick="app.openResults('${e.id}')" style="padding:6px 16px;font-size:0.85rem;">📊 Resultados</button>
-                                                        <button class="btn btn-danger" onclick="app.deleteExam('${e.id}')" style="padding:6px 16px;font-size:0.85rem;">🗑️</button>
-                                                    </div>
-                                                </div>
-                                            `).join('')}
-                                        </div>
-                                    `;
-                                }).join('')}
-                            `}
-                        </div>
-                    </div>
-                `;
-            }
-
-            // --- TEACHER CREATE ---
-            renderTeacherCreate() {
-                const { error, busy, draftTitle, draftQuestions, draftTimeLimit, draftPart } = this.state;
-                const part = COURSE_PARTS.find(p => p.id === draftPart);
-
-                return `
-                    <div class="header">
-                        <h1>📝 MATEM</h1>
-                        <div class="header-buttons">
-                            <button class="btn btn-outline" onclick="app.goToTeacherDashboard()">← Volver</button>
-                        </div>
-                    </div>
-
-                    <div class="container">
-                        <div class="card">
-                            <h2 class="card-title">Crear Examen</h2>
-                            <p class="card-subtitle">${part ? `Parte ${part.id}: ${part.title}` : 'Nuevo examen'}</p>
-
-                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
-
-                            <div class="grid-2">
-                                <div class="input-group">
-                                    <label>Título del examen</label>
-                                    <input type="text" value="${draftTitle}" oninput="app.state.draftTitle = this.value" placeholder="Ej: Examen de Álgebra" />
-                                </div>
-                                <div class="input-group">
-                                    <label>Parte del curso</label>
-                                    <select onchange="app.state.draftPart = parseInt(this.value)">
-                                        ${COURSE_PARTS.map(p => `
-                                            <option value="${p.id}" ${p.id === draftPart ? 'selected' : ''}>${p.title}</option>
-                                        `).join('')}
-                                    </select>
-                                </div>
-                                <div class="input-group">
-                                    <label>Tiempo límite (minutos)</label>
-                                    <input type="number" value="${draftTimeLimit}" oninput="app.state.draftTimeLimit = parseInt(this.value) || 1" min="1" max="180" />
-                                </div>
-                            </div>
-
-                            <div style="margin-bottom:12px;padding:12px 16px;background:#F8FAFC;border-radius:8px;border:1px solid #E2E8F0;">
-                                <span style="font-size:0.85rem;color:#64748B;">📐 Puedes usar <strong>MathJax</strong> para ecuaciones: <code>\$x^2 + y^2 = r^2\$</code></span>
-                            </div>
-
-                            ${draftQuestions.map((q, qi) => `
-                                <div class="question-block">
-                                    <div class="question-header">
-                                        <span>PREGUNTA ${qi + 1} · ${q.type === 'tf' ? 'Verdadero/Falso' : q.type === 'sa' ? 'Respuesta Corta' : 'Opción múltiple'}</span>
-                                        <button class="btn btn-danger" onclick="app.removeDraftQuestion('${q.id}')" style="padding:4px 12px;font-size:0.8rem;">🗑️</button>
-                                    </div>
-                                    <div class="input-group" style="margin-bottom:8px;">
-                                        <label style="font-size:0.8rem;">Enunciado (puedes usar \$...\$ para matemáticas)</label>
-                                        <input type="text" value="${q.text}" oninput="app.updateDraftQuestion('${q.id}', { text: this.value })" placeholder="Ej: Resuelve la ecuación \$2x + 3 = 7\$" style="width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:6px;outline:none;font-size:1rem;background:white;" />
-                                    </div>
-                                    
-                                    ${q.type === 'sa' ? `
-                                        <div style="padding:8px 12px;background:#EEF2FF;border-radius:6px;border:1px dashed #E2E8F0;">
-                                            <span style="font-size:0.85rem;color:#64748B;">📝 Respuesta corta</span>
-                                            <div style="margin-top:8px;">
-                                                <label style="font-size:0.75rem;color:#64748B;">Respuesta correcta (el sistema validará automáticamente):</label>
-                                                <input type="text" value="${q.correctAnswer || ''}" oninput="app.updateDraftQuestion('${q.id}', { correctAnswer: this.value })" placeholder="Ej: x = 2" style="width:100%;padding:6px 12px;border:1px solid #E2E8F0;border-radius:4px;margin-top:4px;font-size:0.9rem;" />
-                                            </div>
-                                            <div style="margin-top:6px;">
-                                                <label style="font-size:0.75rem;color:#64748B;">Palabras clave adicionales (separadas por coma):</label>
-                                                <input type="text" value="${q.keywords || ''}" oninput="app.updateDraftQuestion('${q.id}', { keywords: this.value })" placeholder="Ej: función, lineal, pendiente" style="width:100%;padding:6px 12px;border:1px solid #E2E8F0;border-radius:4px;margin-top:4px;font-size:0.9rem;" />
-                                            </div>
-                                            <div style="font-size:0.7rem;color:#64748B;margin-top:4px;">💡 La respuesta se valida comparando con la respuesta correcta (ignorando espacios y mayúsculas)</div>
-                                        </div>
-                                    ` : q.options.map((opt, oi) => `
-                                        <div class="option-row">
-                                            <input type="radio" ${q.correctIndex === oi ? 'checked' : ''} onchange="app.updateDraftQuestion('${q.id}', { correctIndex: ${oi} })" />
-                                            <input type="text" value="${opt}" oninput="app.updateOption('${q.id}', ${oi}, this.value)" placeholder="Opción ${oi + 1}" />
-                                        </div>
-                                    `).join('')}
-                                    
-                                    ${q.type !== 'sa' ? `
-                                        <div style="font-size:0.7rem;color:#64748B;font-family:monospace;margin-top:4px;">Marca el círculo de la respuesta correcta</div>
-                                    ` : ''}
-                                </div>
+                    <div class="flex-center flex-col" style="max-width:420px;margin:20px auto;">
+                        <h2 class="chalk-title" style="font-size:2.4rem;">📝 Registro Estudiante</h2>
+                        <p class="chalk-subtitle" style="font-size:1rem;">Crea tu cuenta y elige tu curso</p>
+                        ${error ? `<div class="msg-chalk error">⚠️ ${error}</div>` : ''}
+                        ${success ? `<div class="msg-chalk success">✅ ${success}</div>` : ''}
+                        <div class="input-chalk-label">Nombre completo</div>
+                        <input class="input-chalk" type="text" value="${studentName}" oninput="app.state.studentName = this.value" placeholder="Juan Pérez" />
+                        <div class="input-chalk-label">ID de estudiante (carné)</div>
+                        <input class="input-chalk" type="text" value="${studentId}" oninput="app.state.studentId = this.value" placeholder="2024-0001" />
+                        <div class="input-chalk-label">Email</div>
+                        <input class="input-chalk" type="email" value="${studentEmail}" oninput="app.state.studentEmail = this.value" placeholder="estudiante@email.com" />
+                        <div class="input-chalk-label">Contraseña</div>
+                        <input class="input-chalk" type="password" value="${studentPass}" oninput="app.state.studentPass = this.value" placeholder="Mínimo 6 caracteres" />
+                        <div class="input-chalk-label">Elige tu curso</div>
+                        <select class="input-chalk" onchange="app.state.studentCourse = this.value">
+                            <option value="">Selecciona un curso...</option>
+                            ${COURSES.map(c => `
+                                <option value="${c.id}" ${c.id === studentCourse ? 'selected' : ''}>${c.icon} ${c.name}</option>
                             `).join('')}
-
-                            <div style="display:flex;gap:10px;margin:16px 0;flex-wrap:wrap;">
-                                <button class="btn btn-secondary" onclick="app.addDraftQuestion('mc')">➕ Opción múltiple</button>
-                                <button class="btn btn-secondary" onclick="app.addDraftQuestion('tf')">➕ Verdadero/Falso</button>
-                                <button class="btn btn-secondary" onclick="app.addDraftQuestion('sa')">➕ Respuesta corta</button>
-                            </div>
-
-                            <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                                <button class="btn btn-primary" onclick="app.saveDraftExam()" ${busy ? 'disabled' : ''}>
-                                    ${busy ? '⏳ Guardando...' : '💾 Guardar examen'}
-                                </button>
-                                <button class="btn btn-ghost" onclick="app.goToTeacherDashboard()">Cancelar</button>
-                            </div>
-                        </div>
+                        </select>
+                        <button class="btn-chalk btn-chalk-purple w-full" onclick="app.handleStudentRegister()" ${busy ? 'disabled' : ''}>
+                            ${busy ? '⏳ Cargando...' : '📝 Registrarse'}
+                        </button>
+                        <button class="btn-chalk" onclick="app.goToStudentLogin()" style="padding:8px 20px;font-size:0.9rem;margin-top:4px;">← Volver</button>
                     </div>
                 `;
             }
 
-            // --- TEACHER RESULTS ---
-            renderTeacherResults() {
-                const { resultsExam, resultsList, stats, openAttempt } = this.state;
-
-                if (!resultsExam) {
-                    return `
-                        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
-                            <div class="spinner"></div>
-                        </div>
-                    `;
-                }
-
-                return `
-                    <div class="header">
-                        <h1>📊 MATEM</h1>
-                        <div class="header-buttons">
-                            <button class="btn btn-outline" onclick="app.goToTeacherDashboard()">← Volver</button>
-                        </div>
-                    </div>
-
-                    <div class="container">
-                        <div class="card">
-                            <h2 class="card-title">Resultados: ${resultsExam.title}</h2>
-                            <p class="card-subtitle">${resultsList.length} intentos ${stats ? `· Promedio provisional: ${stats.avg.toFixed(1)}% · Aprobados: ${stats.passRate.toFixed(1)}%` : ''}</p>
-
-                            ${resultsList.length === 0 ? `
-                                <div class="text-center" style="padding:40px 0;">
-                                    <div style="font-size:4rem;">👥</div>
-                                    <p style="color:#64748B;">Nadie ha respondido este examen todavía.</p>
-                                </div>
-                            ` : `
-                                ${resultsList.map(r => {
-                                    const pct = (r.score / r.total * 100);
-                                    const isGraded = r.gradingStatus === 'graded';
-                                    const finalPct = isGraded ? (r.finalGrade / r.total * 100) : null;
-                                    const passed = isGraded ? finalPct >= 60 : pct >= 60;
-                                    const id = r.id || r.studentId || 'unknown';
-                                    return `
-                                        <div style="margin-bottom:4px;">
-                                            <div class="exam-item" style="cursor:pointer;background:${openAttempt === id ? '#EEF2FF' : '#F8FAFC'};" onclick="app.toggleAttempt('${id}')">
-                                                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                                                    <span>${isGraded ? (passed ? '✅' : '❌') : '⏳'}</span>
-                                                    <div>
-                                                        <div style="font-weight:500;color:#0F172A;">${r.studentName}</div>
-                                                        <div style="font-size:0.75rem;color:#64748B;">${formatDate(r.submittedAt)}</div>
-                                                    </div>
-                                                    <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                                                        <span style="font-family:monospace;font-size:0.85rem;color:#64748B;">
-                                                            Provisional: ${r.score}/${r.total} (${pct.toFixed(0)}%)
-                                                        </span>
-                                                        ${isGraded ? `
-                                                            <span style="font-family:monospace;font-size:0.85rem;font-weight:600;${passed ? 'color:#16A34A;' : 'color:#DC2626;'}">
-                                                                Final: ${r.finalGrade}/${r.total} (${finalPct.toFixed(0)}%)
-                                                            </span>
-                                                        ` : `
-                                                            <span class="grade-badge pending">Pendiente</span>
-                                                        `}
-                                                    </div>
-                                                </div>
-                                                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                                                    ${!isGraded ? `
-                                                        <button class="btn btn-warning" onclick="event.stopPropagation();app.goToGrade('${r.id}')" style="padding:4px 12px;font-size:0.8rem;">✏️ Calificar</button>
-                                                    ` : `
-                                                        <button class="btn btn-secondary" onclick="event.stopPropagation();app.goToGrade('${r.id}')" style="padding:4px 12px;font-size:0.8rem;">📝 Revisar</button>
-                                                    `}
-                                                </div>
-                                            </div>
-                                            ${openAttempt === id ? `
-                                                <div style="padding:12px 16px 12px 32px;border-left:3px solid #4F46E5;background:#EEF2FF;border-radius:0 0 8px 8px;">
-                                                    ${r.details.map((d, i) => `
-                                                        <div style="display:flex;align-items:flex-start;gap:8px;padding:3px 0;">
-                                                            <span>${d.correct ? '✅' : '❌'}</span>
-                                                            <div style="font-size:0.9rem;color:#334155;">
-                                                                <div class="math-text">${d.text}</div>
-                                                                <div style="font-size:0.75rem;color:#64748B;font-family:monospace;">
-                                                                    ${d.type === 'sa' ? `Respondió: ${d.shortAnswer || '—'}` : `Respondió: ${d.options?.[d.chosen] || '—'}`}
-                                                                    ${!d.correct && d.correctIndex !== undefined ? ` · Correcta: ${d.options?.[d.correctIndex] || d.correctAnswer || '—'}` : ''}
-                                                                    ${d.type === 'sa' && d.correctAnswer ? ` · Respuesta esperada: ${d.correctAnswer}` : ''}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    `).join('')}
-                                                    
-                                                    ${r.teacherComments && r.teacherComments.length > 0 ? `
-                                                        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #E2E8F0;">
-                                                            <div style="font-size:0.85rem;font-weight:600;color:#0F172A;">💬 Comentarios del profesor:</div>
-                                                            ${r.teacherComments.map(c => `
-                                                                <div class="comment-box">
-                                                                    <div class="comment-text">${c.text}</div>
-                                                                    <div class="comment-date">${c.teacherName} · ${formatDate(c.date)}</div>
-                                                                </div>
-                                                            `).join('')}
-                                                        </div>
-                                                    ` : ''}
-                                                </div>
-                                            ` : ''}
-                                        </div>
-                                    `;
-                                }).join('')}
-                            `}
-                        </div>
-                    </div>
-                `;
-            }
-
-            // --- TEACHER GRADE ---
-            renderTeacherGrade() {
-                const { gradingAttempt, gradingQuestions, error, success, busy } = this.state;
-
-                if (!gradingAttempt) {
-                    return `
-                        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
-                            <div class="spinner"></div>
-                        </div>
-                    `;
-                }
-
-                return `
-                    <div class="header">
-                        <h1>✏️ MATEM</h1>
-                        <div class="header-buttons">
-                            <button class="btn btn-outline" onclick="app.goToTeacherResults()">← Volver</button>
-                        </div>
-                    </div>
-
-                    <div class="container">
-                        <div class="card">
-                            <h2 class="card-title">Calificar: ${gradingAttempt.examTitle}</h2>
-                            <p class="card-subtitle">Estudiante: ${gradingAttempt.studentName} · Provisional: ${gradingAttempt.score}/${gradingAttempt.total}</p>
-
-                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
-                            ${success ? `<div class="success-msg">✅ ${success}</div>` : ''}
-
-                            ${gradingQuestions.map((q, qi) => `
-                                <div style="margin-bottom:16px;padding:16px;background:#F8FAFC;border-radius:10px;border:1px solid #E2E8F0;">
-                                    <div style="font-weight:500;color:#0F172A;margin-bottom:8px;" class="math-text">${qi + 1}. ${q.text}</div>
-                                    <div style="font-size:0.9rem;color:#334155;padding:8px 12px;background:white;border-radius:6px;margin-bottom:8px;">
-                                        <strong>Respuesta del estudiante:</strong> ${q.type === 'sa' ? (q.shortAnswer || '—') : (q.options?.[q.chosen] || '—')}
-                                    </div>
-                                    ${q.type === 'sa' ? `
-                                        <div style="margin-bottom:8px;">
-                                            <label style="font-size:0.85rem;color:#64748B;">Respuesta correcta esperada: <strong>${q.correctAnswer || 'No definida'}</strong></label>
-                                        </div>
-                                        <div class="input-group" style="margin-bottom:8px;">
-                                            <label style="font-size:0.85rem;color:#64748B;">¿Es correcta?</label>
-                                            <select onchange="app.updateGradingQuestion(${qi}, this.value === 'true')">
-                                                <option value="true" ${q.gradingCorrect === true ? 'selected' : ''}>✅ Correcta</option>
-                                                <option value="false" ${q.gradingCorrect === false ? 'selected' : ''}>❌ Incorrecta</option>
-                                            </select>
-                                        </div>
-                                    ` : `
-                                        <div style="font-size:0.85rem;color:#64748B;">
-                                            Correcta: ${q.options?.[q.correctIndex] || '—'}
-                                        </div>
-                                        <div style="margin-top:4px;">
-                                            <span style="font-size:0.85rem;font-weight:600;${q.correct ? 'color:#16A34A;' : 'color:#DC2626;'}">
-                                                ${q.correct ? '✅ Correcta' : '❌ Incorrecta'}
-                                            </span>
-                                        </div>
-                                    `}
-                                </div>
-                            `).join('')}
-
-                            <div class="input-group">
-                                <label>Comentario para el estudiante</label>
-                                <textarea rows="3" id="teacherCommentInput" placeholder="Escribe aquí tus observaciones sobre el examen..." style="width:100%;padding:12px 16px;border:1px solid #E2E8F0;border-radius:8px;font-family:inherit;font-size:1rem;resize:vertical;"></textarea>
-                            </div>
-
-                            <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                                <button class="btn btn-success" onclick="app.saveGrade()" ${busy ? 'disabled' : ''}>
-                                    ${busy ? '⏳ Guardando...' : '💾 Guardar calificación final'}
-                                </button>
-                                <button class="btn btn-ghost" onclick="app.goToTeacherResults()">Cancelar</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // --- STUDENT LIST ---
-            renderStudentList() {
-                const { exams, loggedStudent, attemptsOfStudent } = this.state;
+            // --- STUDENT EXAMS (Lista de exámenes disponibles) ---
+            renderStudentExams() {
+                const { loggedStudent, exams, attemptsOfStudent } = this.state;
+                const course = COURSES.find(c => c.id === loggedStudent?.courseId);
 
                 const available = exams.filter(e => !attemptsOfStudent.some(a => a.examId === e.id));
                 const completed = exams.filter(e => attemptsOfStudent.some(a => a.examId === e.id));
 
                 return `
-                    <div class="header">
-                        <h1>🎓 MATEM</h1>
-                        <div class="header-buttons">
-                            <span style="color:#F8FAFC;font-size:0.9rem;">👨‍🎓 ${loggedStudent?.name || 'Estudiante'}</span>
-                            <button class="btn btn-outline" onclick="app.goToStudentGrades()" style="border-color:#D97706;color:#D97706;">📊 Mis notas</button>
-                            <button class="btn btn-outline" onclick="app.goToHome()">🏠 Inicio</button>
-                            <button class="btn btn-danger" onclick="app.logout()">🚪 Salir</button>
-                        </div>
-                    </div>
-
-                    <div class="container">
-                        <div class="card">
-                            <div class="flex-between">
-                                <div>
-                                    <h2 class="card-title">Hola, ${loggedStudent?.name || 'Estudiante'}</h2>
-                                    <p class="card-subtitle">${available.length} exámenes disponibles · ${completed.length} completados</p>
-                                </div>
+                    <div>
+                        <div class="flex-between" style="margin-bottom:16px;">
+                            <div>
+                                <h2 class="chalk-title" style="font-size:2.4rem;">📚 ${course?.name || 'Mis Exámenes'}</h2>
+                                <p class="chalk-subtitle">👨‍🎓 ${loggedStudent?.name || 'Estudiante'} · ${available.length} disponibles · ${completed.length} completados</p>
                             </div>
-
-                            <h3 style="font-weight:600;color:#0F172A;margin:16px 0 10px;">📝 Exámenes disponibles</h3>
-                            ${available.length === 0 ? `
-                                <div class="text-center" style="padding:20px 0;">
-                                    <p style="color:#64748B;">🎉 ¡Has completado todos los exámenes!</p>
-                                </div>
-                            ` : `
-                                ${available.map(e => {
-                                    const part = COURSE_PARTS.find(p => p.id === e.part);
-                                    return `
-                                        <div class="exam-item">
-                                            <div>
-                                                <div class="exam-title">${e.title}</div>
-                                                <div class="exam-meta">${part?.title || `Parte ${e.part}`} · ${e.questions?.length || 0} preguntas · ${e.timeLimit || 30} min</div>
-                                            </div>
-                                            <button class="btn btn-primary" onclick="app.startExam('${e.id}')">▶️ Empezar</button>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            `}
-
-                            ${completed.length > 0 ? `
-                                <h3 style="font-weight:600;color:#0F172A;margin:20px 0 10px;">✅ Exámenes completados</h3>
-                                ${completed.map(e => {
-                                    const attempt = attemptsOfStudent.find(a => a.examId === e.id);
-                                    if (!attempt) return '';
-                                    const pct = (attempt.score / attempt.total * 100);
-                                    const isGraded = attempt.gradingStatus === 'graded';
-                                    const finalPct = isGraded ? (attempt.finalGrade / attempt.total * 100) : null;
-                                    const passed = isGraded ? finalPct >= 60 : pct >= 60;
-                                    return `
-                                        <div class="exam-item">
-                                            <div>
-                                                <div class="exam-title">${e.title}</div>
-                                                <div style="font-family:monospace;font-size:0.9rem;">
-                                                    <span style="color:#64748B;">Provisional: ${attempt.score}/${attempt.total} (${pct.toFixed(0)}%)</span>
-                                                    ${isGraded ? `
-                                                        <span style="margin-left:12px;font-weight:600;${passed ? 'color:#16A34A;' : 'color:#DC2626;'}">
-                                                            Final: ${attempt.finalGrade}/${attempt.total} (${finalPct.toFixed(0)}%) ${passed ? '✅' : '❌'}
-                                                        </span>
-                                                    ` : `
-                                                        <span class="grade-badge pending" style="margin-left:12px;">⏳ Pendiente de calificar</span>
-                                                    `}
-                                                </div>
-                                            </div>
-                                            <span style="font-size:1.5rem;">${isGraded ? (passed ? '🎉' : '📚') : '⏳'}</span>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            ` : ''}
+                            <div class="flex" style="gap:10px;">
+                                <button class="btn-chalk" onclick="app.goToStudentGrades()" style="border-color:var(--chalk-yellow);color:var(--chalk-yellow);padding:6px 16px;font-size:0.9rem;">📊 Mis notas</button>
+                                <button class="btn-chalk" onclick="app.logout()" style="padding:6px 16px;font-size:0.9rem;">🚪 Salir</button>
+                            </div>
                         </div>
+
+                        <h3 class="chalk-text" style="font-size:1.3rem;margin:16px 0 10px;">📝 Exámenes disponibles</h3>
+                        ${available.length === 0 ? `
+                            <div class="text-center" style="padding:20px 0;">
+                                <p class="chalk-text">🎉 ¡Has completado todos los exámenes!</p>
+                            </div>
+                        ` : `
+                            ${available.map(e => {
+                                const partial = PARTIALS.find(p => p.id === e.partialId);
+                                return `
+                                    <div class="exam-item-chalk" style="border-left-color:var(--chalk-blue);">
+                                        <div>
+                                            <div class="exam-title">${e.title}</div>
+                                            <div class="exam-meta">${partial?.name || `Parcial ${e.partialId}`} · ${e.questions?.length || 0} preguntas · ${e.timeLimit || 30} min</div>
+                                        </div>
+                                        <button class="btn-chalk btn-chalk-primary" onclick="app.startExam('${e.id}')" style="padding:6px 20px;font-size:0.95rem;">▶️ Empezar</button>
+                                    </div>
+                                `;
+                            }).join('')}
+                        `}
+
+                        ${completed.length > 0 ? `
+                            <h3 class="chalk-text" style="font-size:1.3rem;margin:20px 0 10px;">✅ Exámenes completados</h3>
+                            ${completed.map(e => {
+                                const attempt = attemptsOfStudent.find(a => a.examId === e.id);
+                                if (!attempt) return '';
+                                const pct = (attempt.score / attempt.total * 100);
+                                const isGraded = attempt.gradingStatus === 'graded';
+                                const finalPct = isGraded ? (attempt.finalGrade / attempt.total * 100) : null;
+                                const passed = isGraded ? finalPct >= 60 : pct >= 60;
+                                return `
+                                    <div class="exam-item-chalk" style="border-left-color:${isGraded ? (passed ? 'var(--chalk-green)' : 'var(--chalk-red)') : 'var(--chalk-orange)'};">
+                                        <div>
+                                            <div class="exam-title">${e.title}</div>
+                                            <div class="exam-meta">
+                                                Provisional: ${attempt.score}/${attempt.total} (${pct.toFixed(0)}%)
+                                                ${isGraded ? `
+                                                    · <span style="color:${passed ? 'var(--chalk-green)' : 'var(--chalk-red)'};font-weight:bold;">
+                                                        Final: ${attempt.finalGrade}/${attempt.total} (${finalPct.toFixed(0)}%) ${passed ? '✅' : '❌'}
+                                                    </span>
+                                                ` : `
+                                                    · <span class="badge-chalk pending">⏳ Pendiente</span>
+                                                `}
+                                            </div>
+                                        </div>
+                                        <span style="font-size:1.5rem;">${isGraded ? (passed ? '🎉' : '📚') : '⏳'}</span>
+                                    </div>
+                                `;
+                            }).join('')}
+                        ` : ''}
                     </div>
                 `;
             }
 
-            // --- STUDENT EXAM ---
-            renderStudentExam() {
+            // --- STUDENT TAKING EXAM ---
+            renderStudentTakingExam() {
                 const { activeExam, answers, error, timeRemaining, busy } = this.state;
-
                 if (!activeExam) {
-                    return `
-                        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
-                            <div class="spinner"></div>
-                        </div>
-                    `;
+                    return `<div class="flex-center" style="min-height:50vh;"><div class="spinner-chalk"></div></div>`;
                 }
-
                 const minutes = Math.floor(timeRemaining / 60);
                 const seconds = timeRemaining % 60;
                 const isLow = timeRemaining < 60;
 
                 return `
-                    <div class="header">
-                        <h1>📝 MATEM</h1>
-                        <div class="header-buttons">
-                            <div class="timer ${isLow ? 'timer-warning' : ''}">
+                    <div>
+                        <div class="flex-between" style="margin-bottom:16px;">
+                            <div>
+                                <h2 class="chalk-title" style="font-size:2rem;">📝 ${activeExam.title}</h2>
+                                <p class="chalk-subtitle">${Object.keys(answers).length}/${activeExam.questions.length} respondidas</p>
+                            </div>
+                            <div class="timer-chalk ${isLow ? 'warning' : ''}">
                                 ⏱️ ${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}
                             </div>
                         </div>
-                    </div>
 
-                    <div class="container">
-                        <div class="card">
-                            <div class="flex-between">
-                                <div>
-                                    <h2 class="card-title">${activeExam.title}</h2>
-                                    <p class="card-subtitle">${Object.keys(answers).length}/${activeExam.questions.length} respondidas</p>
-                                </div>
+                        ${error ? `<div class="msg-chalk error">⚠️ ${error}</div>` : ''}
+
+                        ${activeExam.questions.map((q, qi) => `
+                            <div style="margin-bottom:16px;padding:16px;background:rgba(255,255,255,0.03);border-radius:10px;border:1px solid rgba(255,255,255,0.06);">
+                                <div style="font-weight:500;color:var(--chalk-bright);margin-bottom:8px;" class="math-text">${qi + 1}. ${q.text}</div>
+                                ${q.type === 'sa' ? `
+                                    <div>
+                                        <textarea class="input-chalk" rows="2" placeholder="Escribe tu respuesta aquí..." oninput="app.setShortAnswer('${q.id}', this.value)" style="font-size:1rem;">${answers[q.id] || ''}</textarea>
+                                        <div class="chalk-small" style="margin-top:4px;opacity:0.5;">📝 Respuesta corta</div>
+                                    </div>
+                                ` : q.options.map((opt, oi) => `
+                                    <label class="radio-option" style="display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:6px;cursor:pointer;transition:background 0.2s;">
+                                        <input type="radio" name="q_${q.id}" ${answers[q.id] === oi ? 'checked' : ''} onchange="app.setAnswer('${q.id}', ${oi})" style="width:18px;height:18px;accent-color:var(--chalk-yellow);cursor:pointer;" />
+                                        <span class="chalk-text">${opt}</span>
+                                    </label>
+                                `).join('')}
                             </div>
+                        `).join('')}
 
-                            ${error ? `<div class="error-msg">⚠️ ${error}</div>` : ''}
-
-                            ${activeExam.questions.map((q, qi) => `
-                                <div style="margin-bottom:16px;padding:16px;background:#F8FAFC;border-radius:10px;">
-                                    <div style="font-weight:500;color:#0F172A;margin-bottom:8px;" class="math-text">${qi + 1}. ${q.text}</div>
-                                    
-                                    ${q.type === 'sa' ? `
-                                        <div>
-                                            <textarea class="short-answer-input" rows="2" placeholder="Escribe tu respuesta aquí..." oninput="app.setShortAnswer('${q.id}', this.value)">${answers[q.id] || ''}</textarea>
-                                            <div style="font-size:0.7rem;color:#64748B;margin-top:4px;">📝 Respuesta corta - Escribe tu respuesta en detalle</div>
-                                        </div>
-                                    ` : q.options.map((opt, oi) => `
-                                        <label class="radio-option">
-                                            <input type="radio" name="q_${q.id}" ${answers[q.id] === oi ? 'checked' : ''} onchange="app.setAnswer('${q.id}', ${oi})" />
-                                            <span>${opt}</span>
-                                        </label>
-                                    `).join('')}
-                                </div>
-                            `).join('')}
-
-                            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px;">
-                                <button class="btn btn-primary" onclick="app.submitExam()" ${busy ? 'disabled' : ''}>
-                                    ${busy ? '⏳ Enviando...' : '📤 Enviar examen'}
-                                </button>
-                                <button class="btn btn-ghost" onclick="if(confirm('¿Seguro que quieres salir? Perderás tu progreso.')) app.cancelExam()">Cancelar</button>
-                            </div>
+                        <div class="flex" style="gap:12px;flex-wrap:wrap;margin-top:8px;">
+                            <button class="btn-chalk btn-chalk-primary" onclick="app.submitExam()" ${busy ? 'disabled' : ''}>
+                                ${busy ? '⏳ Enviando...' : '📤 Enviar examen'}
+                            </button>
+                            <button class="btn-chalk" onclick="if(confirm('¿Seguro que quieres salir? Perderás tu progreso.')) app.cancelExam()">Cancelar</button>
                         </div>
                     </div>
                 `;
@@ -1956,259 +1775,189 @@
             // --- STUDENT RESULT ---
             renderStudentResult() {
                 const { result } = this.state;
-
                 if (!result) {
-                    return `
-                        <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;">
-                            <div class="spinner"></div>
-                        </div>
-                    `;
+                    return `<div class="flex-center" style="min-height:50vh;"><div class="spinner-chalk"></div></div>`;
                 }
-
                 const pct = (result.score / result.total * 100);
                 const passed = pct >= 60;
 
                 return `
-                    <div class="header">
-                        <h1>🎓 MATEM</h1>
-                        <div class="header-buttons">
-                            <button class="btn btn-outline" onclick="app.goToStudentList()">← Volver</button>
-                        </div>
-                    </div>
-
-                    <div class="container">
-                        <div class="card">
-                            <h2 class="card-title">📊 Resultado Provisional</h2>
-                            <p class="card-subtitle">${result.examTitle}</p>
-
-                            <div class="text-center">
-                                <div class="score-circle ${passed ? 'passed' : 'failed'}">
-                                    <span class="score-number ${passed ? 'text-success' : 'text-danger'}">${pct.toFixed(0)}%</span>
-                                    <span class="score-label ${passed ? 'text-success' : 'text-danger'}">${result.score}/${result.total}</span>
-                                </div>
-                                <div style="font-size:1.2rem;font-weight:600;${passed ? 'color:#16A34A;' : 'color:#DC2626;'}">
-                                    ${passed ? '🎉 ¡Aprobado!' : '📚 Reprobado - Sigue practicando'}
-                                </div>
-                                <div style="font-size:0.85rem;color:#64748B;margin-top:8px;">
-                                    ⏳ Este resultado es provisional. El profesor lo revisará y dará una nota final.
-                                </div>
+                    <div>
+                        <div class="flex-between" style="margin-bottom:16px;">
+                            <div>
+                                <h2 class="chalk-title" style="font-size:2rem;">📊 Resultado Provisional</h2>
+                                <p class="chalk-subtitle">${result.examTitle}</p>
                             </div>
+                            <button class="btn-chalk" onclick="app.goToStudentExams()" style="padding:6px 16px;font-size:0.9rem;">← Volver</button>
+                        </div>
 
-                            <div style="margin-top:20px;">
-                                ${result.details.map((d, i) => `
-                                    <div style="display:flex;align-items:flex-start;gap:8px;padding:4px 0;">
-                                        <span>${d.correct ? '✅' : '❌'}</span>
-                                        <div style="font-size:0.9rem;color:#334155;">
-                                            <div class="math-text">${d.text}</div>
-                                            <div style="font-size:0.75rem;color:#64748B;font-family:monospace;">
-                                                ${d.type === 'sa' ? `Tu respuesta: ${d.shortAnswer || '—'}` : `Tu respuesta: ${d.options?.[d.chosen] || '—'}`}
-                                                ${!d.correct && d.correctIndex !== undefined ? ` · Correcta: ${d.options?.[d.correctIndex] || d.correctAnswer || '—'}` : ''}
-                                            </div>
+                        <div class="text-center">
+                            <div class="score-circle-chalk ${passed ? 'passed' : 'failed'}">
+                                <span class="score-num">${pct.toFixed(0)}%</span>
+                                <span class="score-label">${result.score}/${result.total}</span>
+                            </div>
+                            <div style="font-size:1.4rem;font-weight:600;color:${passed ? 'var(--chalk-green)' : 'var(--chalk-red)'};">
+                                ${passed ? '🎉 ¡Aprobado!' : '📚 Reprobado - Sigue practicando'}
+                            </div>
+                            <div class="chalk-small" style="margin-top:8px;opacity:0.6;">
+                                ⏳ Este resultado es provisional. El profesor lo revisará y dará una nota final.
+                            </div>
+                        </div>
+
+                        <div style="margin-top:20px;">
+                            ${result.details.map((d, i) => `
+                                <div class="flex" style="align-items:flex-start;gap:8px;padding:4px 0;">
+                                    <span>${d.correct ? '✅' : '❌'}</span>
+                                    <div>
+                                        <div class="math-text" style="font-size:0.95rem;">${d.text}</div>
+                                        <div class="chalk-small" style="font-family:monospace;opacity:0.6;">
+                                            ${d.type === 'sa' ? `Tu respuesta: ${d.shortAnswer || '—'}` : `Tu respuesta: ${d.options?.[d.chosen] || '—'}`}
+                                            ${!d.correct && d.correctIndex !== undefined ? ` · Correcta: ${d.options?.[d.correctIndex] || d.correctAnswer || '—'}` : ''}
                                         </div>
                                     </div>
-                                `).join('')}
-                            </div>
-
-                            <button class="btn btn-primary mt-4" onclick="app.goToStudentList()">← Volver a exámenes</button>
+                                </div>
+                            `).join('')}
                         </div>
+
+                        <button class="btn-chalk btn-chalk-primary mt-4" onclick="app.goToStudentExams()">← Volver a exámenes</button>
                     </div>
                 `;
             }
 
-            // --- STUDENT GRADES ---
+            // --- STUDENT GRADES (Historial de notas) ---
             renderStudentGrades() {
                 const { attemptsOfStudent, loggedStudent } = this.state;
 
                 return `
-                    <div class="header">
-                        <h1>📊 MATEM</h1>
-                        <div class="header-buttons">
-                            <span style="color:#F8FAFC;font-size:0.9rem;">👨‍🎓 ${loggedStudent?.name || 'Estudiante'}</span>
-                            <button class="btn btn-outline" onclick="app.goToStudentList()">← Volver</button>
-                            <button class="btn btn-danger" onclick="app.logout()">🚪 Salir</button>
+                    <div>
+                        <div class="flex-between" style="margin-bottom:16px;">
+                            <div>
+                                <h2 class="chalk-title" style="font-size:2.4rem;">📊 Mis Calificaciones</h2>
+                                <p class="chalk-subtitle">Resumen de todas tus notas y comentarios</p>
+                            </div>
+                            <button class="btn-chalk" onclick="app.goToStudentExams()" style="padding:6px 16px;font-size:0.9rem;">← Volver</button>
                         </div>
-                    </div>
 
-                    <div class="container">
-                        <div class="card">
-                            <h2 class="card-title">📊 Mis Calificaciones</h2>
-                            <p class="card-subtitle">Resumen de todas tus notas y comentarios</p>
-
-                            ${attemptsOfStudent.length === 0 ? `
-                                <div class="text-center" style="padding:40px 0;">
-                                    <div style="font-size:4rem;">📄</div>
-                                    <p style="color:#64748B;">Aún no has completado ningún examen.</p>
-                                </div>
-                            ` : `
-                                ${attemptsOfStudent.map((attempt, index) => {
-                                    const pct = (attempt.score / attempt.total * 100);
-                                    const isGraded = attempt.gradingStatus === 'graded';
-                                    const finalPct = isGraded ? (attempt.finalGrade / attempt.total * 100) : null;
-                                    const passed = isGraded ? finalPct >= 60 : pct >= 60;
-                                    const part = COURSE_PARTS.find(p => p.id === attempt.part);
-                                    
-                                    return `
-                                        <div class="student-grade-summary" style="${index > 0 ? 'border-top:1px solid #E2E8F0;padding-top:16px;' : ''}">
-                                            <div class="flex-between">
-                                                <div>
-                                                    <div style="font-weight:600;color:#0F172A;">${attempt.examTitle}</div>
-                                                    <div style="font-size:0.85rem;color:#64748B;">${part?.title || `Parte ${attempt.part}`} · ${formatDate(attempt.submittedAt)}</div>
-                                                </div>
-                                                <div style="text-align:right;">
-                                                    <div style="font-size:0.85rem;color:#64748B;">
-                                                        Provisional: ${attempt.score}/${attempt.total} (${pct.toFixed(0)}%)
-                                                    </div>
-                                                    ${isGraded ? `
-                                                        <div style="font-size:1.1rem;font-weight:700;${passed ? 'color:#16A34A;' : 'color:#DC2626;'}">
-                                                            Final: ${attempt.finalGrade}/${attempt.total} (${finalPct.toFixed(0)}%) ${passed ? '✅' : '❌'}
-                                                        </div>
-                                                    ` : `
-                                                        <div class="grade-badge pending">⏳ Pendiente de calificar</div>
-                                                    `}
-                                                </div>
+                        ${attemptsOfStudent.length === 0 ? `
+                            <div class="text-center" style="padding:40px 0;">
+                                <div style="font-size:4rem;opacity:0.3;">📄</div>
+                                <p class="chalk-text">Aún no has completado ningún examen.</p>
+                            </div>
+                        ` : `
+                            ${attemptsOfStudent.map((attempt, index) => {
+                                const pct = (attempt.score / attempt.total * 100);
+                                const isGraded = attempt.gradingStatus === 'graded';
+                                const finalPct = isGraded ? (attempt.finalGrade / attempt.total * 100) : null;
+                                const passed = isGraded ? finalPct >= 60 : pct >= 60;
+                                const partial = PARTIALS.find(p => p.id === attempt.partialId);
+                                return `
+                                    <div class="student-grade-summary" style="border-bottom:1px solid rgba(255,255,255,0.06);padding:14px 0;${index > 0 ? 'border-top:1px solid rgba(255,255,255,0.06);' : ''}">
+                                        <div class="flex-between">
+                                            <div>
+                                                <div style="font-weight:600;color:var(--chalk-bright);font-size:1.1rem;">${attempt.examTitle}</div>
+                                                <div class="chalk-small">${partial?.name || `Parcial ${attempt.partialId}`} · ${formatDate(attempt.submittedAt)}</div>
                                             </div>
-                                            
-                                            ${isGraded && attempt.teacherComments && attempt.teacherComments.length > 0 ? `
-                                                <div style="margin-top:8px;">
-                                                    <div style="font-size:0.85rem;font-weight:600;color:#0F172A;">💬 Comentarios del profesor:</div>
-                                                    ${attempt.teacherComments.map(c => `
-                                                        <div class="comment-box">
-                                                            <div class="comment-text">${c.text}</div>
-                                                            <div class="comment-date">${c.teacherName} · ${formatDate(c.date)}</div>
-                                                        </div>
-                                                    `).join('')}
-                                                </div>
-                                            ` : isGraded ? `
-                                                <div style="margin-top:8px;font-size:0.85rem;color:#64748B;">Sin comentarios adicionales.</div>
-                                            ` : ''}
+                                            <div style="text-align:right;">
+                                                <div class="chalk-small">Provisional: ${attempt.score}/${attempt.total} (${pct.toFixed(0)}%)</div>
+                                                ${isGraded ? `
+                                                    <div style="font-size:1.1rem;font-weight:700;color:${passed ? 'var(--chalk-green)' : 'var(--chalk-red)'};">
+                                                        Final: ${attempt.finalGrade}/${attempt.total} (${finalPct.toFixed(0)}%) ${passed ? '✅' : '❌'}
+                                                    </div>
+                                                ` : `
+                                                    <span class="badge-chalk pending">⏳ Pendiente</span>
+                                                `}
+                                            </div>
                                         </div>
-                                    `;
-                                }).join('')}
-                            `}
-                        </div>
+                                        ${isGraded && attempt.teacherComments && attempt.teacherComments.length > 0 ? `
+                                            <div style="margin-top:8px;">
+                                                <div class="chalk-small" style="font-weight:bold;">💬 Comentarios del profesor:</div>
+                                                ${attempt.teacherComments.map(c => `
+                                                    <div class="comment-box" style="background:rgba(255,255,255,0.04);border-radius:6px;padding:8px 14px;margin-top:4px;border-left:2px solid var(--chalk-yellow);">
+                                                        <div class="comment-text" style="font-size:0.9rem;">${c.text}</div>
+                                                        <div class="comment-date" style="font-size:0.7rem;opacity:0.5;">${c.teacherName} · ${formatDate(c.date)}</div>
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        ` : isGraded ? `
+                                            <div class="chalk-small" style="margin-top:6px;opacity:0.5;">Sin comentarios adicionales.</div>
+                                        ` : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        `}
                     </div>
                 `;
             }
 
-            // ============================================
+            // ============================================================
             // ACCIONES
-            // ============================================
+            // ============================================================
 
             // --- Navegación ---
-            goToHome() {
-                this.setState({ view: 'home', error: '', success: '' });
+            goToHome() { this.setState({ view: 'home', error: '', success: '' }); }
+            goToTeacherLogin() { this.setState({ view: 'teacher-login', error: '', success: '', teacherEmail: '',
+                    teacherPass: '' }); }
+            goToTeacherRegister() { this.setState({ view: 'teacher-register', error: '', success: '', teacherEmail: '',
+                    teacherPass: '', teacherName: '', teacherSignupCode: '' }); }
+            goToTeacherCourses() { this.setState({ view: 'teacher-courses', error: '', success: '', selectedCourse: null,
+                    selectedPartial: null }); }
+            goToTeacherPartials() { this.setState({ view: 'teacher-partials', error: '', success: '' }); }
+            goToCreateExam() { this.setState({ view: 'teacher-create-exam', error: '', success: '', draftTitle: '',
+                    draftQuestions: [], draftTimeLimit: 30 }); }
+            goToTeacherGradeExam() { this.loadExams(this.state.selectedCourse, this.state.selectedPartial);
+                this.setState({ view: 'teacher-grade-exam', error: '', success: '' }); }
+            goToStudentLogin() { this.setState({ view: 'student-login', error: '', success: '', studentEmail: '',
+                    studentPass: '' }); }
+            goToStudentRegister() { this.setState({ view: 'student-register', error: '', success: '', studentEmail: '',
+                    studentPass: '', studentName: '', studentId: '', studentCourse: '' }); }
+            goToStudentExams() { this.loadExams(this.state.loggedStudent?.courseId);
+                this.setState({ view: 'student-exams', error: '', success: '' }); }
+            goToStudentGrades() { this.loadStudentAttempts(this.state.authUser?.uid);
+                this.setState({ view: 'student-grades', error: '', success: '' }); }
+
+            selectTeacherCourse(courseId) {
+                this.state.selectedCourse = courseId;
+                this.state.selectedPartial = null;
+                this.setState({ view: 'teacher-partials', error: '', success: '' });
             }
 
-            goToTeacherLogin() {
-                this.setState({ view: 'teacher-login', error: '', success: '', teacherEmail: '', teacherPass: '' });
-            }
-
-            goToTeacherRegister() {
-                this.setState({ view: 'teacher-register', error: '', success: '', teacherEmail: '', teacherPass: '',
-                    teacherName: '', teacherSignupCode: '' });
-            }
-
-            goToTeacherDashboard() {
-                this.loadExams();
-                this.setState({ view: 'teacher-dashboard', error: '', success: '' });
-            }
-
-            goToCreateExam(partId) {
-                if (partId) this.state.draftPart = partId;
-                this.setState({
-                    view: 'teacher-create',
-                    error: '',
-                    success: '',
-                    draftTitle: '',
-                    draftQuestions: [],
-                    draftTimeLimit: 30
-                });
-            }
-
-            goToTeacherResults() {
-                this.setState({ view: 'teacher-results', error: '', success: '' });
-            }
-
-            goToStudentLogin() {
-                this.setState({ view: 'student-login', error: '', success: '', studentEmail: '', studentPass: '' });
-            }
-
-            goToStudentRegister() {
-                this.setState({ view: 'student-register', error: '', success: '', studentEmail: '', studentPass: '',
-                    studentName: '', studentId: '' });
-            }
-
-            goToStudentList() {
-                this.loadExams();
-                if (this.state.loggedStudent) {
-                    this.loadStudentAttempts(this.state.loggedStudent.uid);
-                }
-                this.setState({ view: 'student-list', error: '', success: '' });
-            }
-
-            goToStudentGrades() {
-                if (this.state.loggedStudent) {
-                    this.loadStudentAttempts(this.state.loggedStudent.uid);
-                }
-                this.setState({ view: 'student-grades', error: '', success: '' });
-            }
-
-            togglePart(id) {
-                this.setState({
-                    selectedPart: this.state.selectedPart === id ? null : id
-                });
+            selectTeacherPartial(partialId) {
+                this.state.selectedPartial = partialId;
+                this.setState({ view: 'teacher-create-exam', error: '', success: '', draftTitle: '', draftQuestions: [],
+                    draftTimeLimit: 30 });
             }
 
             toggleAttempt(id) {
-                this.setState({
-                    openAttempt: this.state.openAttempt === id ? null : id
-                });
+                this.setState({ openAttempt: this.state.openAttempt === id ? null : id });
             }
 
             // --- Autenticación ---
             async handleTeacherLogin() {
                 const { teacherEmail, teacherPass } = this.state;
-                if (!teacherEmail || !teacherPass) {
-                    return this.setError('Ingresa email y contraseña.');
-                }
-
+                if (!teacherEmail || !teacherPass) return this.setError('Ingresa email y contraseña.');
                 this.setBusy(true);
                 this.setError('');
                 this.setSuccess('');
-
                 try {
                     await FirebaseService.login(teacherEmail, teacherPass);
-                    // El estado se actualizará en el listener de auth
                 } catch (error) {
-                    if (error.code === 'auth/user-not-found') {
-                        this.setError('Usuario no encontrado. Regístrate primero.');
-                    } else if (error.code === 'auth/wrong-password') {
-                        this.setError('Contraseña incorrecta.');
-                    } else {
-                        this.setError('Error al iniciar sesión. Intenta nuevamente.');
-                    }
+                    if (error.code === 'auth/user-not-found') this.setError('Usuario no encontrado. Regístrate primero.');
+                    else if (error.code === 'auth/wrong-password') this.setError('Contraseña incorrecta.');
+                    else this.setError('Error al iniciar sesión. Intenta nuevamente.');
                 }
-
                 this.setBusy(false);
             }
 
             async handleTeacherRegister() {
                 const { teacherEmail, teacherPass, teacherName, teacherSignupCode } = this.state;
-
-                if (!teacherName.trim() || !teacherEmail || !teacherPass) {
-                    return this.setError('Completa todos los campos.');
-                }
-                if (teacherPass.length < 6) {
-                    return this.setError('La contraseña debe tener al menos 6 caracteres.');
-                }
+                if (!teacherName.trim() || !teacherEmail || !teacherPass) return this.setError('Completa todos los campos.');
+                if (teacherPass.length < 6) return this.setError('La contraseña debe tener al menos 6 caracteres.');
                 if (teacherSignupCode !== TEACHER_SIGNUP_CODE) {
-                    return this.setError('❌ Código de verificación incorrecto. El código es: ' + TEACHER_SIGNUP_CODE);
+                    return this.setError('❌ Código incorrecto. El código es: ' + TEACHER_SIGNUP_CODE);
                 }
-
                 this.setBusy(true);
                 this.setError('');
                 this.setSuccess('');
-
                 try {
                     const user = await FirebaseService.register(teacherEmail, teacherPass);
                     await FirebaseService.saveTeacher({
@@ -2222,56 +1971,38 @@
                         this.setState({ view: 'teacher-login', teacherEmail: '', teacherPass: '' });
                     }, 1500);
                 } catch (error) {
-                    if (error.code === 'auth/email-already-in-use') {
-                        this.setError('Este email ya está registrado. Inicia sesión.');
-                    } else {
-                        this.setError('Error al registrarse. Intenta nuevamente.');
-                    }
+                    if (error.code === 'auth/email-already-in-use') this.setError('Este email ya está registrado.');
+                    else this.setError('Error al registrarse. Intenta nuevamente.');
                 }
-
                 this.setBusy(false);
             }
 
             async handleStudentLogin() {
                 const { studentEmail, studentPass } = this.state;
-                if (!studentEmail || !studentPass) {
-                    return this.setError('Completa todos los campos.');
-                }
-
+                if (!studentEmail || !studentPass) return this.setError('Completa todos los campos.');
                 this.setBusy(true);
                 this.setError('');
                 this.setSuccess('');
-
                 try {
                     await FirebaseService.login(studentEmail, studentPass);
-                    // El estado se actualizará en el listener de auth
                 } catch (error) {
-                    if (error.code === 'auth/user-not-found') {
-                        this.setError('Usuario no encontrado. Regístrate primero.');
-                    } else if (error.code === 'auth/wrong-password') {
-                        this.setError('Contraseña incorrecta.');
-                    } else {
-                        this.setError('Error al iniciar sesión. Intenta nuevamente.');
-                    }
+                    if (error.code === 'auth/user-not-found') this.setError('Usuario no encontrado. Regístrate primero.');
+                    else if (error.code === 'auth/wrong-password') this.setError('Contraseña incorrecta.');
+                    else this.setError('Error al iniciar sesión. Intenta nuevamente.');
                 }
-
                 this.setBusy(false);
             }
 
             async handleStudentRegister() {
-                const { studentEmail, studentPass, studentName, studentId } = this.state;
-
+                const { studentEmail, studentPass, studentName, studentId, studentCourse } = this.state;
                 if (!studentName.trim() || !studentId.trim() || !studentEmail || !studentPass) {
                     return this.setError('Completa todos los campos.');
                 }
-                if (studentPass.length < 6) {
-                    return this.setError('La contraseña debe tener al menos 6 caracteres.');
-                }
-
+                if (!studentCourse) return this.setError('Selecciona un curso.');
+                if (studentPass.length < 6) return this.setError('La contraseña debe tener al menos 6 caracteres.');
                 this.setBusy(true);
                 this.setError('');
                 this.setSuccess('');
-
                 try {
                     const user = await FirebaseService.register(studentEmail, studentPass);
                     await FirebaseService.saveStudent({
@@ -2280,6 +2011,7 @@
                         displayId: studentId.trim(),
                         email: studentEmail,
                         uid: user.uid,
+                        courseId: studentCourse,
                         role: 'student'
                     });
                     this.setSuccess('✅ ¡Registro exitoso! Ahora puedes iniciar sesión.');
@@ -2287,13 +2019,9 @@
                         this.setState({ view: 'student-login', studentEmail: '', studentPass: '' });
                     }, 1500);
                 } catch (error) {
-                    if (error.code === 'auth/email-already-in-use') {
-                        this.setError('Este email ya está registrado. Inicia sesión.');
-                    } else {
-                        this.setError('Error al registrarse. Intenta nuevamente.');
-                    }
+                    if (error.code === 'auth/email-already-in-use') this.setError('Este email ya está registrado.');
+                    else this.setError('Error al registrarse. Intenta nuevamente.');
                 }
-
                 this.setBusy(false);
             }
 
@@ -2303,33 +2031,26 @@
                     this.state.isTeacher = false;
                     this.state.teacherData = null;
                     this.state.loggedStudent = null;
-                    this.state.attemptsOfStudent = [];
                     this.state.authUser = null;
                     this.state.userRole = null;
-                    if (this.state.examTimer) {
-                        clearInterval(this.state.examTimer);
-                        this.state.examTimer = null;
-                    }
+                    this.state.selectedCourse = null;
+                    this.state.selectedPartial = null;
+                    if (this.state.examTimer) { clearInterval(this.state.examTimer);
+                        this.state.examTimer = null; }
                     this.setState({ view: 'home', error: '', success: '' });
                 } catch (error) {
                     console.error('Error al cerrar sesión:', error);
                 }
             }
 
-            // --- Teacher exam creation ---
+            // --- Exámenes ---
             addDraftQuestion(type) {
                 const newQ = { id: genId(), type: type, text: '' };
-                if (type === 'tf') {
-                    newQ.options = ['Verdadero', 'Falso'];
-                    newQ.correctIndex = 0;
-                } else if (type === 'sa') {
-                    newQ.correctAnswer = '';
+                if (type === 'tf') { newQ.options = ['Verdadero', 'Falso'];
+                    newQ.correctIndex = 0; } else if (type === 'sa') { newQ.correctAnswer = '';
                     newQ.keywords = '';
-                    newQ.correctIndex = null;
-                } else {
-                    newQ.options = ['', '', '', ''];
-                    newQ.correctIndex = 0;
-                }
+                    newQ.correctIndex = null; } else { newQ.options = ['', '', '', ''];
+                    newQ.correctIndex = 0; }
                 this.state.draftQuestions.push(newQ);
                 this.render();
             }
@@ -2352,8 +2073,7 @@
             }
 
             async saveDraftExam() {
-                const { draftTitle, draftQuestions, draftTimeLimit, draftPart } = this.state;
-
+                const { draftTitle, draftQuestions, draftTimeLimit, selectedCourse, selectedPartial, teacherData } = this.state;
                 if (!draftTitle.trim()) return this.setError('Ponle un título al examen.');
                 if (draftQuestions.length === 0) return this.setError('Agrega al menos una pregunta.');
                 for (const q of draftQuestions) {
@@ -2365,48 +2085,41 @@
                         return this.setError('La pregunta de respuesta corta debe tener una respuesta correcta definida.');
                     }
                 }
-
                 this.setBusy(true);
                 this.setError('');
                 this.setSuccess('');
-
                 try {
                     await FirebaseService.saveExam({
                         title: draftTitle.trim(),
-                        part: draftPart,
+                        courseId: selectedCourse,
+                        partialId: selectedPartial,
                         questions: draftQuestions,
                         timeLimit: draftTimeLimit,
-                        createdBy: this.state.teacherData?.email || 'teacher',
-                        createdByName: this.state.teacherData?.name || 'Profesor'
+                        createdBy: teacherData?.email || 'teacher',
+                        createdByName: teacherData?.name || 'Profesor'
                     });
-                    await this.loadExams();
-                    this.state.draftTitle = '';
-                    this.state.draftQuestions = [];
-                    this.state.draftTimeLimit = 30;
-                    this.setState({ view: 'teacher-dashboard', error: '', success: '✅ Examen guardado exitosamente.' });
+                    this.setSuccess('✅ Examen guardado exitosamente.');
+                    setTimeout(() => {
+                        this.goToTeacherPartials();
+                    }, 1000);
                 } catch (error) {
                     this.setError('Error al guardar el examen.');
                 }
-
                 this.setBusy(false);
             }
 
-            // --- Exam taking ---
+            // --- Tomar examen ---
             async startExam(examId) {
                 this.setBusy(true);
                 try {
                     const exam = await FirebaseService.getExam(examId);
-                    if (!exam) {
-                        this.setError('El examen no existe.');
-                        this.setBusy(false);
-                        return;
-                    }
+                    if (!exam) { this.setError('El examen no existe.');
+                        this.setBusy(false); return; }
                     this.state.activeExam = exam;
                     this.state.answers = {};
                     this.state.result = null;
                     this.state.timeRemaining = (exam.timeLimit || 30) * 60;
-                    this.setState({ view: 'student-exam', error: '', success: '' });
-
+                    this.setState({ view: 'student-taking-exam', error: '', success: '' });
                     if (this.state.examTimer) clearInterval(this.state.examTimer);
                     this.state.examTimer = setInterval(() => {
                         this.state.timeRemaining--;
@@ -2417,34 +2130,22 @@
                         }
                         this.render();
                     }, 1000);
-                } catch (error) {
-                    this.setError('Error al cargar el examen.');
-                }
+                } catch (error) { this.setError('Error al cargar el examen.'); }
                 this.setBusy(false);
             }
 
-            setAnswer(qId, value) {
-                this.state.answers[qId] = value;
-                this.render();
-            }
-
-            setShortAnswer(qId, value) {
-                this.state.answers[qId] = value;
-                this.render();
-            }
+            setAnswer(qId, value) { this.state.answers[qId] = value;
+                this.render(); }
+            setShortAnswer(qId, value) { this.state.answers[qId] = value;
+                this.render(); }
 
             async submitExam(autoSubmit = false) {
                 const { activeExam, answers, loggedStudent } = this.state;
-
                 if (!autoSubmit && Object.keys(answers).length < activeExam.questions.length) {
                     return this.setError('Responde todas las preguntas antes de enviar.');
                 }
-
-                if (this.state.examTimer) {
-                    clearInterval(this.state.examTimer);
-                    this.state.examTimer = null;
-                }
-
+                if (this.state.examTimer) { clearInterval(this.state.examTimer);
+                    this.state.examTimer = null; }
                 this.setBusy(true);
                 this.setError('');
                 this.setSuccess('');
@@ -2453,17 +2154,12 @@
                 const details = activeExam.questions.map(q => {
                     const chosen = answers[q.id];
                     let correct = false;
-
                     if (q.type === 'sa') {
-                        // Validar respuesta corta comparando con la respuesta correcta
                         const correctAnswer = (q.correctAnswer || '').trim().toLowerCase();
                         const studentAnswer = (chosen || '').trim().toLowerCase();
-                        // Limpiar espacios extra y comparar
                         const cleanCorrect = correctAnswer.replace(/\s+/g, ' ');
                         const cleanStudent = studentAnswer.replace(/\s+/g, ' ');
                         correct = cleanStudent === cleanCorrect;
-
-                        // Si no coincide exactamente, verificar palabras clave
                         if (!correct && q.keywords) {
                             const keywords = q.keywords.split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
                             correct = keywords.some(k => cleanStudent.includes(k));
@@ -2471,7 +2167,6 @@
                     } else {
                         correct = chosen === q.correctIndex;
                     }
-
                     if (correct) score++;
                     return {
                         questionId: q.id,
@@ -2489,10 +2184,11 @@
 
                 const attempt = {
                     studentName: loggedStudent.name,
-                    studentId: loggedStudent.id || loggedStudent.uid,
+                    studentId: loggedStudent.id,
                     examId: activeExam.id,
                     examTitle: activeExam.title,
-                    part: activeExam.part,
+                    courseId: activeExam.courseId,
+                    partialId: activeExam.partialId,
                     score,
                     total: activeExam.questions.length,
                     details,
@@ -2504,63 +2200,43 @@
 
                 try {
                     await FirebaseService.saveAttempt(attempt);
-                    await this.loadStudentAttempts(loggedStudent.uid);
+                    await this.loadStudentAttempts(loggedStudent.id);
                     this.state.result = attempt;
                     this.setState({ view: 'student-result', error: '', success: '¡Examen enviado exitosamente!' });
-                } catch (error) {
-                    this.setError('Error al guardar el intento.');
-                }
-
+                } catch (error) { this.setError('Error al guardar el intento.'); }
                 this.setBusy(false);
             }
 
             cancelExam() {
-                if (this.state.examTimer) {
-                    clearInterval(this.state.examTimer);
-                    this.state.examTimer = null;
-                }
-                this.setState({ view: 'student-list', error: '', success: '' });
+                if (this.state.examTimer) { clearInterval(this.state.examTimer);
+                    this.state.examTimer = null; }
+                this.setState({ view: 'student-exams', error: '', success: '' });
             }
 
-            // --- Teacher grading ---
+            // --- Calificación ---
             async goToGrade(attemptId) {
                 this.setBusy(true);
                 try {
                     const attempt = await FirebaseService.getAttempt(attemptId);
-                    if (!attempt) {
-                        this.setError('No se encontró el intento.');
-                        this.setBusy(false);
-                        return;
-                    }
-
-                    const questions = attempt.details.map((d, i) => ({
-                        ...d,
-                        index: i,
-                        gradingCorrect: d.correct
-                    }));
-
+                    if (!attempt) { this.setError('No se encontró el intento.');
+                        this.setBusy(false); return; }
+                    const questions = attempt.details.map((d, i) => ({ ...d, index: i, gradingCorrect: d.correct }));
                     this.state.gradingAttempt = attempt;
                     this.state.gradingQuestions = questions;
                     this.setState({ view: 'teacher-grade', error: '', success: '' });
-                } catch (error) {
-                    this.setError('Error al cargar el intento.');
-                }
+                } catch (error) { this.setError('Error al cargar el intento.'); }
                 this.setBusy(false);
             }
 
             updateGradingQuestion(index, isCorrect) {
                 const q = this.state.gradingQuestions[index];
-                if (q) {
-                    q.gradingCorrect = isCorrect;
-                    this.render();
-                }
+                if (q) { q.gradingCorrect = isCorrect;
+                    this.render(); }
             }
 
             async saveGrade() {
-                const { gradingAttempt, gradingQuestions } = this.state;
-
+                const { gradingAttempt, gradingQuestions, teacherData } = this.state;
                 if (!gradingAttempt) return;
-
                 const commentInput = document.getElementById('teacherCommentInput');
                 const comment = commentInput ? commentInput.value.trim() : '';
 
@@ -2569,49 +2245,37 @@
                     const q = gradingQuestions.find(g => g.index === i);
                     const isCorrect = q ? q.gradingCorrect : d.correct;
                     if (isCorrect) finalScore++;
-                    return {
-                        ...d,
-                        correct: isCorrect
-                    };
+                    return { ...d, correct: isCorrect };
                 });
 
                 this.setBusy(true);
                 this.setError('');
                 this.setSuccess('');
-
                 try {
                     await FirebaseService.updateAttempt(gradingAttempt.id, {
                         finalGrade: finalScore,
                         gradingStatus: 'graded',
                         details: updatedDetails
                     });
-
                     if (comment) {
                         await FirebaseService.addCommentToAttempt(
                             gradingAttempt.id,
                             comment,
-                            this.state.teacherData?.name || 'Profesor'
+                            teacherData?.name || 'Profesor'
                         );
                     }
-
                     this.setSuccess('✅ Calificación guardada exitosamente.');
-                    setTimeout(() => {
-                        this.goToTeacherResults();
-                    }, 1000);
-                } catch (error) {
-                    this.setError('Error al guardar la calificación.');
-                }
-
+                    setTimeout(() => this.goToTeacherGradeExam(), 1000);
+                } catch (error) { this.setError('Error al guardar la calificación.'); }
                 this.setBusy(false);
             }
 
-            // --- Results ---
+            // --- Resultados ---
             async openResults(examId) {
                 this.setBusy(true);
                 try {
                     const exam = await FirebaseService.getExam(examId);
                     const attempts = await FirebaseService.getAttemptsByExam(examId);
-
                     let stats = null;
                     if (attempts.length > 0) {
                         const scores = attempts.map(a => (a.score / a.total) * 100);
@@ -2619,15 +2283,12 @@
                         const passRate = (scores.filter(s => s >= 60).length / scores.length) * 100;
                         stats = { avg, passRate, total: attempts.length };
                     }
-
                     this.state.resultsExam = exam;
                     this.state.resultsList = attempts;
                     this.state.stats = stats;
                     this.state.openAttempt = null;
                     this.setState({ view: 'teacher-results', error: '', success: '' });
-                } catch (error) {
-                    this.setError('Error al cargar resultados.');
-                }
+                } catch (error) { this.setError('Error al cargar resultados.'); }
                 this.setBusy(false);
             }
 
@@ -2636,19 +2297,17 @@
                 this.setBusy(true);
                 try {
                     await FirebaseService.deleteExam(examId);
-                    await this.loadExams();
+                    this.loadExams(this.state.selectedCourse, this.state.selectedPartial);
                     this.setSuccess('✅ Examen eliminado.');
                     this.render();
-                } catch (error) {
-                    this.setError('Error al eliminar el examen.');
-                }
+                } catch (error) { this.setError('Error al eliminar el examen.'); }
                 this.setBusy(false);
             }
         }
 
-        // ============================================
+        // ============================================================
         // INICIALIZAR
-        // ============================================
+        // ============================================================
         const app = new App();
         window.app = app;
     </script>
