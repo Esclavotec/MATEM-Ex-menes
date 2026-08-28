@@ -20,6 +20,15 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async>
     </script>
+    <!-- math.js: evalúa de forma segura la fórmula que escribe el profesor en las
+         preguntas de "gráfica" (sin usar eval), para dibujarla y comparar el dibujo
+         del estudiante contra ella. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js">
+    </script>
+    <!-- SheetJS (xlsx): genera archivos .xlsx reales (columnas separadas de verdad,
+         no un .csv disfrazado) para las descargas de listas y perfiles de estudiante. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -449,13 +458,21 @@
             border: 1px solid var(--papel-linea);
             padding: 20px;
         }
+        .perfil-avatar-fila {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
         .perfil-avatar {
             width: 100px;
             height: 100px;
             border-radius: 50%;
             border: 4px solid var(--papel-linea);
             overflow: hidden;
-            margin: 0 auto 14px;
+            flex-shrink: 0;
             background: var(--papel);
             display: flex;
             align-items: center;
@@ -478,20 +495,10 @@
             text-transform: uppercase;
             user-select: none;
         }
-        .perfil-avatar .cambiar-foto {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            width: 100%;
-            border: none;
-            background: rgba(22, 35, 58, 0.8);
-            color: white;
-            font-size: 0.6rem;
-            padding: 4px;
-            text-align: center;
-            cursor: pointer;
-            font-family: 'Space Mono', monospace;
+        .btn-cambiar-avatar {
+            font-size: 0.8rem;
+            padding: 8px 16px;
+            white-space: nowrap;
         }
         .panel-avatar {
             max-width: 320px;
@@ -684,6 +691,94 @@
         }
         .cuenta-regresiva.tiempo-critico {
             color: var(--prob);
+        }
+
+        .revision-toggle.activo-si {
+            background: var(--geo-suave);
+            border-color: var(--geo);
+            color: #1c6b4f;
+        }
+        .revision-toggle.activo-no {
+            background: #fde3e3;
+            border-color: var(--prob);
+            color: #a13a3a;
+        }
+
+        .pregunta-imagen-examen {
+            display: block;
+            max-width: 100%;
+            max-height: 260px;
+            width: auto;
+            border-radius: 8px;
+            border: 1px solid var(--papel-linea);
+            margin: 8px 0;
+        }
+        .pregunta-imagen-preview img {
+            display: block;
+            max-width: 100%;
+            max-height: 180px;
+            width: auto;
+            border-radius: 8px;
+            border: 1px solid var(--papel-linea);
+            margin-top: 6px;
+        }
+
+        .svg-plano-cartesiano {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            aspect-ratio: 1;
+            background: #fff;
+            border: 1px solid var(--papel-linea);
+            border-radius: 8px;
+            touch-action: none;
+            cursor: crosshair;
+        }
+        .contenedor-plano-dibujo {
+            max-width: 340px;
+        }
+        .preview-grafica-mini {
+            max-width: 300px;
+            margin-top: 8px;
+        }
+
+        /* Mini-formulario del teclado matemático del estudiante (fracción, raíz,
+           potencia, subíndice, trigonometría): piden solo los datos, nunca código. */
+        .mini-form-mate {
+            margin-top: 8px;
+            padding: 10px;
+            background: #fff;
+            border: 1px solid var(--papel-linea);
+            border-radius: 8px;
+        }
+        .mini-form-titulo {
+            font-size: 0.78rem;
+            color: var(--tinta-suave);
+            margin-bottom: 6px;
+        }
+        .mini-form-campos {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .mini-input {
+            flex: 1;
+            min-width: 100px;
+            padding: 6px 8px;
+            border: 1px solid var(--papel-linea);
+            border-radius: 6px;
+            font-family: 'Lora', serif;
+            font-size: 0.85rem;
+        }
+        .mini-form-botones {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .mini-form-botones button {
+            font-size: 0.75rem;
+            padding: 5px 14px;
         }
 
         /* ===== ESTUDIANTES ===== */
@@ -1259,6 +1354,18 @@
         .math-text .math {
             font-size: 1.05rem;
         }
+        /* El reset global de arriba pone "svg { display:block }" para que los
+           iconos no dejen huecos raros, pero eso también le pega a las fórmulas
+           que dibuja MathJax (cada una es un <svg>), y por eso cada fórmula
+           saltaba de línea aunque estuviera en medio de una oración. Aquí se
+           revierte SOLO para las fórmulas de MathJax. */
+        mjx-container {
+            display: inline-block !important;
+        }
+        mjx-container svg {
+            display: inline !important;
+            max-width: none !important;
+        }
 
         /* ============================================================
            NOTIFICACIONES FLOTANTES
@@ -1655,11 +1762,13 @@
                 <button class="btn-fantasma" onclick="irA('inicio')" style="margin-bottom:16px;font-size:0.85rem;padding:8px 16px;">← Volver</button>
                 <div class="perfil-container">
                     <h2 class="display" style="font-size:1.5rem;text-align:center;margin-bottom:16px;">Mi Perfil</h2>
-                    <div class="perfil-avatar" id="avatarContainer">
-                        <span class="placeholder-avatar oculto" id="avatarPreset"></span>
-                        <span class="avatar-iniciales" id="avatarIniciales">AB</span>
-                        <img id="avatarImg" class="oculto" alt="Foto de perfil">
-                        <button type="button" class="cambiar-foto" id="botonCambiarAvatar" onclick="toggleOpcionesAvatar()">Cambiar avatar</button>
+                    <div class="perfil-avatar-fila">
+                        <div class="perfil-avatar" id="avatarContainer">
+                            <span class="placeholder-avatar oculto" id="avatarPreset"></span>
+                            <span class="avatar-iniciales" id="avatarIniciales">AB</span>
+                            <img id="avatarImg" class="oculto" alt="Foto de perfil">
+                        </div>
+                        <button type="button" class="btn-fantasma btn-cambiar-avatar" id="botonCambiarAvatar" onclick="toggleOpcionesAvatar()">Cambiar avatar</button>
                     </div>
                     <div id="panelAvatar" class="panel-avatar oculto">
                         <p class="panel-avatar-titulo">Elige un avatar</p>
@@ -1680,9 +1789,11 @@
                     <div class="perfil-campo">
                         <label>Cambiar contraseña</label>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <input id="perfilPassActual" type="password" placeholder="Contraseña actual" style="flex:1;min-width:160px;">
                             <input id="perfilNuevaPass" type="password" placeholder="Nueva contraseña" style="flex:1;min-width:160px;">
                             <button class="btn-primario" onclick="cambiarContraseña()" style="padding:8px 16px;font-size:0.8rem;">Actualizar</button>
                         </div>
+                        <p style="color:var(--tinta-suave);font-size:0.75rem;margin-top:4px;">Por seguridad, Firebase pide confirmar tu contraseña actual antes de cambiarla.</p>
                     </div>
                     <button class="btn-fantasma" onclick="cerrarSesion()" style="width:100%;margin-top:8px;color:var(--prob);border-color:var(--prob);">Cerrar sesión</button>
                 </div>
@@ -1694,7 +1805,7 @@
     <footer>
         <div class="contenedor">
             <div><strong>MATEM</strong> · Plataforma educativa de matemáticas.</div>
-            <div>Creado por Antony Arias Valle, Diego González Rodríguez y Claude AI</div>
+            <div>Creado por Antony Arias Valle y Claude AI</div>
             <div class="notas">
                 <div>© 2026 - Todos los derechos reservados</div>
                 <div>Diseño inspirado en EVEPRIM</div>
@@ -1735,6 +1846,10 @@
                 <div id="campoCedulaRegistro" class="campo oculto">
                     <label>Cédula (solo para estudiantes)</label>
                     <input id="inputCedulaRegistro" type="text" placeholder="Ej: 1-2345-6789">
+                </div>
+                <div id="campoColegioRegistro" class="campo oculto">
+                    <label>Colegio (solo para estudiantes)</label>
+                    <input id="inputColegioRegistro" type="text" placeholder="Ej: Liceo San José">
                 </div>
                 <div id="campoCursoRegistro" class="campo oculto">
                     <label>Curso (solo para estudiantes)</label>
@@ -1779,6 +1894,17 @@
             <span class="eyebrow">Resultados</span>
             <h3 id="resultadosTitulo" style="margin-top:4px;font-size:1.2rem;">Resultados del examen</h3>
             <div id="resultadosLista" class="resultados-lista"></div>
+        </div>
+    </div>
+
+    <!-- ===================== MODAL REVISIÓN DE DESARROLLO ===================== -->
+    <div id="revisionOverlay" class="fondo-modal oculto" style="z-index:160;" onclick="if(event.target===this) cerrarRevision()">
+        <div class="modal" style="max-width:560px;">
+            <button class="cerrar" onclick="cerrarRevision()">✕</button>
+            <span class="eyebrow">Revisión</span>
+            <h3 style="margin-top:4px;font-size:1.2rem;">Revisar desarrollo de <span id="revisionEstudianteNombre">Estudiante</span></h3>
+            <div id="revisionLista" style="margin-top:12px;"></div>
+            <button class="btn-primario" onclick="guardarRevisionAttempt()" style="margin-top:10px;width:100%;">Guardar revisión</button>
         </div>
     </div>
 
@@ -1981,6 +2107,45 @@
             });
         }
 
+        // Igual que comprimirImagenAFoto, pero SIN recortar a cuadrado (mantiene las
+        // proporciones originales) y con un tamaño configurable: sirve para imágenes
+        // de preguntas de examen, que pueden ser de cualquier forma.
+        function comprimirImagenGenerica(file, opciones) {
+            const maxLado = opciones?.maxLado || 600;
+            const calidades = opciones?.calidades || [0.75, 0.55, 0.4, 0.25];
+            const maxChars = opciones?.maxChars || 500000;
+            return new Promise((resolve, reject) => {
+                const lector = new FileReader();
+                lector.onerror = () => reject(new Error('No se pudo leer el archivo.'));
+                lector.onload = () => {
+                    const img = new Image();
+                    img.onerror = () => reject(new Error('El archivo no es una imagen válida.'));
+                    img.onload = () => {
+                        let w = img.width, h = img.height;
+                        if (w >= h && w > maxLado) { h = Math.round(h * maxLado / w); w = maxLado; }
+                        else if (h > w && h > maxLado) { w = Math.round(w * maxLado / h); h = maxLado; }
+                        const canvas = document.createElement('canvas');
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+
+                        let dataUrl = '';
+                        for (const calidad of calidades) {
+                            dataUrl = canvas.toDataURL('image/jpeg', calidad);
+                            if (dataUrl.length < maxChars) break;
+                        }
+                        if (dataUrl.length >= maxChars) {
+                            reject(new Error('La imagen es muy grande incluso comprimida. Prueba con otra foto más simple o de menor resolución.'));
+                            return;
+                        }
+                        resolve(dataUrl);
+                    };
+                    img.src = lector.result;
+                };
+                lector.readAsDataURL(file);
+            });
+        }
 
         // ============================================================
         // ESTADO GLOBAL
@@ -1992,6 +2157,7 @@
         let profesorAsignado = null;
         let estudiantesAsignados = [];
         let preguntasTemp = [];
+        let preguntaTempEnEdicionId = null; // id de la pregunta que se está agregando/editando ahora mismo (null = ninguna abierta)
         const NUM_UNIDADES = 4;
         let unidadEnEdicion = null;      // 1-4 mientras el profesor crea/edita el examen de esa unidad
         let examEnEdicionId = null;      // id del examen si se está EDITANDO uno ya existente
@@ -2000,6 +2166,7 @@
         let unsubContenidoCurso = null;  // función para dejar de escuchar cambios en vivo del curso anterior
         let modoEdicionInfo = false;
         let modoEdicionRecursos = false;
+        let infoEnEdicionBuffer = null;  // { descripcion, bloques:[{id,titulo,texto}] } mientras el profesor edita "Info"
         const MAX_INTENTOS_PRACTICA = 2; // intentos de práctica (sin tiempo) antes del definitivo
         let examTomaId = null;           // id del examen que el ESTUDIANTE está resolviendo ahora mismo
         let examTomaDatos = null;        // datos del examen que está resolviendo
@@ -2008,6 +2175,9 @@
         let examTomaTiempoLimite = null; // timestamp (ms) en que se acaba el tiempo, solo si es 'final'
         let examTomaTimerId = null;      // id del setInterval de la cuenta regresiva
         let respuestasTomaTemp = {};     // { [preguntaId]: respuesta } mientras el estudiante contesta
+        let revisionEnEdicion = null;    // intento (attempt) que el profesor está revisando ahora mismo (preguntas de desarrollo)
+        const PLANO_TAMANO = 280;            // px, tamaño del plano cartesiano en la vista previa del profesor
+        const PLANO_TAMANO_ESTUDIANTE = 320; // px, tamaño del plano cartesiano donde dibuja el estudiante
 
         // ============================================================
         // FUNCIONES DE NAVEGACIÓN
@@ -2116,6 +2286,7 @@
             examEnEdicionId = null;
             examDatosEnEdicion = null;
             preguntasTemp = [];
+            preguntaTempEnEdicionId = null;
             detenerCuentaRegresiva();
             examTomaId = null;
             examTomaDatos = null;
@@ -2146,6 +2317,7 @@
                             <button class="activo" onclick="cambiarTabCurso('info')">Info</button>
                             <button onclick="cambiarTabCurso('recursos')">Recursos</button>
                             <button onclick="cambiarTabCurso('examenes')">Exámenes</button>
+                            <button onclick="cambiarTabCurso('asistencia')">Asistencia</button>
                         </div>
                         <div id="contenidoCurso">${renderizarInfoCurso(curso)}</div>
                     </div>
@@ -2165,24 +2337,31 @@
         function contenidoCursoPorDefecto(curso) {
             return {
                 descripcion: curso.descripcion + ' Este curso está diseñado para estudiantes de nivel intermedio que desean fortalecer sus conocimientos en ' + curso.nombre.toLowerCase() + '.',
-                recursos: {
-                    guia: { descripcion: 'Descarga la guía completa del curso.', url: '' },
-                    videos: { descripcion: 'Lista de reproducción con videos explicativos.', url: 'https://youtube.com' },
-                    ejercicios: { descripcion: 'Práctica extra con ejercicios resueltos.', url: '' },
-                    enlaces: { descripcion: 'Recursos externos para profundizar.', url: '' }
-                }
+                bloques: [], // bloques de información adicionales que el profesor agrega libremente (objetivos, requisitos, evaluación, etc.)
+                diasClase: [], // fechas 'YYYY-MM-DD' en las que el profesor tomó asistencia
+                recursos: [
+                    { id: 'guia-def', tipo: 'guia', descripcion: 'Descarga la guía completa del curso.', url: '' },
+                    { id: 'videos-def', tipo: 'videos', descripcion: 'Lista de reproducción con videos explicativos.', url: 'https://youtube.com' },
+                    { id: 'ejercicios-def', tipo: 'ejercicios', descripcion: 'Práctica extra con ejercicios resueltos.', url: '' },
+                    { id: 'enlaces-def', tipo: 'enlaces', descripcion: 'Recursos externos para profundizar.', url: '' }
+                ]
             };
         }
 
         function mezclarContenidoCurso(curso) {
             const base = contenidoCursoPorDefecto(curso);
             if (!contenidoCursoActual) return base;
-            const recursos = {};
-            for (const key of Object.keys(base.recursos)) {
-                recursos[key] = { ...base.recursos[key], ...(contenidoCursoActual.recursos?.[key] || {}) };
+            let recursos = base.recursos;
+            if (Array.isArray(contenidoCursoActual.recursos)) {
+                recursos = contenidoCursoActual.recursos;
+            } else if (contenidoCursoActual.recursos && typeof contenidoCursoActual.recursos === 'object') {
+                // Compatibilidad con el formato viejo (objeto con 4 llaves fijas).
+                recursos = Object.entries(contenidoCursoActual.recursos).map(([tipo, r]) => ({ id: tipo, tipo, ...r }));
             }
             return {
                 descripcion: contenidoCursoActual.descripcion || base.descripcion,
+                bloques: Array.isArray(contenidoCursoActual.bloques) ? contenidoCursoActual.bloques : base.bloques,
+                diasClase: Array.isArray(contenidoCursoActual.diasClase) ? contenidoCursoActual.diasClase : base.diasClase,
                 recursos
             };
         }
@@ -2207,15 +2386,33 @@
         function renderizarInfoCurso(curso) {
             const contenido = mezclarContenidoCurso(curso);
             if (modoEdicionInfo) {
+                if (!infoEnEdicionBuffer) {
+                    infoEnEdicionBuffer = { descripcion: contenido.descripcion, bloques: (contenido.bloques || []).map(b => ({ ...b })) };
+                }
+                const buf = infoEnEdicionBuffer;
                 return `
                     <div class="tarjeta-plana">
                         <h4>Editar información del curso</h4>
-                        <div class="campo" style="margin-top:10px;"><label>Descripción</label>
-                            <textarea id="infoDescripcionEdit" rows="4" style="width:100%;padding:10px;border:1px solid var(--papel-linea);border-radius:8px;font-family:'Lora',serif;font-size:0.9rem;">${contenido.descripcion}</textarea>
+                        <div class="campo" style="margin-top:10px;"><label>Descripción general</label>
+                            <textarea id="infoDescripcionEdit" rows="4" style="width:100%;padding:10px;border:1px solid var(--papel-linea);border-radius:8px;font-family:'Lora',serif;font-size:0.9rem;">${buf.descripcion}</textarea>
                         </div>
-                        <div style="display:flex;gap:8px;margin-top:10px;">
+                        <hr style="border:none;border-top:1px solid var(--papel-linea);margin:14px 0;">
+                        <p style="font-size:0.85rem;color:var(--tinta-suave);margin-bottom:8px;">Bloques adicionales (objetivos, requisitos, evaluación, o lo que necesites agregar). Puedes añadir o quitar los que quieras:</p>
+                        <div id="bloquesInfoContainer">
+                            ${buf.bloques.map(b => `
+                                <div class="tarjeta-plana" style="margin-bottom:8px;padding:12px;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                                        <input type="text" id="bloqueTitulo_${b.id}" value="${(b.titulo || '').replace(/"/g, '&quot;')}" placeholder="Título del bloque (ej: Objetivos)" style="flex:1;font-weight:600;padding:6px 8px;border:none;border-bottom:1px solid var(--papel-linea);outline:none;font-size:0.9rem;background:transparent;">
+                                        <button class="btn-fantasma" onclick="eliminarBloqueInfo('${b.id}')" style="font-size:0.7rem;padding:3px 10px;color:var(--prob);border-color:var(--prob);flex-shrink:0;">Eliminar</button>
+                                    </div>
+                                    <textarea id="bloqueTexto_${b.id}" rows="3" placeholder="Contenido del bloque" style="width:100%;margin-top:8px;padding:8px;border:1px solid var(--papel-linea);border-radius:8px;font-family:'Lora',serif;font-size:0.88rem;">${b.texto || ''}</textarea>
+                                </div>
+                            `).join('') || '<p style="color:var(--tinta-suave);font-size:0.85rem;">Todavía no hay bloques adicionales.</p>'}
+                        </div>
+                        <button class="btn-fantasma" onclick="agregarBloqueInfo()" style="font-size:0.8rem;margin-bottom:12px;">+ Agregar bloque</button>
+                        <div style="display:flex;gap:8px;">
                             <button class="btn-primario" onclick="guardarInfoCurso('${curso.id}')" style="flex:1;">Guardar cambios</button>
-                            <button class="btn-fantasma" onclick="cancelarEdicionInfo('${curso.id}')" style="flex:1;">Cancelar</button>
+                            <button class="btn-fantasma" onclick="cancelarEdicionInfo()" style="flex:1;">Cancelar</button>
                         </div>
                     </div>
                 `;
@@ -2229,31 +2426,73 @@
                     <p style="color:var(--tinta-suave);margin-top:6px;white-space:pre-wrap;">${contenido.descripcion}</p>
                     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
                         <span class="badge-curso" style="background:var(--geo-suave);color:var(--geo);">${NUM_UNIDADES} unidades</span>
-                        <span class="badge-curso" style="background:var(--medidas-suave);color:var(--medidas);">${NUM_UNIDADES} exámenes</span>
+                        <span class="badge-curso" style="background:var(--medidas-suave);color:var(--medidas);">${NUM_UNIDADES} apartados de examen</span>
                     </div>
                 </div>
+                ${(contenido.bloques || []).map(b => `
+                    <div class="tarjeta-plana" style="margin-top:10px;">
+                        <h4 style="font-size:0.95rem;">${b.titulo || 'Sin título'}</h4>
+                        <p style="color:var(--tinta-suave);margin-top:6px;white-space:pre-wrap;">${b.texto || ''}</p>
+                    </div>
+                `).join('')}
             `;
         }
 
         function toggleEdicionInfo() {
             modoEdicionInfo = true;
+            infoEnEdicionBuffer = null; // se llena al renderizar, con el contenido actual
             const curso = CURSOS.find(c => c.id === obtenerCursoActual());
             document.getElementById('contenidoCurso').innerHTML = renderizarInfoCurso(curso);
         }
 
         function cancelarEdicionInfo() {
             modoEdicionInfo = false;
+            infoEnEdicionBuffer = null;
+            const curso = CURSOS.find(c => c.id === obtenerCursoActual());
+            document.getElementById('contenidoCurso').innerHTML = renderizarInfoCurso(curso);
+        }
+
+        // Antes de re-dibujar el formulario (al agregar/quitar un bloque o al guardar)
+        // guardamos lo que el profesor ya había escrito, para no perder texto a medias.
+        function sincronizarBufferInfoDesdeDOM() {
+            if (!infoEnEdicionBuffer) return;
+            const descEl = document.getElementById('infoDescripcionEdit');
+            if (descEl) infoEnEdicionBuffer.descripcion = descEl.value;
+            infoEnEdicionBuffer.bloques = infoEnEdicionBuffer.bloques.map(b => ({
+                id: b.id,
+                titulo: document.getElementById(`bloqueTitulo_${b.id}`)?.value ?? b.titulo,
+                texto: document.getElementById(`bloqueTexto_${b.id}`)?.value ?? b.texto
+            }));
+        }
+
+        function agregarBloqueInfo() {
+            sincronizarBufferInfoDesdeDOM();
+            if (!infoEnEdicionBuffer) infoEnEdicionBuffer = { descripcion: '', bloques: [] };
+            infoEnEdicionBuffer.bloques.push({ id: Date.now().toString(), titulo: '', texto: '' });
+            const curso = CURSOS.find(c => c.id === obtenerCursoActual());
+            document.getElementById('contenidoCurso').innerHTML = renderizarInfoCurso(curso);
+        }
+
+        function eliminarBloqueInfo(id) {
+            sincronizarBufferInfoDesdeDOM();
+            if (!infoEnEdicionBuffer) return;
+            infoEnEdicionBuffer.bloques = infoEnEdicionBuffer.bloques.filter(b => b.id !== id);
             const curso = CURSOS.find(c => c.id === obtenerCursoActual());
             document.getElementById('contenidoCurso').innerHTML = renderizarInfoCurso(curso);
         }
 
         async function guardarInfoCurso(cursoId) {
-            const texto = document.getElementById('infoDescripcionEdit')?.value.trim();
+            sincronizarBufferInfoDesdeDOM();
+            const texto = infoEnEdicionBuffer?.descripcion?.trim();
             if (!texto) return mostrarAdvertencia('La descripción no puede quedar vacía.');
+            const bloquesFinal = (infoEnEdicionBuffer?.bloques || [])
+                .map(b => ({ id: b.id, titulo: (b.titulo || '').trim() || 'Sin título', texto: (b.texto || '').trim() }))
+                .filter(b => b.texto); // no guardamos bloques que quedaron completamente vacíos
             try {
-                await db.collection('courseContent').doc(cursoId).set({ descripcion: texto }, { merge: true });
-                contenidoCursoActual = { ...(contenidoCursoActual || {}), descripcion: texto };
+                await db.collection('courseContent').doc(cursoId).set({ descripcion: texto, bloques: bloquesFinal }, { merge: true });
+                contenidoCursoActual = { ...(contenidoCursoActual || {}), descripcion: texto, bloques: bloquesFinal };
                 modoEdicionInfo = false;
+                infoEnEdicionBuffer = null;
                 document.getElementById('contenidoCurso').innerHTML = renderizarInfoCurso(CURSOS.find(c => c.id === cursoId));
                 mostrarToast('Contenido del curso actualizado.', 'success');
             } catch (error) {
@@ -2265,7 +2504,7 @@
             const cursoId = obtenerCursoActual();
             const tabs = document.querySelectorAll('#cursoTabs button');
             tabs.forEach(b => b.classList.remove('activo'));
-            const map = { info: 0, recursos: 1, examenes: 2 };
+            const map = { info: 0, recursos: 1, examenes: 2, asistencia: 3 };
             const idx = map[tab] !== undefined ? map[tab] : 0;
             if (tabs[idx]) tabs[idx].classList.add('activo');
             const container = document.getElementById('contenidoCurso');
@@ -2279,8 +2518,13 @@
                 examEnEdicionId = null;
                 examDatosEnEdicion = null;
                 preguntasTemp = [];
+                preguntaTempEnEdicionId = null;
                 container.innerHTML = renderizarExamenesCurso(cursoId);
                 cargarExamenesCurso(cursoId);
+            } else if (tab === 'asistencia') {
+                diaAsistenciaSeleccionado = null;
+                container.innerHTML = '<p style="color:var(--tinta-suave);">Cargando asistencia...</p>';
+                cargarAsistenciaCurso(cursoId);
             }
         }
 
@@ -2290,25 +2534,43 @@
             return curso?.id || CURSOS[0].id;
         }
 
-        const RECURSOS_META = [
-            { key: 'guia', titulo: 'Guía' },
-            { key: 'videos', titulo: 'Videos' },
-            { key: 'ejercicios', titulo: 'Ejercicios' },
-            { key: 'enlaces', titulo: 'Enlaces' }
+        const TIPOS_RECURSO = [
+            { value: 'guia', label: 'Guía' },
+            { value: 'videos', label: 'Videos' },
+            { value: 'ejercicios', label: 'Ejercicios' },
+            { value: 'enlaces', label: 'Enlaces' },
+            { value: 'otro', label: 'Otro' }
         ];
+        let recursosEnEdicionBuffer = null; // arreglo temporal [{id,tipo,descripcion,url}] mientras el profesor edita "Recursos"
+
+        function etiquetaTipoRecurso(tipo) {
+            return TIPOS_RECURSO.find(t => t.value === tipo)?.label || 'Recurso';
+        }
 
         function renderizarRecursosCurso(curso) {
             const contenido = mezclarContenidoCurso(curso);
             if (modoEdicionRecursos) {
+                if (!recursosEnEdicionBuffer) recursosEnEdicionBuffer = (contenido.recursos || []).map(r => ({ ...r }));
+                const buf = recursosEnEdicionBuffer;
                 return `
                     <div class="tarjeta-plana">
                         <h4>Editar recursos del curso</h4>
-                        ${RECURSOS_META.map(r => `
-                            <hr style="border:none;border-top:1px solid var(--papel-linea);margin:12px 0;">
-                            <p style="font-weight:600;font-size:0.85rem;margin-bottom:6px;">${r.titulo}</p>
-                            <div class="campo"><label>Descripción</label><input id="rec_${r.key}_desc" type="text" value="${(contenido.recursos[r.key].descripcion || '').replace(/"/g, '&quot;')}"></div>
-                            <div class="campo"><label>Enlace (opcional)</label><input id="rec_${r.key}_url" type="text" placeholder="https://..." value="${(contenido.recursos[r.key].url || '').replace(/"/g, '&quot;')}"></div>
-                        `).join('')}
+                        <p style="color:var(--tinta-suave);font-size:0.85rem;margin-top:4px;">Para cada recurso, primero elige de qué tipo es y luego completa su descripción y enlace. Puedes agregar tantos como quieras y quitar los que no uses.</p>
+                        <div id="recursosEnEdicionContainer">
+                            ${buf.map(r => `
+                                <div class="tarjeta-plana" style="margin-top:10px;padding:12px;">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+                                        <select id="rec_tipo_${r.id}" style="padding:6px 8px;border:1px solid var(--papel-linea);border-radius:8px;font-family:'Lora',serif;font-size:0.85rem;">
+                                            ${TIPOS_RECURSO.map(t => `<option value="${t.value}" ${t.value === r.tipo ? 'selected' : ''}>${t.label}</option>`).join('')}
+                                        </select>
+                                        <button class="btn-fantasma" onclick="eliminarRecursoCurso('${r.id}')" style="font-size:0.7rem;padding:3px 10px;color:var(--prob);border-color:var(--prob);">Eliminar</button>
+                                    </div>
+                                    <div class="campo" style="margin-top:8px;"><label>Descripción</label><input id="rec_desc_${r.id}" type="text" value="${(r.descripcion || '').replace(/"/g, '&quot;')}"></div>
+                                    <div class="campo"><label>Enlace (opcional)</label><input id="rec_url_${r.id}" type="text" placeholder="https://..." value="${(r.url || '').replace(/"/g, '&quot;')}"></div>
+                                </div>
+                            `).join('') || '<p style="color:var(--tinta-suave);font-size:0.85rem;margin-top:10px;">Todavía no hay recursos.</p>'}
+                        </div>
+                        <button class="btn-fantasma" onclick="agregarRecursoCurso()" style="font-size:0.8rem;margin-top:10px;">+ Agregar recurso</button>
                         <div style="display:flex;gap:8px;margin-top:10px;">
                             <button class="btn-primario" onclick="guardarRecursosCurso('${curso.id}')" style="flex:1;">Guardar cambios</button>
                             <button class="btn-fantasma" onclick="cancelarEdicionRecursos()" style="flex:1;">Cancelar</button>
@@ -2318,51 +2580,293 @@
             }
             return `
                 ${rolActual === 'teacher' ? `<div style="text-align:right;margin-bottom:10px;"><button class="btn-fantasma" onclick="toggleEdicionRecursos()" style="font-size:0.75rem;padding:4px 12px;">Editar recursos</button></div>` : ''}
+                ${(contenido.recursos || []).length === 0 ? '<p style="color:var(--tinta-suave);">Todavía no hay recursos para este curso.</p>' : ''}
                 <div class="grid-cursos" style="grid-template-columns:1fr 1fr;">
-                    ${RECURSOS_META.map(r => `
-                        <div class="tarjeta-plana"><h4>${r.titulo}</h4><p style="color:var(--tinta-suave);font-size:0.85rem;">${contenido.recursos[r.key].descripcion}</p><button class="btn-fantasma" style="margin-top:10px;font-size:0.8rem;" onclick="abrirRecursoCurso('${r.key}','${curso.id}')">Abrir</button></div>
+                    ${(contenido.recursos || []).map(r => `
+                        <div class="tarjeta-plana">
+                            <span class="badge-curso" style="background:var(--geo-suave);color:var(--geo);">${etiquetaTipoRecurso(r.tipo)}</span>
+                            <p style="color:var(--tinta-suave);font-size:0.85rem;margin-top:8px;">${r.descripcion || ''}</p>
+                            <button class="btn-fantasma" style="margin-top:10px;font-size:0.8rem;" onclick="abrirRecursoCurso('${r.id}','${curso.id}')">Abrir</button>
+                        </div>
                     `).join('')}
                 </div>
             `;
         }
 
-        function abrirRecursoCurso(key, cursoId) {
+        function abrirRecursoCurso(id, cursoId) {
             const curso = CURSOS.find(c => c.id === cursoId);
             const contenido = mezclarContenidoCurso(curso);
-            const url = contenido.recursos[key]?.url;
+            const url = contenido.recursos.find(r => r.id === id)?.url;
             if (url) { window.open(url, '_blank'); return; }
             mostrarAdvertencia('El profesor todavía no agregó un enlace para este recurso.', 'Recurso no disponible todavía');
         }
 
         function toggleEdicionRecursos() {
             modoEdicionRecursos = true;
+            recursosEnEdicionBuffer = null; // se llena al renderizar, con el contenido actual
             const curso = CURSOS.find(c => c.id === obtenerCursoActual());
             document.getElementById('contenidoCurso').innerHTML = renderizarRecursosCurso(curso);
         }
 
         function cancelarEdicionRecursos() {
             modoEdicionRecursos = false;
+            recursosEnEdicionBuffer = null;
+            const curso = CURSOS.find(c => c.id === obtenerCursoActual());
+            document.getElementById('contenidoCurso').innerHTML = renderizarRecursosCurso(curso);
+        }
+
+        // Antes de re-dibujar (al agregar/quitar un recurso o al guardar) guardamos
+        // lo que el profesor ya había escrito, para no perder texto a medias.
+        function sincronizarBufferRecursosDesdeDOM() {
+            if (!recursosEnEdicionBuffer) return;
+            recursosEnEdicionBuffer = recursosEnEdicionBuffer.map(r => ({
+                id: r.id,
+                tipo: document.getElementById(`rec_tipo_${r.id}`)?.value ?? r.tipo,
+                descripcion: document.getElementById(`rec_desc_${r.id}`)?.value ?? r.descripcion,
+                url: document.getElementById(`rec_url_${r.id}`)?.value ?? r.url
+            }));
+        }
+
+        function agregarRecursoCurso() {
+            sincronizarBufferRecursosDesdeDOM();
+            if (!recursosEnEdicionBuffer) recursosEnEdicionBuffer = [];
+            recursosEnEdicionBuffer.push({ id: Date.now().toString(), tipo: 'guia', descripcion: '', url: '' });
+            const curso = CURSOS.find(c => c.id === obtenerCursoActual());
+            document.getElementById('contenidoCurso').innerHTML = renderizarRecursosCurso(curso);
+        }
+
+        function eliminarRecursoCurso(id) {
+            sincronizarBufferRecursosDesdeDOM();
+            if (!recursosEnEdicionBuffer) return;
+            recursosEnEdicionBuffer = recursosEnEdicionBuffer.filter(r => r.id !== id);
             const curso = CURSOS.find(c => c.id === obtenerCursoActual());
             document.getElementById('contenidoCurso').innerHTML = renderizarRecursosCurso(curso);
         }
 
         async function guardarRecursosCurso(cursoId) {
-            const recursos = {};
-            for (const r of RECURSOS_META) {
-                recursos[r.key] = {
-                    descripcion: document.getElementById(`rec_${r.key}_desc`)?.value.trim() || '',
-                    url: document.getElementById(`rec_${r.key}_url`)?.value.trim() || ''
-                };
-            }
+            sincronizarBufferRecursosDesdeDOM();
+            const recursos = (recursosEnEdicionBuffer || []).map(r => ({
+                id: r.id,
+                tipo: r.tipo || 'otro',
+                descripcion: (r.descripcion || '').trim(),
+                url: (r.url || '').trim()
+            }));
             try {
                 await db.collection('courseContent').doc(cursoId).set({ recursos }, { merge: true });
                 contenidoCursoActual = { ...(contenidoCursoActual || {}), recursos };
                 modoEdicionRecursos = false;
+                recursosEnEdicionBuffer = null;
                 document.getElementById('contenidoCurso').innerHTML = renderizarRecursosCurso(CURSOS.find(c => c.id === cursoId));
                 mostrarToast('Recursos del curso actualizados.', 'success');
             } catch (error) {
                 mostrarAdvertencia(error);
             }
+        }
+
+        // ============================================================
+        // ASISTENCIA: días de clase + registro por estudiante
+        // ============================================================
+        // Antes la "asistencia" que se mostraba era un número inventado al
+        // azar (Math.random) porque nunca se guardaba nada real. Ahora vive
+        // en la colección "attendance" (un documento por curso+fecha, con un
+        // mapa {estudianteId: true/false}) y los días de clase se guardan en
+        // courseContent/{cursoId}.diasClase.
+        let attendanceCache = {};        // fecha -> {estudianteId: bool}, del curso abierto actualmente
+        let estudiantesCursoAsistencia = []; // estudiantes activos de ESTE curso (solo profesor)
+        let diaAsistenciaSeleccionado = null;
+
+        function formatearFecha(f) {
+            if (!f) return '';
+            const partes = f.split('-');
+            if (partes.length !== 3) return f;
+            const [y, m, d] = partes;
+            return `${d}/${m}/${y}`;
+        }
+
+        async function cargarAsistenciaCurso(cursoId) {
+            try {
+                const peticiones = [db.collection('attendance').where('courseId', '==', cursoId).get()];
+                if (rolActual === 'teacher') {
+                    peticiones.push(db.collection('users')
+                        .where('rol', '==', 'student')
+                        .where('profesorId', '==', usuarioActual.uid)
+                        .where('curso', '==', cursoId)
+                        .get());
+                }
+                const [attSnap, studSnap] = await Promise.all(peticiones);
+                attendanceCache = {};
+                attSnap.docs.forEach(d => {
+                    const data = d.data();
+                    attendanceCache[data.fecha] = data.registros || {};
+                });
+                if (studSnap) {
+                    estudiantesCursoAsistencia = studSnap.docs.map(d => ({ id: d.id, ...d.data() }))
+                        .filter(e => !e.estadoMatricula || e.estadoMatricula === 'activo');
+                }
+                const container = document.getElementById('contenidoCurso');
+                const tabActiva = document.querySelector('#cursoTabs .activo')?.textContent;
+                if (container && tabActiva === 'Asistencia') {
+                    container.innerHTML = renderizarAsistenciaCurso(cursoId);
+                }
+            } catch (error) {
+                mostrarAdvertencia(error);
+            }
+        }
+
+        function renderizarAsistenciaCurso(cursoId) {
+            const curso = CURSOS.find(c => c.id === cursoId);
+            const contenido = mezclarContenidoCurso(curso);
+            const diasClase = (contenido.diasClase || []).slice().sort();
+
+            if (rolActual === 'teacher') {
+                const diaSel = diaAsistenciaSeleccionado || diasClase[diasClase.length - 1] || null;
+                const registrosDia = diaSel ? (attendanceCache[diaSel] || {}) : {};
+                return `
+                    <div class="perfil-container">
+                        <h4 style="margin-bottom:10px;font-size:1rem;">Días de clase</h4>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+                            <input type="date" id="inputNuevoDiaClase" style="flex:1;min-width:160px;padding:8px;border-radius:8px;border:1px solid var(--papel-linea);">
+                            <button class="btn-primario" onclick="agregarDiaClase('${cursoId}')" style="padding:8px 16px;font-size:0.8rem;">Agregar día</button>
+                        </div>
+                        ${diasClase.length === 0 ? '<p style="color:var(--tinta-suave);font-size:0.85rem;">Todavía no has agregado días de clase para este curso.</p>' : `
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+                            ${diasClase.map(f => `
+                                <span onclick="seleccionarDiaAsistencia('${cursoId}','${f}')" style="cursor:pointer;padding:6px 10px;border-radius:999px;border:1px solid var(--papel-linea);font-size:0.78rem;display:inline-flex;align-items:center;gap:6px;${f === diaSel ? 'background:var(--acento);color:#fff;border-color:var(--acento);' : ''}">
+                                    ${formatearFecha(f)}
+                                    <span onclick="event.stopPropagation();eliminarDiaClase('${cursoId}','${f}')" title="Eliminar día" style="opacity:0.75;">✕</span>
+                                </span>
+                            `).join('')}
+                        </div>`}
+                        ${diaSel ? `
+                        <hr style="border:none;border-top:2px solid var(--papel-linea);margin:16px 0;">
+                        <h4 style="margin-bottom:10px;font-size:1rem;">Tomar asistencia — ${formatearFecha(diaSel)}</h4>
+                        ${estudiantesCursoAsistencia.length === 0 ? '<p style="color:var(--tinta-suave);font-size:0.85rem;">No tienes estudiantes activos en este curso todavía.</p>' : `
+                        <div id="listaAsistenciaDia">
+                            ${estudiantesCursoAsistencia.map(est => `
+                                <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--papel-linea);font-size:0.9rem;">
+                                    <input type="checkbox" data-est="${est.id}" ${registrosDia[est.id] ? 'checked' : ''}>
+                                    ${est.nombre}
+                                </label>
+                            `).join('')}
+                        </div>
+                        <button class="btn-primario" onclick="guardarAsistenciaDia('${cursoId}','${diaSel}')" style="margin-top:12px;">Guardar asistencia</button>
+                        `}` : ''}
+                    </div>
+                `;
+            }
+
+            // Vista del estudiante: resumen de solo lectura.
+            const total = diasClase.length;
+            let presentes = 0;
+            diasClase.forEach(f => { if (attendanceCache[f]?.[usuarioActual.uid]) presentes++; });
+            const pct = total > 0 ? Math.round(presentes / total * 100) : 0;
+            return `
+                <div class="perfil-container">
+                    <h4 style="margin-bottom:10px;font-size:1rem;">Mi asistencia</h4>
+                    <p style="font-size:1.5rem;font-weight:700;margin-bottom:4px;">${presentes}/${total} <span style="font-size:0.9rem;font-weight:400;color:var(--tinta-suave);">(${pct}%)</span></p>
+                    ${total === 0 ? '<p style="color:var(--tinta-suave);font-size:0.85rem;margin-top:8px;">Tu profesor todavía no ha registrado días de clase.</p>' : `
+                    <div style="margin-top:14px;display:flex;flex-direction:column;gap:2px;">
+                        ${diasClase.map(f => `
+                            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--papel-linea);font-size:0.85rem;">
+                                <span>${formatearFecha(f)}</span>
+                                <span style="font-weight:600;color:${attendanceCache[f]?.[usuarioActual.uid] ? 'var(--geo)' : 'var(--prob)'};">${attendanceCache[f]?.[usuarioActual.uid] ? 'Presente' : 'Ausente'}</span>
+                            </div>
+                        `).join('')}
+                    </div>`}
+                </div>
+            `;
+        }
+
+        async function agregarDiaClase(cursoId) {
+            const input = document.getElementById('inputNuevoDiaClase');
+            const fecha = input?.value;
+            if (!fecha) return mostrarAdvertencia('Elige una fecha primero.');
+            try {
+                const contenido = mezclarContenidoCurso(CURSOS.find(c => c.id === cursoId));
+                const diasClase = Array.from(new Set([...(contenido.diasClase || []), fecha])).sort();
+                await db.collection('courseContent').doc(cursoId).set({ diasClase }, { merge: true });
+                contenidoCursoActual = { ...(contenidoCursoActual || {}), diasClase };
+                diaAsistenciaSeleccionado = fecha;
+                document.getElementById('contenidoCurso').innerHTML = renderizarAsistenciaCurso(cursoId);
+                mostrarToast('Día de clase agregado.', 'success');
+            } catch (error) {
+                mostrarAdvertencia(error);
+            }
+        }
+
+        async function eliminarDiaClase(cursoId, fecha) {
+            try {
+                const contenido = mezclarContenidoCurso(CURSOS.find(c => c.id === cursoId));
+                const diasClase = (contenido.diasClase || []).filter(f => f !== fecha);
+                await db.collection('courseContent').doc(cursoId).set({ diasClase }, { merge: true });
+                contenidoCursoActual = { ...(contenidoCursoActual || {}), diasClase };
+                if (diaAsistenciaSeleccionado === fecha) diaAsistenciaSeleccionado = null;
+                document.getElementById('contenidoCurso').innerHTML = renderizarAsistenciaCurso(cursoId);
+                mostrarToast('Día de clase eliminado.', 'info');
+            } catch (error) {
+                mostrarAdvertencia(error);
+            }
+        }
+
+        function seleccionarDiaAsistencia(cursoId, fecha) {
+            diaAsistenciaSeleccionado = fecha;
+            document.getElementById('contenidoCurso').innerHTML = renderizarAsistenciaCurso(cursoId);
+        }
+
+        async function guardarAsistenciaDia(cursoId, fecha) {
+            try {
+                const checks = document.querySelectorAll('#listaAsistenciaDia input[type="checkbox"]');
+                const registros = {};
+                checks.forEach(chk => { registros[chk.dataset.est] = chk.checked; });
+                await db.collection('attendance').doc(`${cursoId}_${fecha}`).set({
+                    courseId: cursoId,
+                    fecha,
+                    registros,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                attendanceCache[fecha] = registros;
+                mostrarToast('Asistencia guardada.', 'success');
+            } catch (error) {
+                mostrarAdvertencia(error);
+            }
+        }
+
+        // Helpers reutilizados por la vista "Mis Estudiantes" y por las descargas:
+        // calculan asistencia real (días de clase + registros) para uno o varios
+        // cursos a la vez, evitando repetir lecturas de Firestore.
+        async function calcularAsistenciaPorCurso(cursoIds) {
+            const asistenciaPorCurso = {};
+            await Promise.all(cursoIds.map(async cursoId => {
+                const [ccDoc, attSnap] = await Promise.all([
+                    db.collection('courseContent').doc(cursoId).get(),
+                    db.collection('attendance').where('courseId', '==', cursoId).get()
+                ]);
+                const diasClase = ccDoc.exists ? (ccDoc.data().diasClase || []) : [];
+                const attendanceByFecha = {};
+                attSnap.docs.forEach(d => {
+                    const data = d.data();
+                    attendanceByFecha[data.fecha] = data.registros || {};
+                });
+                asistenciaPorCurso[cursoId] = { diasClase, attendanceByFecha };
+            }));
+            return asistenciaPorCurso;
+        }
+
+        function calcularAsistenciaEstudiante(est, asistenciaPorCurso) {
+            const info = asistenciaPorCurso[est.curso];
+            if (!info || info.diasClase.length === 0) return { presentes: 0, total: 0 };
+            let presentes = 0;
+            info.diasClase.forEach(f => { if (info.attendanceByFecha[f]?.[est.id]) presentes++; });
+            return { presentes, total: info.diasClase.length };
+        }
+
+        async function calcularNotaPromedioEstudiante(estudianteId) {
+            const snap = await db.collection('attempts').where('studentId', '==', estudianteId).get();
+            const finales = snap.docs.map(d => d.data())
+                .filter(a => (a.tipo || 'final') === 'final' && a.gradingStatus === 'graded'
+                    && typeof a.score === 'number' && typeof a.total === 'number' && a.total > 0);
+            if (finales.length === 0) return null;
+            return finales.reduce((acc, a) => acc + (a.score / a.total * 100), 0) / finales.length;
         }
 
         // ============================================================
@@ -2381,11 +2885,15 @@
             if (!container) return;
             try {
                 const snapshot = await db.collection('exams').where('courseId', '==', cursoId).get();
+                // Cada unidad puede tener MÁS DE UN examen, así que agrupamos en listas
+                // (no en un solo objeto) para no perder los que se agreguen después del primero.
                 const porUnidad = {};
                 const examIds = [];
                 snapshot.docs.forEach(doc => {
                     const data = doc.data();
-                    porUnidad[data.unidad || 0] = { id: doc.id, ...data };
+                    const u = data.unidad || 1;
+                    if (!porUnidad[u]) porUnidad[u] = [];
+                    porUnidad[u].push({ id: doc.id, ...data });
                     examIds.push(doc.id);
                 });
 
@@ -2408,7 +2916,7 @@
 
                 let html = '';
                 for (let u = 1; u <= NUM_UNIDADES; u++) {
-                    html += renderizarApartadoExamen(u, porUnidad[u] || null, estadoIntentos);
+                    html += renderizarApartadoExamen(u, porUnidad[u] || [], estadoIntentos);
                 }
                 container.innerHTML = html;
             } catch (error) {
@@ -2417,51 +2925,61 @@
             }
         }
 
-        function renderizarApartadoExamen(unidad, exam, estadoIntentos) {
+        function renderizarApartadoExamen(unidad, exams, estadoIntentos) {
             const encabezado = `<span class="badge-curso" style="background:var(--geo-suave);color:var(--geo);">Unidad ${unidad}</span>`;
-            if (!exam) {
+            const lista = Array.isArray(exams) ? exams : [];
+
+            if (lista.length === 0) {
                 return `
-                    <div class="tarjeta-plana" style="margin-bottom:10px;">
+                    <div class="tarjeta-plana" style="margin-bottom:14px;">
                         ${encabezado}
-                        <p style="color:var(--tinta-suave);margin-top:8px;">${rolActual === 'teacher' ? 'Todavía no has creado el examen de esta unidad.' : 'El profesor todavía no publica el examen de esta unidad.'}</p>
+                        <p style="color:var(--tinta-suave);margin-top:8px;">${rolActual === 'teacher' ? 'Todavía no has creado ningún examen para esta unidad.' : 'El profesor todavía no publica exámenes para esta unidad.'}</p>
                         ${rolActual === 'teacher' ? `<button class="btn-primario" onclick="crearExamenParaUnidad(${unidad})" style="margin-top:10px;font-size:0.85rem;">Crear examen</button>` : ''}
                     </div>
                 `;
             }
 
-            let accionesEstudiante = '';
-            if (rolActual !== 'teacher') {
-                const estado = (estadoIntentos && estadoIntentos.get(exam.id)) || { practicas: 0, final: false };
-                if (estado.final) {
-                    accionesEstudiante = `<span style="color:var(--geo);font-weight:600;">Completado</span>`;
-                } else {
-                    const restantes = Math.max(0, MAX_INTENTOS_PRACTICA - estado.practicas);
-                    const botones = [];
-                    if (restantes > 0) {
-                        const texto = restantes === 1 ? 'te queda 1 intento' : `te quedan ${restantes} intentos`;
-                        botones.push(`<button class="btn-fantasma" onclick="iniciarExamen('${exam.id}', 'practica')" style="font-size:0.75rem;padding:4px 12px;">Intento de práctica (sin tiempo) · ${texto}</button>`);
+            const tarjetas = lista.map(exam => {
+                let accionesEstudiante = '';
+                if (rolActual !== 'teacher') {
+                    const estado = (estadoIntentos && estadoIntentos.get(exam.id)) || { practicas: 0, final: false };
+                    if (estado.final) {
+                        accionesEstudiante = `<span style="color:var(--geo);font-weight:600;">Completado</span>`;
+                    } else {
+                        const restantes = Math.max(0, MAX_INTENTOS_PRACTICA - estado.practicas);
+                        const botones = [];
+                        if (restantes > 0) {
+                            const texto = restantes === 1 ? 'te queda 1 intento' : `te quedan ${restantes} intentos`;
+                            botones.push(`<button class="btn-fantasma" onclick="iniciarExamen('${exam.id}', 'practica')" style="font-size:0.75rem;padding:4px 12px;">Intento de práctica (sin tiempo) · ${texto}</button>`);
+                        }
+                        botones.push(`<button class="btn-primario" onclick="iniciarExamen('${exam.id}', 'final')" style="font-size:0.8rem;padding:4px 14px;">${restantes > 0 ? 'Empezar con tiempo (definitivo)' : 'Presentar el definitivo (con tiempo)'}</button>`);
+                        accionesEstudiante = `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">${botones.join('')}</div>`;
                     }
-                    botones.push(`<button class="btn-primario" onclick="iniciarExamen('${exam.id}', 'final')" style="font-size:0.8rem;padding:4px 14px;">${restantes > 0 ? 'Empezar con tiempo (definitivo)' : 'Presentar el definitivo (con tiempo)'}</button>`);
-                    accionesEstudiante = `<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">${botones.join('')}</div>`;
                 }
-            }
+                return `
+                    <div class="tarjeta-plana" style="margin-bottom:8px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+                            <div>
+                                <h4 style="font-size:1rem;">${exam.title}</h4>
+                                <p style="color:var(--tinta-suave);font-size:0.8rem;">${exam.questions?.length || 0} preguntas · ${exam.timeLimit || 30} min (definitivo)</p>
+                            </div>
+                            ${rolActual === 'teacher' ? `
+                                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <button class="btn-fantasma" onclick="editarExamen('${exam.id}')" style="font-size:0.75rem;padding:4px 12px;">Editar</button>
+                                    <button class="btn-fantasma" onclick="verResultadosExamen('${exam.id}')" style="font-size:0.75rem;padding:4px 12px;">Resultados</button>
+                                    <button class="btn-fantasma" onclick="eliminarExamen('${exam.id}')" style="font-size:0.75rem;padding:4px 12px;color:var(--prob);border-color:var(--prob);">Eliminar</button>
+                                </div>
+                            ` : accionesEstudiante}
+                        </div>
+                    </div>
+                `;
+            }).join('');
 
             return `
-                <div class="tarjeta-plana" style="margin-bottom:10px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-                        <div>
-                            ${encabezado}
-                            <h4 style="font-size:1rem;margin-top:6px;">${exam.title}</h4>
-                            <p style="color:var(--tinta-suave);font-size:0.8rem;">${exam.questions?.length || 0} preguntas · ${exam.timeLimit || 30} min (definitivo)</p>
-                        </div>
-                        ${rolActual === 'teacher' ? `
-                            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                                <button class="btn-fantasma" onclick="editarExamen('${exam.id}')" style="font-size:0.75rem;padding:4px 12px;">Editar</button>
-                                <button class="btn-fantasma" onclick="verResultadosExamen('${exam.id}')" style="font-size:0.75rem;padding:4px 12px;">Resultados</button>
-                                <button class="btn-fantasma" onclick="eliminarExamen('${exam.id}')" style="font-size:0.75rem;padding:4px 12px;color:var(--prob);border-color:var(--prob);">Eliminar</button>
-                            </div>
-                        ` : accionesEstudiante}
-                    </div>
+                <div style="margin-bottom:14px;">
+                    <div style="margin-bottom:6px;">${encabezado}</div>
+                    ${tarjetas}
+                    ${rolActual === 'teacher' ? `<button class="btn-primario" onclick="crearExamenParaUnidad(${unidad})" style="font-size:0.8rem;padding:8px 16px;margin-top:6px;">+ Agregar otro examen o prueba a esta unidad</button>` : ''}
                 </div>
             `;
         }
@@ -2471,6 +2989,7 @@
             examEnEdicionId = null;
             examDatosEnEdicion = null;
             preguntasTemp = [];
+            preguntaTempEnEdicionId = null;
             const curso = CURSOS.find(c => c.id === obtenerCursoActual());
             document.getElementById('contenidoCurso').innerHTML = renderizarFormExamen(curso);
             setTimeout(() => configurarTeclados(), 200);
@@ -2503,16 +3022,23 @@
         // ============================================================
         // CREAR / EDITAR EXAMEN (con tipo "desarrollo", enunciados en LaTeX)
         // ============================================================
+        const TIPOS_PREGUNTA = [
+            { value: 'mc', label: 'Opción múltiple' },
+            { value: 'tf', label: 'Verdadero/Falso' },
+            { value: 'sa', label: 'Respuesta corta' },
+            { value: 'desarrollo', label: 'Desarrollo' },
+            { value: 'grafica', label: 'Gráfica' }
+        ];
+
+        function etiquetaTipoPregunta(type) {
+            return TIPOS_PREGUNTA.find(t => t.value === type)?.label || 'Pregunta';
+        }
+
         function renderizarFormExamen(curso) {
-            const tiposPregunta = [
-                { value: 'mc', label: 'Opción múltiple' },
-                { value: 'tf', label: 'Verdadero/Falso' },
-                { value: 'sa', label: 'Respuesta corta' },
-                { value: 'desarrollo', label: 'Desarrollo' }
-            ];
             const editando = !!examEnEdicionId;
             const tituloValor = (examDatosEnEdicion?.title || '').replace(/"/g, '&quot;');
             const tiempoValor = examDatosEnEdicion?.timeLimit || 30;
+            const puntajeTotal = preguntasTemp.reduce((s, p) => s + (p.puntos || 1), 0);
             return `
                 <button class="btn-fantasma" onclick="cancelarFormExamen()" style="margin-bottom:12px;font-size:0.8rem;">← Volver a exámenes</button>
                 <div class="tarjeta-plana">
@@ -2524,119 +3050,261 @@
                     </div>
                     <hr style="border:none;border-top:1px solid var(--papel-linea);margin:14px 0;">
                     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-                        ${tiposPregunta.map(t => `
+                        ${TIPOS_PREGUNTA.map(t => `
                             <button class="btn-fantasma" onclick="agregarPreguntaTemp('${t.value}')" style="font-size:0.8rem;padding:6px 14px;">${t.label}</button>
                         `).join('')}
                     </div>
+                    <p style="color:var(--tinta-suave);font-size:0.8rem;">Puntaje total del examen: <strong>${puntajeTotal} punto${puntajeTotal === 1 ? '' : 's'}</strong></p>
                     <div id="preguntasContainer">
                         ${preguntasTemp.length === 0 ? '<p style="color:var(--tinta-suave);font-size:0.85rem;">No hay preguntas agregadas.</p>' : ''}
-                        ${preguntasTemp.map((p, i) => `
+                        ${preguntasTemp.map((p, i) => {
+                            if (p.id === preguntaTempEnEdicionId) {
+                                return `
+                                    <div class="tarjeta-plana" style="margin-bottom:8px;padding:14px;">
+                                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                                            <span style="font-size:0.85rem;"><strong>${p._nuevoSinGuardar ? 'Nueva pregunta' : ('Editando pregunta ' + (i+1))}</strong> · ${etiquetaTipoPregunta(p.type)}</span>
+                                            <button class="btn-fantasma" onclick="cancelarPreguntaTemp('${p.id}')" style="padding:2px 10px;font-size:0.7rem;color:var(--prob);border-color:var(--prob);">Cancelar</button>
+                                        </div>
+                                        ${formularioPreguntaHTML(p)}
+                                        <button class="btn-primario" onclick="guardarPreguntaTemp('${p.id}')" style="margin-top:8px;padding:6px 16px;font-size:0.8rem;">Guardar pregunta</button>
+                                    </div>
+                                `;
+                            }
+                            return `
                             <div class="tarjeta-plana" style="margin-bottom:8px;padding:14px;">
-                                <div style="display:flex;justify-content:space-between;align-items:center;">
-                                    <span style="font-size:0.85rem;"><strong>Pregunta ${i+1}</strong> · ${p.type === 'tf' ? 'V/F' : p.type === 'sa' ? 'Respuesta corta' : p.type === 'desarrollo' ? 'Desarrollo' : 'Opción múltiple'}</span>
-                                    <button class="btn-fantasma" onclick="eliminarPreguntaTemp(${i})" style="padding:2px 10px;font-size:0.7rem;color:var(--prob);border-color:var(--prob);">Eliminar</button>
+                                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+                                    <span style="font-size:0.85rem;"><strong>Pregunta ${i+1}</strong> · ${etiquetaTipoPregunta(p.type)} · ${p.puntos || 1} pto${(p.puntos || 1) === 1 ? '' : 's'}${p.imagenUrl ? ' · con imagen' : ''}</span>
+                                    <div style="display:flex;gap:6px;">
+                                        <button class="btn-fantasma" onclick="editarPreguntaTemp('${p.id}')" style="padding:2px 10px;font-size:0.7rem;">Editar</button>
+                                        <button class="btn-fantasma" onclick="eliminarPreguntaTemp(${i})" style="padding:2px 10px;font-size:0.7rem;color:var(--prob);border-color:var(--prob);">Eliminar</button>
+                                    </div>
                                 </div>
-                                <p style="font-size:0.85rem;margin-top:4px;">${p.text || 'Sin enunciado'}</p>
+                                <p style="font-size:0.85rem;margin-top:4px;">${p.type === 'grafica' ? ('Función: ' + (p.criterio || 'sin definir')) : (p.text || 'Sin enunciado')}</p>
                             </div>
-                        `).join('')}
+                        `;
+                        }).join('')}
                     </div>
                     <button class="btn-primario" onclick="guardarExamen('${curso.id}')" style="margin-top:14px;width:100%;">${editando ? 'Guardar cambios' : 'Guardar examen'}</button>
                 </div>
             `;
         }
 
-        function agregarPreguntaTemp(type) {
-            const q = { id: Date.now().toString(), type, text: '' };
-            if (type === 'tf') { q.options = ['Verdadero', 'Falso'];
-                q.correctIndex = 0; } else if (type === 'sa') { q.correctAnswer = '';
-                q.keywords = ''; } else if (type === 'desarrollo') { q.correctAnswer = '';
-                q.keywords = ''; } else { q.options = ['', '', '', ''];
-                q.correctIndex = 0; }
-            preguntasTemp.push(q);
-
-            // Mostrar formulario para completar la pregunta recién agregada
-            const container = document.getElementById('preguntasContainer');
-            const div = document.createElement('div');
-            div.className = 'tarjeta-plana';
-            div.style.marginBottom = '8px';
-            div.style.padding = '14px';
-            div.innerHTML = `
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                    <span style="font-size:0.85rem;"><strong>Nueva pregunta</strong> · ${type === 'tf' ? 'V/F' : type === 'sa' ? 'Respuesta corta' : type === 'desarrollo' ? 'Desarrollo' : 'Opción múltiple'}</span>
-                    <button class="btn-fantasma" onclick="cancelarPreguntaTemp('${q.id}')" style="padding:2px 10px;font-size:0.7rem;color:var(--prob);border-color:var(--prob);">Cancelar</button>
+        // Genera los campos editables de UNA pregunta (enunciado, imagen, puntos y
+        // los campos propios de su tipo). Se usa tanto al crearla como para volver
+        // a dibujarla cuando se agrega/quita una opción o una imagen, sin perder lo
+        // que ya se había escrito en los demás campos.
+        function formularioPreguntaHTML(q) {
+            const imagenHtml = q.imagenUrl ? `
+                <div class="pregunta-imagen-preview">
+                    <img src="${q.imagenUrl}" alt="Imagen de la pregunta">
+                    <button type="button" class="btn-fantasma" onclick="eliminarImagenPregunta('${q.id}')" style="font-size:0.7rem;padding:3px 10px;color:var(--prob);border-color:var(--prob);margin-top:6px;">Quitar imagen</button>
                 </div>
-                <div class="campo"><label>Enunciado</label>
-                    <div class="campo-latex"><input id="q_text_${q.id}" type="text" placeholder="Ej: Resuelve $2x+3=7$"></div>
-                </div>
-                ${type === 'desarrollo' ? `
-                    <div style="background:var(--geo-suave);padding:10px;border-radius:8px;margin:6px 0;">
-                        <p style="font-size:0.8rem;color:var(--tinta-suave);">Pregunta de desarrollo: el estudiante escribirá su procedimiento paso a paso.</p>
-                    </div>
-                    <div class="campo"><label>Respuesta correcta (paso a paso esperado)</label>
-                        <div class="campo-latex"><textarea id="q_answer_${q.id}" rows="3" placeholder="Escribe la solución esperada paso a paso..."></textarea></div>
-                    </div>
-                ` : type === 'sa' ? `
-                    <div class="campo"><label>Respuesta correcta</label><div class="campo-latex"><input id="q_answer_${q.id}" type="text" placeholder="Ej: 2"></div></div>
-                    <div class="campo"><label>Palabras clave (separadas por coma)</label><input id="q_keywords_${q.id}" type="text" placeholder="Ej: función, lineal" style="font-size:0.9rem;"></div>
-                ` : type === 'tf' ? `
-                    <div style="display:flex;gap:12px;margin:6px 0;">
-                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><input type="radio" name="correct_${q.id}" value="0" checked> Verdadero</label>
-                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><input type="radio" name="correct_${q.id}" value="1"> Falso</label>
-                    </div>
-                ` : `
-                    ${[0,1,2,3].map(o => `
-                        <div class="option-row" style="display:flex;align-items:center;gap:8px;padding:3px 0;">
-                            <input type="radio" name="correct_${q.id}" value="${o}" ${o===0?'checked':''} style="width:16px;height:16px;accent-color:var(--amarillo);">
-                            <input id="q_opt_${q.id}_${o}" type="text" placeholder="Opción ${o+1}" style="flex:1;padding:4px 8px;border:none;border-bottom:1px solid var(--papel-linea);outline:none;font-size:0.9rem;background:transparent;">
-                        </div>
-                    `).join('')}
-                `}
-                <button class="btn-primario" onclick="guardarPreguntaTemp('${q.id}')" style="margin-top:8px;padding:6px 16px;font-size:0.8rem;">Guardar pregunta</button>
+            ` : `
+                <label class="btn-fantasma" style="font-size:0.75rem;padding:4px 12px;cursor:pointer;display:inline-block;margin-top:6px;">
+                    Agregar imagen (opcional)
+                    <input type="file" accept="image/*" style="display:none;" onchange="subirImagenPregunta('${q.id}', this.files[0])">
+                </label>
             `;
-            container.prepend(div);
-            configurarTeclados();
+
+            const camposComunes = `
+                <div class="campo"><label>Enunciado</label>
+                    <div class="campo-latex"><input id="q_text_${q.id}" type="text" placeholder="Ej: Resuelve $2x+3=7$" value="${(q.text || '').replace(/"/g, '&quot;')}"></div>
+                    ${imagenHtml}
+                </div>
+                <div class="campo" style="max-width:140px;"><label>Puntos</label><input id="q_puntos_${q.id}" type="number" min="1" max="100" value="${q.puntos || 1}"></div>
+            `;
+
+            let camposTipo = '';
+            if (q.type === 'desarrollo') {
+                camposTipo = `
+                    <div style="background:var(--geo-suave);padding:10px;border-radius:8px;margin:6px 0;">
+                        <p style="font-size:0.8rem;color:var(--tinta-suave);">Pregunta de desarrollo: el estudiante escribe su procedimiento y tú calificas al final. Aquí pones solo la RESPUESTA FINAL esperada (no el paso a paso). Si el estudiante llega a ese resultado, se le asignan los puntos de forma provisional, pero tú decides si dárselos o no cuando revises el examen.</p>
+                    </div>
+                    <div class="campo"><label>Respuesta final esperada</label>
+                        <div class="campo-latex"><input id="q_answer_${q.id}" type="text" placeholder="Ej: x=2" value="${(q.correctAnswer || '').replace(/"/g, '&quot;')}"></div>
+                    </div>
+                `;
+            } else if (q.type === 'sa') {
+                camposTipo = `
+                    <div class="campo"><label>Respuesta correcta</label><div class="campo-latex"><input id="q_answer_${q.id}" type="text" placeholder="Ej: 2" value="${(q.correctAnswer || '').replace(/"/g, '&quot;')}"></div></div>
+                    <div class="campo"><label>Palabras clave (separadas por coma)</label><input id="q_keywords_${q.id}" type="text" value="${(q.keywords || '').replace(/"/g, '&quot;')}" placeholder="Ej: función, lineal" style="font-size:0.9rem;"></div>
+                `;
+            } else if (q.type === 'tf') {
+                camposTipo = `
+                    <div style="display:flex;gap:12px;margin:6px 0;">
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><input type="radio" name="correct_${q.id}" value="0" ${q.correctIndex === 0 ? 'checked' : ''}> Verdadero</label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><input type="radio" name="correct_${q.id}" value="1" ${q.correctIndex === 1 ? 'checked' : ''}> Falso</label>
+                    </div>
+                `;
+            } else if (q.type === 'mc') {
+                camposTipo = `
+                    <div id="opcionesMcContainer_${q.id}">
+                        ${(q.options || []).map((op, o) => `
+                            <div class="option-row" style="display:flex;align-items:center;gap:8px;padding:3px 0;">
+                                <input type="radio" name="correct_${q.id}" value="${o}" ${o === q.correctIndex ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--amarillo);">
+                                <input id="q_opt_${q.id}_${o}" type="text" placeholder="Opción ${o + 1}" value="${(op || '').replace(/"/g, '&quot;')}" style="flex:1;padding:4px 8px;border:none;border-bottom:1px solid var(--papel-linea);outline:none;font-size:0.9rem;background:transparent;">
+                                ${q.options.length > 2 ? `<button type="button" class="btn-fantasma" onclick="eliminarOpcionMC('${q.id}', ${o})" style="font-size:0.68rem;padding:2px 8px;color:var(--prob);border-color:var(--prob);">Quitar</button>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${q.options.length < 4 ? `<button type="button" class="btn-fantasma" onclick="agregarOpcionMC('${q.id}')" style="font-size:0.75rem;margin-top:6px;">+ Agregar opción</button>` : ''}
+                    <p style="color:var(--tinta-suave);font-size:0.75rem;margin-top:4px;">Mínimo 2 opciones, máximo 4.</p>
+                `;
+            } else if (q.type === 'grafica') {
+                camposTipo = `
+                    <div style="background:var(--geo-suave);padding:10px;border-radius:8px;margin:6px 0;">
+                        <p style="font-size:0.8rem;color:var(--tinta-suave);">El estudiante solo verá un plano cartesiano vacío y dibujará la función haciendo clic para marcar puntos. Aquí defines la función real, en términos de "x", para comparar su dibujo automáticamente.</p>
+                    </div>
+                    <div class="campo"><label>Criterio de la función (ej: x^2 - 4, sin(x), 2*x+1)</label>
+                        <input id="q_criterio_${q.id}" type="text" placeholder="Ej: x^2 - 4" value="${(q.criterio || '').replace(/"/g, '&quot;')}" oninput="actualizarPreviewGrafica('${q.id}')">
+                    </div>
+                    <div id="previewGrafica_${q.id}" class="preview-grafica-mini"></div>
+                `;
+            }
+
+            return camposComunes + camposTipo;
+        }
+
+        // Solo se puede tener UNA pregunta abierta para agregar/editar a la vez
+        // (preguntaTempEnEdicionId). Si había un borrador de pregunta NUEVA sin
+        // guardar y el profesor abre otra (u otra "Nueva pregunta"), ese borrador
+        // se descarta (nunca llegó a existir de verdad); si en cambio estaba
+        // editando una pregunta YA guardada, esa simplemente se cierra tal cual
+        // estaba (no se pierde nada).
+        function descartarBorradorPreguntaSiExiste() {
+            if (!preguntaTempEnEdicionId) return;
+            const actual = preguntasTemp.find(p => p.id === preguntaTempEnEdicionId);
+            if (actual && actual._nuevoSinGuardar) {
+                preguntasTemp = preguntasTemp.filter(p => p.id !== preguntaTempEnEdicionId);
+            }
+            preguntaTempEnEdicionId = null;
+        }
+
+        // Vuelve a dibujar todo el formulario del examen (título, lista de
+        // preguntas y la tarjeta de la que esté en edición, si hay alguna).
+        function rerenderFormExamenCompleto() {
+            const curso = CURSOS.find(c => c.id === obtenerCursoActual());
+            document.getElementById('contenidoCurso').innerHTML = renderizarFormExamen(curso);
+            setTimeout(() => {
+                configurarTeclados();
+                const qEdit = preguntasTemp.find(p => p.id === preguntaTempEnEdicionId);
+                if (qEdit && qEdit.type === 'grafica') actualizarPreviewGrafica(qEdit.id);
+            }, 200);
+        }
+
+        function agregarPreguntaTemp(type) {
+            descartarBorradorPreguntaSiExiste();
+            const q = { id: Date.now().toString(), type, text: '', puntos: 1, imagenUrl: '', _nuevoSinGuardar: true };
+            if (type === 'tf') { q.options = ['Verdadero', 'Falso']; q.correctIndex = 0; }
+            else if (type === 'sa') { q.correctAnswer = ''; q.keywords = ''; }
+            else if (type === 'desarrollo') { q.correctAnswer = ''; }
+            else if (type === 'grafica') { q.criterio = ''; q.rango = { xMin: -10, xMax: 10, yMin: -10, yMax: 10 }; }
+            else { q.options = ['', '', '', '']; q.correctIndex = 0; }
+            preguntasTemp.push(q);
+            preguntaTempEnEdicionId = q.id;
+            rerenderFormExamenCompleto();
+        }
+
+        // Reabre una pregunta YA guardada (de este examen, sea nuevo o ya
+        // existente en Firestore) para poder editarla. Antes esto no existía:
+        // una vez guardada una pregunta solo se podía "Eliminar", no editar.
+        function editarPreguntaTemp(id) {
+            descartarBorradorPreguntaSiExiste();
+            preguntaTempEnEdicionId = id;
+            rerenderFormExamenCompleto();
         }
 
         function cancelarPreguntaTemp(id) {
-            const div = document.querySelector(`#preguntasContainer .tarjeta-plana:first-child`);
-            if (div) div.remove();
-            preguntasTemp = preguntasTemp.filter(p => p.id !== id);
+            const q = preguntasTemp.find(p => p.id === id);
+            if (q && q._nuevoSinGuardar) {
+                preguntasTemp = preguntasTemp.filter(p => p.id !== id);
+            }
+            preguntaTempEnEdicionId = null;
+            rerenderFormExamenCompleto();
         }
 
-        function guardarPreguntaTemp(id) {
-            const text = document.getElementById(`q_text_${id}`)?.value.trim() || 'Sin enunciado';
+        // Antes de re-dibujar la tarjeta (al agregar/quitar una opción o una imagen,
+        // o al guardar) guardamos lo que el profesor ya había escrito en los campos.
+        function sincronizarPreguntaTempDesdeDOM(id) {
             const q = preguntasTemp.find(p => p.id === id);
-            if (!q) return;
-
-            q.text = text;
-
+            if (!q) return null;
+            q.text = document.getElementById(`q_text_${id}`)?.value ?? q.text;
+            const puntosEl = document.getElementById(`q_puntos_${id}`);
+            if (puntosEl) q.puntos = Math.max(1, parseInt(puntosEl.value) || 1);
             if (q.type === 'tf') {
                 const radios = document.querySelectorAll(`input[name="correct_${id}"]`);
                 radios.forEach(r => { if (r.checked) q.correctIndex = parseInt(r.value); });
             } else if (q.type === 'sa') {
-                q.correctAnswer = document.getElementById(`q_answer_${id}`)?.value.trim() || '';
-                q.keywords = document.getElementById(`q_keywords_${id}`)?.value.trim() || '';
+                q.correctAnswer = document.getElementById(`q_answer_${id}`)?.value ?? q.correctAnswer;
+                q.keywords = document.getElementById(`q_keywords_${id}`)?.value ?? q.keywords;
             } else if (q.type === 'desarrollo') {
-                q.correctAnswer = document.getElementById(`q_answer_${id}`)?.value.trim() || '';
-            } else {
-                q.options = [0, 1, 2, 3].map(o => document.getElementById(`q_opt_${id}_${o}`)?.value.trim() || '');
+                q.correctAnswer = document.getElementById(`q_answer_${id}`)?.value ?? q.correctAnswer;
+            } else if (q.type === 'grafica') {
+                q.criterio = document.getElementById(`q_criterio_${id}`)?.value ?? q.criterio;
+            } else if (q.type === 'mc') {
+                q.options = q.options.map((op, o) => document.getElementById(`q_opt_${id}_${o}`)?.value ?? op);
                 const radios = document.querySelectorAll(`input[name="correct_${id}"]`);
                 radios.forEach(r => { if (r.checked) q.correctIndex = parseInt(r.value); });
             }
+            return q;
+        }
 
-            // Eliminar el formulario temporal y recargar la lista
-            const div = document.querySelector(`#preguntasContainer .tarjeta-plana:first-child`);
-            if (div) div.remove();
-            const curso = CURSOS.find(c => c.id === obtenerCursoActual());
-            document.getElementById('contenidoCurso').innerHTML = renderizarFormExamen(curso);
-            setTimeout(() => configurarTeclados(), 200);
+        function agregarOpcionMC(id) {
+            const q = sincronizarPreguntaTempDesdeDOM(id);
+            if (!q || q.options.length >= 4) return;
+            q.options.push('');
+            rerenderFormExamenCompleto();
+        }
+
+        function eliminarOpcionMC(id, idx) {
+            const q = sincronizarPreguntaTempDesdeDOM(id);
+            if (!q || q.options.length <= 2) return;
+            q.options.splice(idx, 1);
+            if (q.correctIndex === undefined || q.correctIndex >= q.options.length) q.correctIndex = 0;
+            rerenderFormExamenCompleto();
+        }
+
+        async function subirImagenPregunta(id, file) {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { mostrarAdvertencia('Ese archivo no es una imagen. Elige un JPG, PNG o similar.'); return; }
+            if (file.size > 8 * 1024 * 1024) { mostrarAdvertencia('La imagen pesa demasiado (máximo 8MB antes de comprimir). Prueba con una más liviana.'); return; }
+            const q = sincronizarPreguntaTempDesdeDOM(id);
+            if (!q) return;
+            try {
+                mostrarToast('Subiendo imagen...', 'info');
+                // Todo el examen (preguntas, opciones, imágenes) vive en UN solo documento
+                // de Firestore con límite de 1MB, así que cada imagen se comprime bastante
+                // para poder tener varias preguntas con imagen en el mismo examen.
+                const dataUrl = await comprimirImagenGenerica(file, { maxLado: 500, maxChars: 280000 });
+                q.imagenUrl = dataUrl;
+                rerenderFormExamenCompleto();
+                mostrarToast('Imagen agregada.', 'success');
+            } catch (error) {
+                mostrarAdvertencia(error);
+            }
+        }
+
+        function eliminarImagenPregunta(id) {
+            const q = sincronizarPreguntaTempDesdeDOM(id);
+            if (!q) return;
+            q.imagenUrl = '';
+            rerenderFormExamenCompleto();
+        }
+
+        function guardarPreguntaTemp(id) {
+            const q = sincronizarPreguntaTempDesdeDOM(id);
+            if (!q) return;
+            q.text = (q.text || '').trim() || 'Sin enunciado';
+            delete q._nuevoSinGuardar;
+            preguntaTempEnEdicionId = null;
+            rerenderFormExamenCompleto();
         }
 
         function eliminarPreguntaTemp(index) {
+            const q = preguntasTemp[index];
+            if (q && q.id === preguntaTempEnEdicionId) preguntaTempEnEdicionId = null;
             preguntasTemp.splice(index, 1);
-            const curso = CURSOS.find(c => c.id === obtenerCursoActual());
-            document.getElementById('contenidoCurso').innerHTML = renderizarFormExamen(curso);
-            setTimeout(() => configurarTeclados(), 200);
+            rerenderFormExamenCompleto();
         }
 
         async function guardarExamen(cursoId) {
@@ -2646,11 +3314,22 @@
             if (preguntasTemp.length === 0) return mostrarAdvertencia('Agrega al menos una pregunta antes de guardar el examen.');
             for (const q of preguntasTemp) {
                 if (!q.text.trim()) return mostrarAdvertencia('Hay una pregunta sin enunciado. Complétala o elimínala antes de guardar.');
-                if (q.type !== 'sa' && q.type !== 'desarrollo' && q.options?.some(o => !o.trim())) {
-                    return mostrarAdvertencia('Una de las preguntas de opción múltiple tiene una opción vacía. Completa las 4 opciones o elimina la pregunta.');
+                if (q.type === 'mc' && (q.options.length < 2 || q.options.length > 4 || q.options.some(o => !o.trim()))) {
+                    return mostrarAdvertencia('Una pregunta de opción múltiple necesita entre 2 y 4 opciones, todas completas.');
                 }
                 if ((q.type === 'sa' || q.type === 'desarrollo') && !q.correctAnswer?.trim()) {
-                    return mostrarAdvertencia('Las preguntas de desarrollo o respuesta corta necesitan una respuesta correcta. Complétala antes de guardar.');
+                    return mostrarAdvertencia('Las preguntas de desarrollo o respuesta corta necesitan una respuesta esperada. Complétala antes de guardar.');
+                }
+                if (q.type === 'grafica') {
+                    if (!q.criterio?.trim()) return mostrarAdvertencia('Falta escribir el criterio (la fórmula) de la función en la pregunta de gráfica.');
+                    try {
+                        if (typeof math === 'undefined') throw new Error('math.js no cargó');
+                        const f = math.compile(q.criterio);
+                        const prueba = f.evaluate({ x: 1 });
+                        if (typeof prueba !== 'number' || !isFinite(prueba)) throw new Error('no numerico');
+                    } catch (e) {
+                        return mostrarAdvertencia('El criterio de la función de la pregunta de gráfica no se pudo entender. Revisa que esté bien escrito (ej: x^2 - 4, sin(x), 2*x+1).');
+                    }
                 }
             }
             try {
@@ -2678,10 +3357,199 @@
                 examEnEdicionId = null;
                 examDatosEnEdicion = null;
                 preguntasTemp = [];
+                preguntaTempEnEdicionId = null;
                 cambiarTabCurso('examenes');
             } catch (error) {
                 mostrarAdvertencia(error);
             }
+        }
+
+        // ============================================================
+        // PLANO CARTESIANO (pregunta tipo "gráfica")
+        // ============================================================
+        function planoXaPixel(x, tamano, rango) {
+            return (x - rango.xMin) / (rango.xMax - rango.xMin) * tamano;
+        }
+        function planoYaPixel(y, tamano, rango) {
+            return tamano - (y - rango.yMin) / (rango.yMax - rango.yMin) * tamano;
+        }
+        function planoPixelAX(px, tamano, rango) {
+            return rango.xMin + (px / tamano) * (rango.xMax - rango.xMin);
+        }
+        function planoPixelAY(py, tamano, rango) {
+            return rango.yMin + ((tamano - py) / tamano) * (rango.yMax - rango.yMin);
+        }
+
+        // Dibuja los ejes y la cuadrícula de un plano cartesiano vacío (sin la función).
+        function construirSVGPlano(svgId, tamano, rango) {
+            let interior = '';
+            for (let x = Math.ceil(rango.xMin); x <= Math.floor(rango.xMax); x++) {
+                const px = planoXaPixel(x, tamano, rango);
+                const esEje = x === 0;
+                interior += `<line x1="${px}" y1="0" x2="${px}" y2="${tamano}" stroke="${esEje ? '#8a8a8a' : '#e6e2d8'}" stroke-width="${esEje ? 1.5 : 1}" />`;
+            }
+            for (let y = Math.ceil(rango.yMin); y <= Math.floor(rango.yMax); y++) {
+                const py = planoYaPixel(y, tamano, rango);
+                const esEje = y === 0;
+                interior += `<line x1="0" y1="${py}" x2="${tamano}" y2="${py}" stroke="${esEje ? '#8a8a8a' : '#e6e2d8'}" stroke-width="${esEje ? 1.5 : 1}" />`;
+            }
+            return `<svg id="${svgId}" viewBox="0 0 ${tamano} ${tamano}" class="svg-plano-cartesiano">${interior}</svg>`;
+        }
+
+        // Evalúa el criterio del profesor con math.js y devuelve el SVG de la curva
+        // (puede ser más de un trazo, para no unir puntos a los lados de una asíntota).
+        function trazarFuncionSVG(criterio, tamano, rango) {
+            if (typeof math === 'undefined') return '';
+            try {
+                const f = math.compile(criterio);
+                const N = 240;
+                const trazos = [];
+                let actual = [];
+                for (let i = 0; i <= N; i++) {
+                    const x = rango.xMin + (i / N) * (rango.xMax - rango.xMin);
+                    let y;
+                    try { y = f.evaluate({ x }); } catch (e) { y = NaN; }
+                    const margen = (rango.yMax - rango.yMin);
+                    if (typeof y !== 'number' || !isFinite(y) || y < rango.yMin - margen || y > rango.yMax + margen) {
+                        if (actual.length > 1) trazos.push(actual);
+                        actual = [];
+                        continue;
+                    }
+                    actual.push(`${planoXaPixel(x, tamano, rango).toFixed(1)},${planoYaPixel(y, tamano, rango).toFixed(1)}`);
+                }
+                if (actual.length > 1) trazos.push(actual);
+                return trazos.map(t => `<polyline points="${t.join(' ')}" fill="none" stroke="var(--geo)" stroke-width="2.5" />`).join('');
+            } catch (e) {
+                return '';
+            }
+        }
+
+        // Vista previa que ve el PROFESOR mientras escribe el criterio de la función.
+        function actualizarPreviewGrafica(id) {
+            const q = preguntasTemp.find(p => p.id === id);
+            if (!q) return;
+            q.criterio = document.getElementById(`q_criterio_${id}`)?.value ?? q.criterio;
+            const cont = document.getElementById(`previewGrafica_${id}`);
+            if (!cont) return;
+            if (!q.criterio?.trim()) {
+                cont.innerHTML = '<p style="color:var(--tinta-suave);font-size:0.8rem;">Escribe una función para ver la vista previa.</p>';
+                return;
+            }
+            const rango = q.rango || { xMin: -10, xMax: 10, yMin: -10, yMax: 10 };
+            const base = construirSVGPlano(`svgPreviewGrafica_${id}`, PLANO_TAMANO, rango);
+            const curva = trazarFuncionSVG(q.criterio, PLANO_TAMANO, rango);
+            cont.innerHTML = base.replace('</svg>', curva + '</svg>');
+            if (!curva) {
+                cont.innerHTML += '<p style="color:var(--prob);font-size:0.78rem;margin-top:4px;">No se pudo dibujar esa función; revisa que esté bien escrita (ej: x^2 - 4, sin(x), 2*x+1).</p>';
+            }
+        }
+
+        // El ESTUDIANTE puede: (1) hacer TOQUES/clics sueltos para ir marcando
+        // puntos uno por uno (como antes), o (2) ARRASTRAR el dedo/mouse para
+        // "dibujar" la función a mano alzada, en cuyo caso se van agregando
+        // puntos automáticamente a lo largo del trazo. Ambos casos alimentan el
+        // mismo arreglo respuestasTomaTemp[q.id] de puntos {x,y}, así que la
+        // calificación (que compara cada punto contra la función real con
+        // math.js) funciona igual sin importar cómo se agregaron los puntos.
+        function inicializarPlanosDibujo() {
+            if (!examTomaDatos) return;
+            examTomaDatos.questions.filter(q => q.type === 'grafica').forEach(q => {
+                if (!Array.isArray(respuestasTomaTemp[q.id])) respuestasTomaTemp[q.id] = [];
+                const rango = q.rango || { xMin: -10, xMax: 10, yMin: -10, yMax: 10 };
+                const svg = document.getElementById(`planoEstudiante_${q.id}`);
+                if (!svg || svg.dataset.listo) return;
+                svg.dataset.listo = '1';
+
+                const obtenerPuntoPlano = (e) => {
+                    const rect = svg.getBoundingClientRect();
+                    const px = (e.clientX - rect.left) * (PLANO_TAMANO_ESTUDIANTE / rect.width);
+                    const py = (e.clientY - rect.top) * (PLANO_TAMANO_ESTUDIANTE / rect.height);
+                    const x = Math.round(planoPixelAX(px, PLANO_TAMANO_ESTUDIANTE, rango) * 100) / 100;
+                    const y = Math.round(planoPixelAY(py, PLANO_TAMANO_ESTUDIANTE, rango) * 100) / 100;
+                    return { x, y, px, py };
+                };
+
+                let arrastrando = false;
+                let ultimoPuntoAgregado = null; // último punto (en píxeles) agregado durante el arrastre actual
+
+                svg.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    try { svg.setPointerCapture(e.pointerId); } catch (err) { /* algunos navegadores no lo soportan; no es crítico */ }
+                    arrastrando = true;
+                    ultimoPuntoAgregado = null;
+                });
+                svg.addEventListener('pointermove', (e) => {
+                    if (!arrastrando) return;
+                    const p = obtenerPuntoPlano(e);
+                    // Solo agrega un punto nuevo si el dedo/mouse se movió lo suficiente
+                    // desde el último punto agregado; si no, un trazo casi quieto
+                    // llenaría el arreglo de puntos casi idénticos.
+                    if (ultimoPuntoAgregado) {
+                        const dx = p.px - ultimoPuntoAgregado.px, dy = p.py - ultimoPuntoAgregado.py;
+                        if (Math.sqrt(dx * dx + dy * dy) < 5) return;
+                    }
+                    respuestasTomaTemp[q.id].push({ x: p.x, y: p.y });
+                    ultimoPuntoAgregado = p;
+                    redibujarPuntosGrafica(q.id);
+                });
+                svg.addEventListener('pointerup', (e) => {
+                    if (!arrastrando) return;
+                    arrastrando = false;
+                    // Si nunca se movió lo suficiente como para contar como "arrastre",
+                    // fue un toque/clic simple: se agrega igual un solo punto, para
+                    // mantener el modo original de "clic para ir agregando puntos".
+                    if (!ultimoPuntoAgregado) {
+                        const p = obtenerPuntoPlano(e);
+                        respuestasTomaTemp[q.id].push({ x: p.x, y: p.y });
+                        redibujarPuntosGrafica(q.id);
+                    }
+                    ultimoPuntoAgregado = null;
+                });
+                svg.addEventListener('pointercancel', () => { arrastrando = false; ultimoPuntoAgregado = null; });
+
+                redibujarPuntosGrafica(q.id);
+            });
+        }
+
+        function redibujarPuntosGrafica(qid) {
+            const q = examTomaDatos?.questions.find(p => p.id === qid);
+            const svg = document.getElementById(`planoEstudiante_${qid}`);
+            if (!q || !svg) return;
+            const rango = q.rango || { xMin: -10, xMax: 10, yMin: -10, yMax: 10 };
+            svg.querySelectorAll('.punto-dibujo, .linea-dibujo').forEach(el => el.remove());
+            // Se dibuja en el ORDEN en que se agregaron los puntos (no ordenados por
+            // x): así un trazo hecho a mano se ve como se dibujó de verdad, en vez de
+            // reordenarse y deformar la forma dibujada.
+            const puntos = respuestasTomaTemp[qid] || [];
+            if (puntos.length > 1) {
+                const linea = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+                linea.setAttribute('class', 'linea-dibujo');
+                linea.setAttribute('points', puntos.map(p => `${planoXaPixel(p.x, PLANO_TAMANO_ESTUDIANTE, rango)},${planoYaPixel(p.y, PLANO_TAMANO_ESTUDIANTE, rango)}`).join(' '));
+                linea.setAttribute('fill', 'none');
+                linea.setAttribute('stroke', 'var(--medidas)');
+                linea.setAttribute('stroke-width', '2.5');
+                svg.appendChild(linea);
+            }
+            (respuestasTomaTemp[qid] || []).forEach(p => {
+                const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                c.setAttribute('class', 'punto-dibujo');
+                c.setAttribute('cx', planoXaPixel(p.x, PLANO_TAMANO_ESTUDIANTE, rango));
+                c.setAttribute('cy', planoYaPixel(p.y, PLANO_TAMANO_ESTUDIANTE, rango));
+                c.setAttribute('r', '4');
+                c.setAttribute('fill', 'var(--medidas)');
+                svg.appendChild(c);
+            });
+        }
+
+        function deshacerPuntoGrafica(qid) {
+            if (!respuestasTomaTemp[qid] || respuestasTomaTemp[qid].length === 0) return;
+            respuestasTomaTemp[qid].pop();
+            redibujarPuntosGrafica(qid);
+        }
+
+        function reiniciarGrafica(qid) {
+            respuestasTomaTemp[qid] = [];
+            redibujarPuntosGrafica(qid);
         }
 
         async function iniciarExamen(examId, tipo) {
@@ -2699,6 +3567,7 @@
                 document.getElementById('contenidoCurso').innerHTML = renderizarTomaExamen();
                 setTimeout(() => {
                     configurarTeclados();
+                    inicializarPlanosDibujo();
                     if (window.MathJax && MathJax.typesetPromise) {
                         MathJax.typesetPromise([document.getElementById('contenidoCurso')]).catch(() => {});
                     }
@@ -2765,10 +3634,13 @@
         }
 
         function renderizarPreguntaToma(q, i) {
-            const numero = `<p style="font-weight:600;margin-bottom:8px;">${i + 1}. <span class="enunciado-pregunta">${q.text}</span></p>`;
+            const puntos = q.puntos || 1;
+            const numero = `<p style="font-weight:600;margin-bottom:8px;">${i + 1}. <span class="enunciado-pregunta">${q.text}</span> <span style="font-weight:400;color:var(--tinta-suave);font-size:0.78rem;">(${puntos} pto${puntos === 1 ? '' : 's'})</span></p>`;
+            const imagen = q.imagenUrl ? `<img src="${q.imagenUrl}" alt="Imagen de la pregunta" class="pregunta-imagen-examen">` : '';
+
             if (q.type === 'mc') {
                 return `<div class="tarjeta-plana" style="margin-bottom:10px;">
-                    ${numero}
+                    ${numero}${imagen}
                     ${(q.options || []).map((op, oi) => `
                         <label style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.9rem;">
                             <input type="radio" name="resp_${q.id}" value="${oi}" onchange="guardarRespuestaToma('${q.id}', ${oi})" style="accent-color:var(--amarillo);width:16px;height:16px;">
@@ -2779,7 +3651,7 @@
             }
             if (q.type === 'tf') {
                 return `<div class="tarjeta-plana" style="margin-bottom:10px;">
-                    ${numero}
+                    ${numero}${imagen}
                     <div style="display:flex;gap:18px;">
                         <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;"><input type="radio" name="resp_${q.id}" value="0" onchange="guardarRespuestaToma('${q.id}', 0)" style="accent-color:var(--amarillo);width:16px;height:16px;"> Verdadero</label>
                         <label style="display:flex;align-items:center;gap:8px;font-size:0.9rem;"><input type="radio" name="resp_${q.id}" value="1" onchange="guardarRespuestaToma('${q.id}', 1)" style="accent-color:var(--amarillo);width:16px;height:16px;"> Falso</label>
@@ -2788,14 +3660,33 @@
             }
             if (q.type === 'sa') {
                 return `<div class="tarjeta-plana" style="margin-bottom:10px;">
-                    ${numero}
+                    ${numero}${imagen}
                     <div class="campo-latex modo-estudiante"><input id="resp_${q.id}" type="text" placeholder="Escribe tu respuesta" oninput="guardarRespuestaToma('${q.id}', this.value)"></div>
                 </div>`;
             }
-            // desarrollo: el estudiante escribe su procedimiento paso a paso
+            if (q.type === 'grafica') {
+                const rango = q.rango || { xMin: -10, xMax: 10, yMin: -10, yMax: 10 };
+                return `<div class="tarjeta-plana" style="margin-bottom:10px;">
+                    ${numero}${imagen}
+                    <p style="color:var(--tinta-suave);font-size:0.8rem;margin-bottom:8px;">Toca/haz clic sobre el plano para ir marcando puntos uno por uno, o mantén presionado y arrastra el dedo/mouse para dibujar la función a mano alzada; se conectan solos. Puedes deshacer el último punto o reiniciar todo el dibujo si te equivocas.</p>
+                    <div class="contenedor-plano-dibujo">${construirSVGPlano(`planoEstudiante_${q.id}`, PLANO_TAMANO_ESTUDIANTE, rango)}</div>
+                    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+                        <button type="button" class="btn-fantasma" onclick="deshacerPuntoGrafica('${q.id}')" style="font-size:0.75rem;">Deshacer último punto</button>
+                        <button type="button" class="btn-fantasma" onclick="reiniciarGrafica('${q.id}')" style="font-size:0.75rem;">Reiniciar dibujo</button>
+                    </div>
+                </div>`;
+            }
+            // desarrollo: la respuesta final se compara automáticamente, pero el
+            // procedimiento queda guardado para que el profesor lo revise antes de
+            // confirmar los puntos.
             return `<div class="tarjeta-plana" style="margin-bottom:10px;">
-                ${numero}
-                <div class="campo-latex modo-estudiante"><textarea id="resp_${q.id}" rows="4" placeholder="Escribe aquí tu procedimiento paso a paso" oninput="guardarRespuestaToma('${q.id}', this.value)"></textarea></div>
+                ${numero}${imagen}
+                <div class="campo"><label style="font-size:0.8rem;">Procedimiento (muestra cómo llegaste al resultado)</label>
+                    <div class="campo-latex modo-estudiante"><textarea id="resp_proc_${q.id}" rows="4" placeholder="Escribe aquí tu procedimiento paso a paso" oninput="guardarRespuestaDesarrollo('${q.id}')"></textarea></div>
+                </div>
+                <div class="campo"><label style="font-size:0.8rem;">Tu respuesta final</label>
+                    <div class="campo-latex modo-estudiante"><input id="resp_final_${q.id}" type="text" placeholder="Ej: x=2" oninput="guardarRespuestaDesarrollo('${q.id}')"></div>
+                </div>
             </div>`;
         }
 
@@ -2803,10 +3694,19 @@
             respuestasTomaTemp[preguntaId] = valor;
         }
 
+        function guardarRespuestaDesarrollo(preguntaId) {
+            respuestasTomaTemp[preguntaId] = {
+                procedimiento: document.getElementById(`resp_proc_${preguntaId}`)?.value || '',
+                respuestaFinal: document.getElementById(`resp_final_${preguntaId}`)?.value || ''
+            };
+        }
+
         async function enviarExamenEstudiante(automatico) {
             if (!automatico) {
                 const sinContestar = examTomaDatos.questions.filter(q => {
                     const r = respuestasTomaTemp[q.id];
+                    if (q.type === 'desarrollo') return !r || (!r.respuestaFinal?.trim() && !r.procedimiento?.trim());
+                    if (q.type === 'grafica') return !Array.isArray(r) || r.length < 2;
                     return r === undefined || r === null || r === '';
                 });
                 if (sinContestar.length > 0 && !confirm(`Tienes ${sinContestar.length} pregunta(s) sin contestar. ¿Entregar de todas formas?`)) return;
@@ -2816,22 +3716,60 @@
             try {
                 const exam = examTomaDatos;
                 const tipo = examTomaTipo || 'practica';
-                let score = 0, total = 0, pendiente = false;
+                let scoreBase = 0, total = 0, pendiente = false;
+                const revisionDesarrollo = [];
                 const normalizar = (s) => (s ?? '').toString().trim().toLowerCase();
                 exam.questions.forEach(q => {
-                    total += 1;
+                    const puntos = q.puntos || 1;
+                    total += puntos;
                     const resp = respuestasTomaTemp[q.id];
                     if (q.type === 'mc' || q.type === 'tf') {
-                        if (resp !== undefined && parseInt(resp) === q.correctIndex) score += 1;
+                        if (resp !== undefined && parseInt(resp) === q.correctIndex) scoreBase += puntos;
                     } else if (q.type === 'sa') {
                         const posibles = [q.correctAnswer, ...((q.keywords || '').split(','))].map(normalizar).filter(Boolean);
-                        if (posibles.includes(normalizar(resp))) score += 1;
+                        if (posibles.includes(normalizar(resp))) scoreBase += puntos;
+                    } else if (q.type === 'grafica') {
+                        const puntosEstudiante = Array.isArray(resp) ? resp : [];
+                        if (puntosEstudiante.length >= 2 && typeof math !== 'undefined' && q.criterio) {
+                            try {
+                                const f = math.compile(q.criterio);
+                                const rango = q.rango || { xMin: -10, xMax: 10, yMin: -10, yMax: 10 };
+                                const escalaY = (rango.yMax - rango.yMin) || 20;
+                                let sumaError = 0, comparables = 0;
+                                puntosEstudiante.forEach(p => {
+                                    let yReal;
+                                    try { yReal = f.evaluate({ x: p.x }); } catch (e) { yReal = NaN; }
+                                    if (typeof yReal === 'number' && isFinite(yReal)) {
+                                        sumaError += Math.min(1, Math.abs(yReal - p.y) / escalaY);
+                                        comparables++;
+                                    }
+                                });
+                                if (comparables > 0) {
+                                    const precision = Math.max(0, 1 - (sumaError / comparables) * 3);
+                                    scoreBase += precision * puntos;
+                                }
+                            } catch (e) { /* criterio invalido: no se pudo calificar esta pregunta */ }
+                        }
                     } else {
-                        // "desarrollo": es un procedimiento, no se puede calificar con una
-                        // comparación de texto exacta. Queda pendiente de revisión manual.
+                        // "desarrollo": comparamos la respuesta final contra la esperada para
+                        // dar un puntaje PROVISIONAL, pero siempre queda pendiente de que el
+                        // profesor confirme (o no) esos puntos al revisar el examen.
+                        const respuestaFinal = resp?.respuestaFinal || '';
+                        const coincide = normalizar(respuestaFinal) === normalizar(q.correctAnswer) && normalizar(respuestaFinal) !== '';
                         pendiente = true;
+                        revisionDesarrollo.push({
+                            preguntaId: q.id,
+                            enunciado: q.text,
+                            procedimiento: resp?.procedimiento || '',
+                            respuestaEstudiante: respuestaFinal,
+                            respuestaEsperada: q.correctAnswer || '',
+                            puntosPosibles: puntos,
+                            otorgado: coincide
+                        });
                     }
                 });
+                const scoreDesarrollo = revisionDesarrollo.reduce((s, r) => s + (r.otorgado ? r.puntosPosibles : 0), 0);
+                const score = scoreBase + scoreDesarrollo;
                 await db.collection('attempts').add({
                     examId: examTomaId,
                     courseId: examTomaCursoId,
@@ -2839,12 +3777,15 @@
                     studentName: datosUsuario?.nombre || usuarioActual.displayName || usuarioActual.email || 'Estudiante',
                     answers: respuestasTomaTemp,
                     score,
+                    scoreBase,
                     total,
                     tipo,
+                    revisionDesarrollo,
                     gradingStatus: pendiente ? 'pending' : 'graded',
                     submittedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 const esFinal = tipo === 'final';
+                const scoreMostrado = Math.round(score * 10) / 10;
                 examTomaId = null;
                 examTomaDatos = null;
                 examTomaCursoId = null;
@@ -2853,10 +3794,10 @@
                 respuestasTomaTemp = {};
                 if (esFinal) {
                     mostrarToast(pendiente
-                        ? `Examen definitivo entregado: ${score}/${total} en las preguntas calificables. Tu profesor revisará las de desarrollo.`
-                        : `¡Examen definitivo entregado! Obtuviste ${score}/${total}.`, 'success');
+                        ? `Examen definitivo entregado: ${scoreMostrado}/${total} en las preguntas ya calificables. Tu profesor revisará las de desarrollo.`
+                        : `¡Examen definitivo entregado! Obtuviste ${scoreMostrado}/${total}.`, 'success');
                 } else {
-                    mostrarToast(`Práctica entregada: ${score}/${total}. Este intento no cuenta para tu nota; cuando quieras, presenta el definitivo con tiempo.`, 'info');
+                    mostrarToast(`Práctica entregada: ${scoreMostrado}/${total}. Este intento no cuenta para tu nota; cuando quieras, presenta el definitivo con tiempo.`, 'info');
                 }
                 cambiarTabCurso('examenes');
             } catch (error) {
@@ -2880,11 +3821,15 @@
         //     calculadora del celular, y la vista previa se arma sola.
         // En ambos casos son los mismos botones; solo cambia el texto de ayuda
         // y si hace falta escribir el $ a mano o no.
+        // Lista del PROFESOR: inserta el código LaTeX directo (él ya sabe leerlo).
         const SIMBOLOS_LATEX = [
             { etiqueta: 'Fracción', insertar: '\\frac{}{}', cursorDesdeElFinal: 3 },
             { etiqueta: 'Raíz', insertar: '\\sqrt{}', cursorDesdeElFinal: 1 },
             { etiqueta: 'Potencia', insertar: '^{}', cursorDesdeElFinal: 1 },
             { etiqueta: 'Subíndice', insertar: '_{}', cursorDesdeElFinal: 1 },
+            { etiqueta: 'sen', insertar: '\\sin()', cursorDesdeElFinal: 1 },
+            { etiqueta: 'cos', insertar: '\\cos()', cursorDesdeElFinal: 1 },
+            { etiqueta: 'tan', insertar: '\\tan()', cursorDesdeElFinal: 1 },
             { etiqueta: 'π', insertar: '\\pi', cursorDesdeElFinal: 0 },
             { etiqueta: 'θ', insertar: '\\theta', cursorDesdeElFinal: 0 },
             { etiqueta: '×', insertar: '\\times', cursorDesdeElFinal: 0 },
@@ -2892,7 +3837,37 @@
             { etiqueta: '≤', insertar: '\\leq', cursorDesdeElFinal: 0 },
             { etiqueta: '≥', insertar: '\\geq', cursorDesdeElFinal: 0 },
             { etiqueta: '±', insertar: '\\pm', cursorDesdeElFinal: 0 },
+            { etiqueta: '≈', insertar: '\\approx', cursorDesdeElFinal: 0 },
+            { etiqueta: '≠', insertar: '\\neq', cursorDesdeElFinal: 0 },
+            { etiqueta: '°', insertar: '^{\\circ}', cursorDesdeElFinal: 0 },
             { etiqueta: '∞', insertar: '\\infty', cursorDesdeElFinal: 0 }
+        ];
+
+        // Lista del ESTUDIANTE: símbolos que se insertan directo, sin pedir nada.
+        const SIMBOLOS_DIRECTOS_ESTUDIANTE = [
+            { etiqueta: 'π', insertar: '\\pi' },
+            { etiqueta: 'θ', insertar: '\\theta' },
+            { etiqueta: '×', insertar: '\\times' },
+            { etiqueta: '÷', insertar: '\\div' },
+            { etiqueta: '≤', insertar: '\\leq' },
+            { etiqueta: '≥', insertar: '\\geq' },
+            { etiqueta: '±', insertar: '\\pm' },
+            { etiqueta: '≈', insertar: '\\approx' },
+            { etiqueta: '≠', insertar: '\\neq' },
+            { etiqueta: '°', insertar: '^{\\circ}' },
+            { etiqueta: '∞', insertar: '\\infty' }
+        ];
+
+        // Lista del ESTUDIANTE: símbolos que necesitan datos (abren un mini-formulario
+        // para que solo llene los espacios en blanco, nunca vea código).
+        const SIMBOLOS_CON_DATOS_ESTUDIANTE = [
+            { etiqueta: 'Fracción', tipo: 'fraccion' },
+            { etiqueta: 'Raíz', tipo: 'raiz' },
+            { etiqueta: 'Potencia', tipo: 'potencia' },
+            { etiqueta: 'Subíndice', tipo: 'subindice' },
+            { etiqueta: 'sen', tipo: 'trig', funcion: '\\sin' },
+            { etiqueta: 'cos', tipo: 'trig', funcion: '\\cos' },
+            { etiqueta: 'tan', tipo: 'trig', funcion: '\\tan' }
         ];
 
         function configurarTeclados() {
@@ -2908,35 +3883,78 @@
                 const etiqueta = document.createElement('div');
                 etiqueta.className = 'campo-latex-etiqueta';
                 etiqueta.textContent = esEstudiante
-                    ? 'Usa estos botones para escribir fracciones, raíces, potencias y símbolos matemáticos'
+                    ? 'Usa estos botones para escribir fracciones, raíces, potencias, trigonometría y símbolos matemáticos'
                     : 'LaTeX: escribe la fórmula entre signos de $ (ejemplo: $x^2+1$) o usa estos símbolos';
                 container.insertBefore(etiqueta, campo);
 
                 const barra = document.createElement('div');
                 barra.className = 'teclado-matematico visible';
-                barra.innerHTML = `
-                    <div class="fila-teclas">
-                        ${SIMBOLOS_LATEX.map((s, i) => `<button type="button" class="tecla" data-indice="${i}">${s.etiqueta}</button>`).join('')}
-                    </div>
-                `;
-                barra.querySelectorAll('.tecla').forEach(tecla => {
-                    tecla.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        const simbolo = SIMBOLOS_LATEX[parseInt(tecla.dataset.indice)];
-                        const cursorPos = campo.selectionStart ?? campo.value.length;
-                        const text = campo.value;
-                        const nuevoTexto = text.substring(0, cursorPos) + simbolo.insertar + text.substring(cursorPos);
-                        const nuevoCursor = cursorPos + simbolo.insertar.length - simbolo.cursorDesdeElFinal;
-                        campo.value = nuevoTexto;
-                        campo.selectionStart = nuevoCursor;
-                        campo.selectionEnd = nuevoCursor;
-                        campo.focus();
-                        campo.dispatchEvent(new Event('input'));
-                        actualizarPreviewLatex(campo);
-                    });
-                });
                 container.appendChild(barra);
+
+                // Recordamos dónde estaba el cursor la última vez que el campo tuvo
+                // foco, porque al abrir el mini-formulario el foco se mueve a sus inputs.
+                let ultimaPosicionCursor = campo.value.length;
+                const recordarCursor = () => { ultimaPosicionCursor = campo.selectionStart ?? campo.value.length; };
+                campo.addEventListener('keyup', recordarCursor);
+                campo.addEventListener('click', recordarCursor);
+
+                const insertarEnCampo = (texto, cursorDesdeElFinal) => {
+                    const pos = ultimaPosicionCursor;
+                    const original = campo.value;
+                    const nuevoTexto = original.substring(0, pos) + texto + original.substring(pos);
+                    const nuevoCursor = pos + texto.length - (cursorDesdeElFinal || 0);
+                    campo.value = nuevoTexto;
+                    campo.focus();
+                    campo.selectionStart = nuevoCursor;
+                    campo.selectionEnd = nuevoCursor;
+                    ultimaPosicionCursor = nuevoCursor;
+                    campo.dispatchEvent(new Event('input'));
+                    actualizarPreviewLatex(campo);
+                };
+
+                if (esEstudiante) {
+                    const fila = document.createElement('div');
+                    fila.className = 'fila-teclas';
+                    barra.appendChild(fila);
+
+                    SIMBOLOS_DIRECTOS_ESTUDIANTE.forEach(s => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'tecla';
+                        btn.textContent = s.etiqueta;
+                        btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); insertarEnCampo(s.insertar, 0); });
+                        fila.appendChild(btn);
+                    });
+
+                    const miniForm = document.createElement('div');
+                    miniForm.className = 'mini-form-mate oculto';
+
+                    SIMBOLOS_CON_DATOS_ESTUDIANTE.forEach(s => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'tecla';
+                        btn.textContent = s.etiqueta;
+                        btn.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            abrirMiniFormMate(s, miniForm, insertarEnCampo);
+                        });
+                        fila.appendChild(btn);
+                    });
+                    barra.appendChild(miniForm);
+                } else {
+                    const fila = document.createElement('div');
+                    fila.className = 'fila-teclas';
+                    SIMBOLOS_LATEX.forEach(s => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'tecla';
+                        btn.textContent = s.etiqueta;
+                        btn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); insertarEnCampo(s.insertar, s.cursorDesdeElFinal || 0); });
+                        fila.appendChild(btn);
+                    });
+                    barra.appendChild(fila);
+                }
 
                 const preview = document.createElement('div');
                 preview.className = 'campo-latex-preview';
@@ -2944,6 +3962,60 @@
 
                 campo.addEventListener('input', () => actualizarPreviewLatex(campo));
                 actualizarPreviewLatex(campo);
+            });
+        }
+
+        // Mini-formulario que se abre al pulsar un botón que necesita datos
+        // (Fracción, Raíz, Potencia, Subíndice, funciones trigonométricas): el
+        // estudiante solo llena los espacios en blanco, nunca ve código LaTeX.
+        function abrirMiniFormMate(simbolo, miniForm, insertarEnCampo) {
+            let titulo = '';
+            let camposHtml = '';
+            if (simbolo.tipo === 'fraccion') {
+                titulo = 'Fracción: ¿quién va arriba y quién va abajo?';
+                camposHtml = `
+                    <input type="text" class="mini-input" data-campo="num" placeholder="Numerador (arriba)">
+                    <input type="text" class="mini-input" data-campo="den" placeholder="Denominador (abajo)">
+                `;
+            } else if (simbolo.tipo === 'raiz') {
+                titulo = '¿Qué va dentro de la raíz?';
+                camposHtml = `<input type="text" class="mini-input" data-campo="contenido" placeholder="Ej: 16 o x+1">`;
+            } else if (simbolo.tipo === 'potencia') {
+                titulo = 'Potencia: escribe primero la base en tu respuesta y aquí solo el exponente';
+                camposHtml = `<input type="text" class="mini-input" data-campo="exp" placeholder="Exponente (ej: 2)">`;
+            } else if (simbolo.tipo === 'subindice') {
+                titulo = 'Subíndice: escribe primero la letra en tu respuesta y aquí solo el subíndice';
+                camposHtml = `<input type="text" class="mini-input" data-campo="sub" placeholder="Subíndice (ej: 1)">`;
+            } else if (simbolo.tipo === 'trig') {
+                titulo = `${simbolo.etiqueta}( ) — ¿cuál es el ángulo o argumento?`;
+                camposHtml = `<input type="text" class="mini-input" data-campo="arg" placeholder="Ej: x o 30">`;
+            }
+            miniForm.innerHTML = `
+                <p class="mini-form-titulo">${titulo}</p>
+                <div class="mini-form-campos">${camposHtml}</div>
+                <div class="mini-form-botones">
+                    <button type="button" class="btn-primario mini-form-btn" data-accion="insertar">Insertar</button>
+                    <button type="button" class="btn-fantasma mini-form-btn" data-accion="cancelar">Cancelar</button>
+                </div>
+            `;
+            miniForm.classList.remove('oculto');
+            miniForm.querySelector('.mini-input')?.focus();
+            miniForm.querySelector('[data-accion="cancelar"]').addEventListener('click', (e) => {
+                e.preventDefault();
+                miniForm.classList.add('oculto');
+            });
+            miniForm.querySelector('[data-accion="insertar"]').addEventListener('click', (e) => {
+                e.preventDefault();
+                const valores = {};
+                miniForm.querySelectorAll('.mini-input').forEach(inp => { valores[inp.dataset.campo] = inp.value.trim(); });
+                let codigo = '';
+                if (simbolo.tipo === 'fraccion') codigo = `\\frac{${valores.num || ''}}{${valores.den || ''}}`;
+                else if (simbolo.tipo === 'raiz') codigo = `\\sqrt{${valores.contenido || ''}}`;
+                else if (simbolo.tipo === 'potencia') codigo = `^{${valores.exp || ''}}`;
+                else if (simbolo.tipo === 'subindice') codigo = `_{${valores.sub || ''}}`;
+                else if (simbolo.tipo === 'trig') codigo = `${simbolo.funcion}(${valores.arg || ''})`;
+                insertarEnCampo(codigo, 0);
+                miniForm.classList.add('oculto');
             });
         }
 
@@ -3032,6 +4104,20 @@
                     solucion: 'Espera un momento antes de volver a intentarlo.'
                 };
             }
+            if (code.includes('requires-recent-login')) {
+                return {
+                    titulo: 'Necesitas confirmar tu sesión',
+                    mensaje: 'Por seguridad, Firebase pide volver a confirmar quién eres antes de hacer este cambio.',
+                    solucion: 'Cierra sesión, vuelve a entrar con tu correo y contraseña, e inténtalo de nuevo enseguida.'
+                };
+            }
+            if (code.includes('wrong-password') || code.includes('invalid-credential')) {
+                return {
+                    titulo: 'Contraseña incorrecta',
+                    mensaje: 'La contraseña actual que escribiste no coincide con la de tu cuenta.',
+                    solucion: 'Revisa que no tenga espacios ni mayúsculas de más y vuelve a intentarlo. Si la olvidaste, cierra sesión y usa "Olvidé mi contraseña".'
+                };
+            }
             // Sin "code" casi siempre significa que es uno de nuestros propios
             // mensajes de validación (ya en español, ya explica qué corregir),
             // no un error técnico — se muestra tal cual, sin sonar alarmante.
@@ -3088,13 +4174,34 @@
                     .where('profesorId', '==', usuarioActual.uid)
                     .get();
                 estudiantesAsignados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                if (estudiantesAsignados.length === 0) {
-                    container.innerHTML = '<p style="color:var(--tinta-suave);">No tienes estudiantes asignados.</p>';
+                const pendientes = estudiantesAsignados.filter(e => e.estadoMatricula === 'pendiente');
+                const activos = estudiantesAsignados.filter(e => !e.estadoMatricula || e.estadoMatricula === 'activo');
+
+                const pendientesHtml = pendientes.length === 0 ? '' : `
+                    <div style="background:var(--medidas-suave);border:1px solid var(--medidas);border-radius:10px;padding:14px;margin-bottom:18px;">
+                        <h4 style="margin-bottom:10px;font-size:0.95rem;">🔔 Nuevos estudiantes por aprobar (${pendientes.length})</h4>
+                        ${pendientes.map(est => `
+                            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding:8px 0;border-bottom:1px solid var(--medidas);">
+                                <div>
+                                    <div style="font-weight:600;">${est.nombre}</div>
+                                    <div style="font-size:0.78rem;color:var(--tinta-suave);">${est.colegio || 'Sin colegio'} · ${CURSOS.find(c => c.id === est.curso)?.nombre || est.curso || 'Sin curso'} · ${est.email || ''}</div>
+                                </div>
+                                <div style="display:flex;gap:6px;">
+                                    <button class="btn-primario" onclick="aprobarEstudianteNuevo('${est.id}')" style="padding:6px 14px;font-size:0.78rem;">Aprobar</button>
+                                    <button class="btn-fantasma" onclick="rechazarEstudianteNuevo('${est.id}')" style="padding:6px 14px;font-size:0.78rem;">Rechazar</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                if (activos.length === 0) {
+                    container.innerHTML = pendientesHtml + '<p style="color:var(--tinta-suave);">No tienes estudiantes activos todavía.</p>';
                     gridColegios.innerHTML = '<p style="color:var(--tinta-suave);">Sin estudiantes.</p>';
                     return;
                 }
                 const colegios = {};
-                estudiantesAsignados.forEach(est => {
+                activos.forEach(est => {
                     const colegio = est.colegio || 'Sin colegio';
                     if (!colegios[colegio]) colegios[colegio] = [];
                     colegios[colegio].push(est);
@@ -3106,10 +4213,16 @@
                         <button class="btn-descarga-colegio" onclick="descargarListaColegio('${nombre}')" style="margin-top:6px;">Descargar</button>
                     </div>
                 `).join('');
-                container.innerHTML = estudiantesAsignados.map(est => {
+
+                // Asistencia real: se calcula a partir de courseContent.diasClase +
+                // la colección "attendance" de cada curso involucrado (ya no es un
+                // número al azar como antes).
+                const cursosInvolucrados = [...new Set(activos.map(e => e.curso).filter(Boolean))];
+                const asistenciaPorCurso = await calcularAsistenciaPorCurso(cursosInvolucrados);
+
+                container.innerHTML = pendientesHtml + activos.map(est => {
                     const avatar = generarAvatar(est.nombre, est.id);
-                    const totalClases = 16;
-                    const asistencias = est.asistencias || Math.floor(Math.random() * 10) + 6;
+                    const { presentes, total } = calcularAsistenciaEstudiante(est, asistenciaPorCurso);
                     return `
                         <div class="estudiante-item">
                             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -3120,7 +4233,7 @@
                                 </div>
                             </div>
                             <div class="acciones">
-                                <span style="font-size:0.75rem;color:var(--tinta-suave);">Asistencia: ${asistencias}/${totalClases}</span>
+                                <span style="font-size:0.75rem;color:var(--tinta-suave);">Asistencia: ${total === 0 ? 'sin registrar' : `${presentes}/${total}`}</span>
                                 <button class="btn-descarga" onclick="descargarPerfilEstudiante('${est.id}')">Perfil</button>
                             </div>
                         </div>
@@ -3132,30 +4245,99 @@
             }
         }
 
+        async function aprobarEstudianteNuevo(estudianteId) {
+            try {
+                await db.collection('users').doc(estudianteId).update({ estadoMatricula: 'activo' });
+                await db.collection('teachers').doc(usuarioActual.uid).update({
+                    estudiantes: firebase.firestore.FieldValue.arrayUnion(estudianteId)
+                });
+                mostrarToast('Estudiante aprobado.', 'success');
+                cargarEstudiantes();
+            } catch (error) {
+                mostrarAdvertencia(error);
+            }
+        }
+
+        async function rechazarEstudianteNuevo(estudianteId) {
+            try {
+                await db.collection('users').doc(estudianteId).update({ estadoMatricula: 'rechazado' });
+                mostrarToast('Solicitud rechazada.', 'info');
+                cargarEstudiantes();
+            } catch (error) {
+                mostrarAdvertencia(error);
+            }
+        }
+
         // ============================================================
         // DESCARGAS
         // ============================================================
-        function descargarListaCompleta() {
-            if (estudiantesAsignados.length === 0) { mostrarAdvertencia('No tienes estudiantes asignados todavía, así que no hay nada que descargar.'); return; }
-            let csv = 'Nombre,Cédula,Email,Colegio,Asistencias,TotalClases\n';
-            estudiantesAsignados.forEach(est => {
-                const asistencias = est.asistencias || Math.floor(Math.random() * 10) + 6;
-                csv += `${est.nombre},${est.cedula || ''},${est.email || ''},${est.colegio || 'Sin colegio'},${asistencias},16\n`;
+        // Antes esto generaba un .csv armado a mano con datos inventados
+        // (Math.random) para asistencia y nota. Ahora usa SheetJS para producir
+        // un .xlsx real, con columnas de verdad (no texto separado por comas) y
+        // con los datos reales de asistencia y notas.
+        function descargarXLSX(hojas, nombreArchivo) {
+            const wb = XLSX.utils.book_new();
+            hojas.forEach(h => {
+                const ws = Array.isArray(h.filas) && h.filas.length > 0
+                    ? XLSX.utils.json_to_sheet(h.filas)
+                    : XLSX.utils.aoa_to_sheet([['Sin datos']]);
+                XLSX.utils.book_append_sheet(wb, ws, h.nombre.substring(0, 31));
             });
-            descargarArchivo(csv, 'lista_completa_estudiantes.csv', 'text/csv');
+            XLSX.writeFile(wb, nombreArchivo);
+            mostrarToast('Descargado: ' + nombreArchivo, 'success');
         }
 
-        function descargarListaColegio(colegio) {
-            const estudiantes = estudiantesAsignados.filter(e => (e.colegio || 'Sin colegio') === colegio);
-            if (estudiantes.length === 0) { mostrarAdvertencia('No hay estudiantes registrados en ese colegio todavía.'); return; }
-            let csv =
-                `Nombre,Email,Colegio,Asistencias,TotalClases,NotaPromedio\n`;
-            estudiantes.forEach(est => {
-                const asistencias = est.asistencias || Math.floor(Math.random() * 10) + 6;
-                const notaPromedio = (Math.random() * 4 + 6).toFixed(1);
-                csv += `${est.nombre},${est.email || ''},${colegio},${asistencias},16,${notaPromedio}\n`;
-            });
-            descargarArchivo(csv, `lista_colegio_${colegio.replace(/\s/g,'_')}.csv`, 'text/csv');
+        async function descargarListaCompleta() {
+            const activos = estudiantesAsignados.filter(e => !e.estadoMatricula || e.estadoMatricula === 'activo');
+            if (activos.length === 0) { mostrarAdvertencia('No tienes estudiantes activos todavía. Revisa si tienes solicitudes pendientes de aprobar.'); return; }
+            try {
+                const cursosInvolucrados = [...new Set(activos.map(e => e.curso).filter(Boolean))];
+                const asistenciaPorCurso = await calcularAsistenciaPorCurso(cursosInvolucrados);
+                const filas = await Promise.all(activos.map(async est => {
+                    const { presentes, total } = calcularAsistenciaEstudiante(est, asistenciaPorCurso);
+                    const notaPromedio = await calcularNotaPromedioEstudiante(est.id);
+                    return {
+                        'Nombre': est.nombre || '',
+                        'Cédula': est.cedula || '',
+                        'Email': est.email || '',
+                        'Colegio': est.colegio || 'Sin colegio',
+                        'Curso': CURSOS.find(c => c.id === est.curso)?.nombre || est.curso || '',
+                        'Días de clase': total,
+                        'Días presente': presentes,
+                        '% Asistencia': total > 0 ? Math.round(presentes / total * 100) : '',
+                        'Nota promedio': notaPromedio !== null ? Number(notaPromedio.toFixed(1)) : 'Sin exámenes calificados'
+                    };
+                }));
+                descargarXLSX([{ nombre: 'Estudiantes', filas }], 'lista_completa_estudiantes.xlsx');
+            } catch (error) {
+                mostrarAdvertencia(error);
+            }
+        }
+
+        async function descargarListaColegio(colegio) {
+            const estudiantes = estudiantesAsignados.filter(e => (e.colegio || 'Sin colegio') === colegio && (!e.estadoMatricula || e.estadoMatricula === 'activo'));
+            if (estudiantes.length === 0) { mostrarAdvertencia('No hay estudiantes activos registrados en ese colegio todavía.'); return; }
+            try {
+                const cursosInvolucrados = [...new Set(estudiantes.map(e => e.curso).filter(Boolean))];
+                const asistenciaPorCurso = await calcularAsistenciaPorCurso(cursosInvolucrados);
+                const filas = await Promise.all(estudiantes.map(async est => {
+                    const { presentes, total } = calcularAsistenciaEstudiante(est, asistenciaPorCurso);
+                    const notaPromedio = await calcularNotaPromedioEstudiante(est.id);
+                    return {
+                        'Nombre': est.nombre || '',
+                        'Email': est.email || '',
+                        'Colegio': colegio,
+                        'Curso': CURSOS.find(c => c.id === est.curso)?.nombre || est.curso || '',
+                        'Días de clase': total,
+                        'Días presente': presentes,
+                        '% Asistencia': total > 0 ? Math.round(presentes / total * 100) : '',
+                        'Nota promedio': notaPromedio !== null ? Number(notaPromedio.toFixed(1)) : 'Sin exámenes calificados'
+                    };
+                }));
+                descargarXLSX([{ nombre: colegio.substring(0, 31), filas }], `lista_colegio_${colegio.replace(/\s/g,'_')}.xlsx`);
+            } catch (error) {
+                mostrarAdvertencia(error);
+            }
         }
 
         async function descargarPerfilEstudiante(estudianteId) {
@@ -3163,34 +4345,68 @@
                 const doc = await db.collection('users').doc(estudianteId).get();
                 const est = doc.data();
                 if (!est) { mostrarAdvertencia('No se encontró ese estudiante. Puede que su cuenta ya no exista; recarga la página e intenta de nuevo.'); return; }
-                const attemptsSnap = await db.collection('attempts')
-                    .where('studentId', '==', estudianteId)
-                    .orderBy('submittedAt', 'desc')
-                    .get();
-                const notas = attemptsSnap.docs.map(d => d.data());
-                const avatar = generarAvatar(est.nombre, estudianteId);
-                const asistencias = est.asistencias || Math.floor(Math.random() * 10) + 6;
-                const totalClases = 16;
-                let perfil = `
-                    =========================================
-                    PERFIL DEL ESTUDIANTE
-                    =========================================
-                    Nombre: ${est.nombre}
-                    Cédula: ${est.cedula || 'No registrada'}
-                    Email: ${est.email || 'No registrado'}
-                    Colegio: ${est.colegio || 'Sin colegio'}
-                    Curso: ${CURSOS.find(c => c.id === est.curso)?.nombre || 'Sin curso'}
-                    ASISTENCIA: ${asistencias}/${totalClases} (${(asistencias/totalClases*100).toFixed(0)}%)
-                    NOTAS DE EXÁMENES: ${notas.length === 0 ? 'Sin exámenes' : ''}
-                `;
-                notas.forEach((n, i) => {
-                    const pct = (n.score / n.total * 100);
-                    perfil += `
-                    ${i+1}. ${n.examTitle}: ${n.score}/${n.total} (${pct.toFixed(0)}%)
-                       Estado: ${n.gradingStatus === 'graded' ? (pct>=60?'Aprobado':'Reprobado') : 'Pendiente'}`;
+
+                const attemptsSnap = await db.collection('attempts').where('studentId', '==', estudianteId).get();
+                // Solo cuentan los intentos definitivos (no las prácticas) como nota.
+                const intentos = attemptsSnap.docs.map(d => d.data()).filter(a => (a.tipo || 'final') === 'final');
+                intentos.sort((a, b) => (b.submittedAt?.toMillis?.() || 0) - (a.submittedAt?.toMillis?.() || 0));
+
+                // Los intentos solo guardan "examId" (nunca guardaron "examTitle": ese
+                // campo no existe y antes salía como "undefined" en la descarga), así
+                // que hay que buscar el título real de cada examen en su colección.
+                const examIds = [...new Set(intentos.map(a => a.examId).filter(Boolean))];
+                const examTitulos = {};
+                await Promise.all(examIds.map(async id => {
+                    const examDoc = await db.collection('exams').doc(id).get();
+                    examTitulos[id] = examDoc.exists ? (examDoc.data().title || id) : 'Examen eliminado';
+                }));
+
+                const asistenciaPorCurso = est.curso ? await calcularAsistenciaPorCurso([est.curso]) : {};
+                const { presentes, total } = est.curso
+                    ? calcularAsistenciaEstudiante({ id: estudianteId, curso: est.curso }, asistenciaPorCurso)
+                    : { presentes: 0, total: 0 };
+
+                const notasValidas = intentos.filter(n => n.gradingStatus === 'graded' && typeof n.score === 'number' && typeof n.total === 'number' && n.total > 0);
+                const notaPromedio = notasValidas.length > 0
+                    ? notasValidas.reduce((acc, n) => acc + (n.score / n.total * 100), 0) / notasValidas.length
+                    : null;
+
+                const resumen = [
+                    { 'Campo': 'Nombre', 'Valor': est.nombre || '' },
+                    { 'Campo': 'Cédula', 'Valor': est.cedula || 'No registrada' },
+                    { 'Campo': 'Email', 'Valor': est.email || 'No registrado' },
+                    { 'Campo': 'Colegio', 'Valor': est.colegio || 'Sin colegio' },
+                    { 'Campo': 'Curso', 'Valor': CURSOS.find(c => c.id === est.curso)?.nombre || 'Sin curso' },
+                    { 'Campo': 'Días de clase', 'Valor': total },
+                    { 'Campo': 'Días presente', 'Valor': presentes },
+                    { 'Campo': '% Asistencia', 'Valor': total > 0 ? Math.round(presentes / total * 100) + '%' : 'Sin registrar todavía' },
+                    { 'Campo': 'Nota promedio (exámenes calificados)', 'Valor': notaPromedio !== null ? notaPromedio.toFixed(1) : 'Sin exámenes calificados' }
+                ];
+
+                const notas = intentos.length === 0 ? [{ 'Examen': 'Sin exámenes presentados todavía', 'Nota': '', 'Total': '', 'Porcentaje': '', 'Estado': '' }] : intentos.map(n => {
+                    const pct = (typeof n.score === 'number' && typeof n.total === 'number' && n.total > 0) ? (n.score / n.total * 100) : null;
+                    return {
+                        'Examen': examTitulos[n.examId] || n.examId || 'Examen',
+                        'Nota': typeof n.score === 'number' ? n.score : '',
+                        'Total': typeof n.total === 'number' ? n.total : '',
+                        'Porcentaje': pct !== null ? Math.round(pct) + '%' : '',
+                        'Estado': n.gradingStatus === 'graded' ? (pct >= 60 ? 'Aprobado' : 'Reprobado') : 'Pendiente de revisión'
+                    };
                 });
-                perfil += `\n=========================================`;
-                descargarArchivo(perfil, `perfil_${est.nombre.replace(/\s/g,'_')}.txt`, 'text/plain');
+
+                const diasClaseCurso = (asistenciaPorCurso[est.curso]?.diasClase || []).slice().sort();
+                const asistenciaDetalle = diasClaseCurso.length === 0
+                    ? [{ 'Fecha': 'Sin días de clase registrados todavía', 'Asistió': '' }]
+                    : diasClaseCurso.map(f => ({
+                        'Fecha': formatearFecha(f),
+                        'Asistió': asistenciaPorCurso[est.curso].attendanceByFecha[f]?.[estudianteId] ? 'Sí' : 'No'
+                    }));
+
+                descargarXLSX([
+                    { nombre: 'Resumen', filas: resumen },
+                    { nombre: 'Notas', filas: notas },
+                    { nombre: 'Asistencia', filas: asistenciaDetalle }
+                ], `perfil_${(est.nombre || 'estudiante').replace(/\s/g,'_')}.xlsx`);
                 mostrarToast('Perfil descargado.', 'success');
             } catch (error) {
                 mostrarAdvertencia(error);
@@ -3237,22 +4453,37 @@
             if (!usuarioActual) { container.innerHTML =
                     '<p style="color:var(--tinta-suave);">Inicia sesión para ver tus notas.</p>'; return; }
             try {
-                const snapshot = await db.collection('attempts').where('studentId', '==', usuarioActual.uid).orderBy(
-                    'submittedAt', 'desc').get();
+                // Sin orderBy: un solo "where" no necesita índice compuesto, y de
+                // todas formas ordenamos en JS después de traer los datos.
+                const snapshot = await db.collection('attempts').where('studentId', '==', usuarioActual.uid).get();
                 const attempts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 if (attempts.length === 0) {
                     container.innerHTML = '<p style="color:var(--tinta-suave);">Aún no has realizado ningún examen.</p>';
                     return;
                 }
+                attempts.sort((a, b) => (b.submittedAt?.toMillis?.() || 0) - (a.submittedAt?.toMillis?.() || 0));
+
+                // Los intentos solo guardan "examId" (nunca guardaron "examTitle", por
+                // eso salía "undefined"): hay que buscar el título real en "exams".
+                const examIds = [...new Set(attempts.map(a => a.examId).filter(Boolean))];
+                const examTitulos = {};
+                await Promise.all(examIds.map(async id => {
+                    const examDoc = await db.collection('exams').doc(id).get();
+                    examTitulos[id] = examDoc.exists ? (examDoc.data().title || 'Examen') : 'Examen eliminado';
+                }));
+
                 container.innerHTML = attempts.map(a => {
                     const pct = (a.score / a.total * 100);
                     const estado = a.gradingStatus === 'graded' ? (pct >= 60 ? 'aprobado' : 'reprobado') : 'pendiente';
                     const estadoTexto = a.gradingStatus === 'graded' ? (pct >= 60 ? 'Aprobado' : 'Reprobado') :
-                        'Pendiente';
+                        'Pendiente de revisión';
+                    // "finalGrade" nunca existió como campo (siempre quedaba
+                    // undefined): la nota final, una vez calificado, se guarda en
+                    // "score" (el profesor la actualiza ahí al revisar desarrollo).
                     return `
                         <div class="nota-item">
-                            <div><div class="nota-curso">${a.examTitle}</div><div style="font-size:0.75rem;color:var(--tinta-suave);">${CURSOS.find(c => c.id === a.courseId)?.nombre || 'Curso'}</div></div>
-                            <div style="text-align:right;"><div class="nota-puntaje">${a.gradingStatus === 'graded' ? a.finalGrade : a.score}/${a.total} (${pct.toFixed(0)}%)</div><span class="nota-estado ${estado}">${estadoTexto}</span></div>
+                            <div><div class="nota-curso">${examTitulos[a.examId] || 'Examen'}</div><div style="font-size:0.75rem;color:var(--tinta-suave);">${CURSOS.find(c => c.id === a.courseId)?.nombre || 'Curso'}</div></div>
+                            <div style="text-align:right;"><div class="nota-puntaje">${a.score}/${a.total} (${pct.toFixed(0)}%)</div><span class="nota-estado ${estado}">${estadoTexto}</span></div>
                         </div>
                     `;
                 }).join('');
@@ -3297,12 +4528,22 @@
         });
 
         async function cambiarContraseña() {
+            const actual = document.getElementById('perfilPassActual')?.value;
             const nueva = document.getElementById('perfilNuevaPass')?.value;
-            if (!nueva || nueva.length < 6) return mostrarAdvertencia('La nueva contraseña debe tener al menos 6 caracteres.');
             if (!usuarioActual) return mostrarAdvertencia('Necesitas iniciar sesión antes de hacer esto.');
+            if (!actual) return mostrarAdvertencia('Ingresa tu contraseña actual para confirmar el cambio.');
+            if (!nueva || nueva.length < 6) return mostrarAdvertencia('La nueva contraseña debe tener al menos 6 caracteres.');
             try {
+                // Firebase exige un inicio de sesión "reciente" para operaciones
+                // sensibles como cambiar la contraseña (auth/requires-recent-login).
+                // Como no sabemos cuánto lleva abierta la sesión, siempre nos
+                // reautenticamos primero con la contraseña actual: así la operación
+                // funciona sin importar cuánto tiempo pasó desde el login.
+                const credencial = firebase.auth.EmailAuthProvider.credential(usuarioActual.email, actual);
+                await usuarioActual.reauthenticateWithCredential(credencial);
                 await usuarioActual.updatePassword(nueva);
                 mostrarToast('Contraseña actualizada.', 'success');
+                document.getElementById('perfilPassActual').value = '';
                 document.getElementById('perfilNuevaPass').value = '';
             } catch (error) {
                 mostrarAdvertencia(error);
@@ -3335,6 +4576,7 @@
             document.getElementById('campoRolRegistro').classList.toggle('oculto', !esRegistro);
             document.getElementById('campoCodigoEspecial').classList.toggle('oculto', true);
             document.getElementById('campoCedulaRegistro').classList.toggle('oculto', !esRegistro);
+            document.getElementById('campoColegioRegistro').classList.toggle('oculto', !esRegistro);
             document.getElementById('campoCursoRegistro').classList.toggle('oculto', !esRegistro);
             document.getElementById('campoProfesorRegistro').classList.toggle('oculto', !esRegistro);
             document.getElementById('campoContraseña').classList.toggle('oculto', esRecuperar);
@@ -3351,6 +4593,7 @@
                     const esEstudiante = this.value === 'student';
                     const esProfesor = this.value === 'teacher';
                     document.getElementById('campoCedulaRegistro').classList.toggle('oculto', !esEstudiante);
+                    document.getElementById('campoColegioRegistro').classList.toggle('oculto', !esEstudiante);
                     document.getElementById('campoCursoRegistro').classList.toggle('oculto', !esEstudiante);
                     document.getElementById('campoProfesorRegistro').classList.toggle('oculto', !esEstudiante);
                     document.getElementById('campoCodigoEspecial').classList.toggle('oculto', !esProfesor);
@@ -3365,11 +4608,13 @@
             const currentRol = document.getElementById('inputRolRegistro').value;
             if (esRegistro && currentRol === 'student') {
                 document.getElementById('campoCedulaRegistro').classList.remove('oculto');
+                document.getElementById('campoColegioRegistro').classList.remove('oculto');
                 document.getElementById('campoCursoRegistro').classList.remove('oculto');
                 document.getElementById('campoProfesorRegistro').classList.remove('oculto');
                 document.getElementById('campoCodigoEspecial').classList.add('oculto');
             } else if (esRegistro && currentRol === 'teacher') {
                 document.getElementById('campoCedulaRegistro').classList.add('oculto');
+                document.getElementById('campoColegioRegistro').classList.add('oculto');
                 document.getElementById('campoCursoRegistro').classList.add('oculto');
                 document.getElementById('campoProfesorRegistro').classList.add('oculto');
                 document.getElementById('campoCodigoEspecial').classList.remove('oculto');
@@ -3428,6 +4673,7 @@
             const nombre = document.getElementById('inputNombre').value.trim();
             const rol = document.getElementById('inputRolRegistro')?.value;
             const cedula = document.getElementById('inputCedulaRegistro')?.value.trim();
+            const colegio = document.getElementById('inputColegioRegistro')?.value.trim();
             const curso = document.getElementById('inputCursoRegistro')?.value;
             const profesorId = document.getElementById('inputProfesorRegistro')?.value;
             const codigoEspecial = document.getElementById('inputCodigoEspecial')?.value.trim();
@@ -3449,6 +4695,7 @@
                         }
                     }
                     if (rol === 'student' && !cedula) throw new Error('Ingresa tu cédula.');
+                    if (rol === 'student' && !colegio) throw new Error('Ingresa el colegio al que perteneces.');
                     if (rol === 'student' && !curso) throw new Error('Selecciona un curso.');
                     if (rol === 'student' && !profesorId) throw new Error('Selecciona un profesor.');
 
@@ -3457,11 +4704,15 @@
                         nombre,
                         email: correo,
                         cedula: rol === 'student' ? cedula : null,
+                        colegio: rol === 'student' ? colegio : null,
                         curso: rol === 'student' ? curso : null,
                         rol: rol,
                         profesorId: rol === 'student' ? profesorId : null,
-                        colegio: rol === 'student' ? 'Sin colegio' : null,
-                        asistencias: 0,
+                        // Un estudiante nuevo queda "pendiente" hasta que su profesor lo
+                        // apruebe explícitamente: ver el aviso de "nuevos estudiantes" en
+                        // la vista del profesor. Mientras esté pendiente NO se le agrega
+                        // al arreglo "estudiantes" del profesor ni cuenta para asistencia.
+                        estadoMatricula: rol === 'student' ? 'pendiente' : null,
                         createdAt: firebase.firestore.FieldValue.serverTimestamp()
                     };
                     await db.collection('users').doc(cred.user.uid).set(userData);
@@ -3474,16 +4725,13 @@
                             createdAt: firebase.firestore.FieldValue.serverTimestamp()
                         });
                     }
-                    if (rol === 'student' && profesorId) {
-                        try {
-                            await db.collection('teachers').doc(profesorId).update({
-                                estudiantes: firebase.firestore.FieldValue.arrayUnion(cred.user.uid)
-                            });
-                        } catch (errProf) {
-                            console.warn('No se pudo vincular al profesor (la cuenta del estudiante sí se creó):', errProf);
-                        }
-                    }
-                    mostrarExitoLogin('Registro exitoso. Ahora inicia sesión.');
+                    // OJO: ya NO se agrega al estudiante al arreglo "estudiantes" del
+                    // profesor aquí. Eso ahora lo hace el profesor manualmente al
+                    // "aprobar" la solicitud (ver aprobarEstudianteNuevo), para que
+                    // pueda revisar quién se está inscribiendo antes de darle acceso.
+                    mostrarExitoLogin(rol === 'student'
+                        ? 'Registro exitoso. Tu profesor debe aprobar tu inscripción antes de que puedas ver el curso. Ya puedes iniciar sesión.'
+                        : 'Registro exitoso. Ahora inicia sesión.');
                     setTimeout(() => cambiarPestana('ingreso'), 1500);
                 } else {
                     const cred = await auth.signInWithEmailAndPassword(correo, contraseña);
@@ -3498,7 +4746,13 @@
 
         function traducirErrorFirebase(err) {
             const code = err.code || '';
-            if (code.includes('email-already-in-use')) return 'Ese correo ya está registrado.';
+            // Este código puede salir aunque el perfil ya no exista en Firestore:
+            // el inicio de sesión y la base de datos son dos sistemas separados
+            // dentro de Firebase, así que borrar el documento de "users" NO borra
+            // la cuenta de inicio de sesión asociada a ese correo. Si de verdad no
+            // aparece en la base de datos, hay que borrar la cuenta desde la
+            // consola de Firebase (Authentication → Users), no solo el documento.
+            if (code.includes('email-already-in-use')) return 'Ese correo ya tiene una cuenta de acceso creada (aunque no tenga perfil en la base de datos). Usa otro correo, o si administras la plataforma, borra esa cuenta desde Firebase Console → Authentication → Users.';
             if (code.includes('invalid-email')) return 'Correo no válido.';
             if (code.includes('weak-password')) return 'Mínimo 6 caracteres.';
             // Firebase agrupa "usuario no existe" y "contraseña incorrecta" bajo el
@@ -3549,7 +4803,13 @@
                 }
 
                 renderizarCursos();
-                if (rolActual === 'student' && cursoEstudiante) {
+                if (rolActual === 'student' && data.estadoMatricula === 'pendiente') {
+                    irA('cursos');
+                    mostrarAdvertencia('Tu profesor todavía no ha aprobado tu inscripción. Cuando lo haga vas a poder ver tu curso, exámenes y asistencia aquí. Si tarda mucho, contáctalo directamente.', 'Inscripción pendiente de aprobación');
+                } else if (rolActual === 'student' && data.estadoMatricula === 'rechazado') {
+                    irA('cursos');
+                    mostrarAdvertencia('Tu profesor rechazó tu solicitud de inscripción. Contáctalo para más información o vuelve a registrarte con los datos correctos.', 'Inscripción rechazada');
+                } else if (rolActual === 'student' && cursoEstudiante) {
                     abrirCurso(cursoEstudiante);
                 } else {
                     irA('cursos');
@@ -3589,12 +4849,15 @@
         // ============================================================
         async function verResultadosExamen(examId) {
             try {
-                const snapshot = await db.collection('attempts').where('examId', '==', examId).orderBy('submittedAt', 'desc')
-                    .get();
+                // Sin orderBy: un "where" con "orderBy" en un campo distinto necesita
+                // un índice compuesto en Firestore (y podía fallar con "failed-precondition"
+                // si no existía). Se ordena en JS después de traer los datos.
+                const snapshot = await db.collection('attempts').where('examId', '==', examId).get();
                 // Solo el intento definitivo cuenta como nota; los de práctica no se
                 // muestran aquí (son para que el estudiante practique, no para calificar).
                 const attempts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-                    .filter(a => (a.tipo || 'final') === 'final');
+                    .filter(a => (a.tipo || 'final') === 'final')
+                    .sort((a, b) => (b.submittedAt?.toMillis?.() || 0) - (a.submittedAt?.toMillis?.() || 0));
                 mostrarResultadosModal(attempts);
             } catch (error) {
                 mostrarAdvertencia(error);
@@ -3607,17 +4870,19 @@
                 lista.innerHTML = `<p style="color:var(--tinta-suave);font-size:0.9rem;">Todavía no hay entregas para este examen.</p>`;
             } else {
                 lista.innerHTML = attempts.map(a => {
-                    const pct = (a.score / a.total * 100);
+                    const total = a.total || 1;
+                    const pct = (a.score / total * 100);
                     const estado = a.gradingStatus === 'graded' ? (pct >= 60 ? 'aprobado' : 'reprobado') : 'pendiente';
                     const etiqueta = estado === 'aprobado' ? 'Aprobado' : (estado === 'reprobado' ? 'Reprobado' : 'Pendiente de revisión');
+                    const puntajeMostrado = Math.round(a.score * 10) / 10;
                     return `<div class="resultado-fila" style="flex-wrap:wrap;">
                         <div>
                             <div class="resultado-nombre">${a.studentName || 'Estudiante'}</div>
-                            <div class="resultado-puntaje">${a.score}/${a.total} puntos (${pct.toFixed(0)}%)${estado === 'pendiente' ? ' · tiene preguntas de desarrollo por revisar' : ''}</div>
+                            <div class="resultado-puntaje">${puntajeMostrado}/${total} puntos (${pct.toFixed(0)}%)${estado === 'pendiente' ? ' · tiene preguntas de desarrollo por revisar' : ''}</div>
                         </div>
                         <div style="display:flex;align-items:center;gap:8px;">
                             <span class="resultado-estado ${estado}">${etiqueta}</span>
-                            ${estado === 'pendiente' ? `<button class="btn-fantasma" style="font-size:0.72rem;padding:3px 10px;" onclick="marcarAttemptRevisado('${a.id}')">Marcar como revisado</button>` : ''}
+                            ${estado === 'pendiente' ? `<button class="btn-fantasma" style="font-size:0.72rem;padding:3px 10px;" onclick="abrirRevisionAttempt('${a.id}')">Revisar</button>` : ''}
                         </div>
                     </div>`;
                 }).join('');
@@ -3625,21 +4890,76 @@
             document.getElementById('resultadosOverlay').classList.remove('oculto');
         }
 
-        async function marcarAttemptRevisado(attemptId) {
+        function cerrarResultados() {
+            document.getElementById('resultadosOverlay').classList.add('oculto');
+        }
+
+        // ============================================================
+        // REVISIÓN DE PREGUNTAS "DESARROLLO" (el profesor confirma los puntos)
+        // ============================================================
+        async function abrirRevisionAttempt(attemptId) {
             try {
-                await db.collection('attempts').doc(attemptId).update({ gradingStatus: 'graded' });
-                const snapshot = await db.collection('attempts').doc(attemptId).get();
-                mostrarToast('Marcado como revisado.', 'success');
-                // Volvemos a pedir todos los intentos de ese examen para refrescar la lista completa.
-                const examId = snapshot.data()?.examId;
+                const doc = await db.collection('attempts').doc(attemptId).get();
+                if (!doc.exists) { mostrarAdvertencia('Ese intento ya no existe. Puede que se haya eliminado desde otra sesión.'); return; }
+                revisionEnEdicion = { id: doc.id, ...doc.data() };
+                renderizarModalRevision();
+                document.getElementById('revisionOverlay').classList.remove('oculto');
+            } catch (error) {
+                mostrarAdvertencia(error);
+            }
+        }
+
+        function renderizarModalRevision() {
+            const cont = document.getElementById('revisionLista');
+            if (!revisionEnEdicion) return;
+            const lista = revisionEnEdicion.revisionDesarrollo || [];
+            document.getElementById('revisionEstudianteNombre').textContent = revisionEnEdicion.studentName || 'Estudiante';
+            cont.innerHTML = lista.length === 0
+                ? '<p style="color:var(--tinta-suave);font-size:0.85rem;">Este intento no tiene preguntas de desarrollo pendientes.</p>'
+                : lista.map((r, i) => `
+                    <div class="tarjeta-plana" style="margin-bottom:8px;">
+                        <p style="font-size:0.85rem;font-weight:600;">${r.enunciado}</p>
+                        ${r.procedimiento ? `<p style="font-size:0.8rem;color:var(--tinta-suave);margin-top:6px;white-space:pre-wrap;"><strong>Procedimiento del estudiante:</strong><br>${r.procedimiento}</p>` : ''}
+                        <p style="font-size:0.82rem;margin-top:6px;">Respuesta esperada: <strong>${r.respuestaEsperada || '(sin definir)'}</strong></p>
+                        <p style="font-size:0.82rem;margin-top:2px;">Respuesta final del estudiante: <strong>${r.respuestaEstudiante || '(sin responder)'}</strong></p>
+                        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;">
+                            <span style="font-size:0.78rem;color:var(--tinta-suave);">${r.puntosPosibles} punto${r.puntosPosibles === 1 ? '' : 's'}:</span>
+                            <button type="button" class="btn-fantasma revision-toggle ${r.otorgado ? 'activo-si' : ''}" onclick="cambiarOtorgadoRevision(${i}, true)">Otorgar puntos</button>
+                            <button type="button" class="btn-fantasma revision-toggle ${!r.otorgado ? 'activo-no' : ''}" onclick="cambiarOtorgadoRevision(${i}, false)">No otorgar</button>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        function cambiarOtorgadoRevision(indice, valor) {
+            if (!revisionEnEdicion?.revisionDesarrollo) return;
+            revisionEnEdicion.revisionDesarrollo[indice].otorgado = valor;
+            renderizarModalRevision();
+        }
+
+        async function guardarRevisionAttempt() {
+            if (!revisionEnEdicion) return;
+            const lista = revisionEnEdicion.revisionDesarrollo || [];
+            const scoreDesarrollo = lista.reduce((s, r) => s + (r.otorgado ? r.puntosPosibles : 0), 0);
+            const scoreFinal = (revisionEnEdicion.scoreBase || 0) + scoreDesarrollo;
+            try {
+                await db.collection('attempts').doc(revisionEnEdicion.id).update({
+                    score: scoreFinal,
+                    revisionDesarrollo: lista,
+                    gradingStatus: 'graded'
+                });
+                mostrarToast('Revisión guardada.', 'success');
+                const examId = revisionEnEdicion.examId;
+                cerrarRevision();
                 if (examId) verResultadosExamen(examId);
             } catch (error) {
                 mostrarAdvertencia(error);
             }
         }
 
-        function cerrarResultados() {
-            document.getElementById('resultadosOverlay').classList.add('oculto');
+        function cerrarRevision() {
+            document.getElementById('revisionOverlay').classList.add('oculto');
+            revisionEnEdicion = null;
         }
 
         async function eliminarExamen(examId) {
