@@ -1193,6 +1193,122 @@
             outline: none;
         }
 
+        /* Variante compacta de .campo-latex: mismo teclado matemático y misma
+           vista previa con MathJax, pero sin el recuadro punteado ni la
+           etiqueta grande, para usarse varias veces seguidas (por ejemplo,
+           una por cada opción de una pregunta de selección única). */
+        .campo-latex.compacto {
+            border: none;
+            padding: 0;
+            background: transparent;
+        }
+        .campo-latex.compacto .campo-latex-etiqueta {
+            display: none;
+        }
+        .campo-latex.compacto input {
+            width: 100%;
+            padding: 5px 4px;
+            font-size: 0.85rem;
+            border: none;
+            border-bottom: 1px solid var(--papel-linea);
+            border-radius: 0;
+            background: transparent;
+        }
+        .campo-latex.compacto input:focus {
+            border-color: var(--amarillo);
+        }
+        .campo-latex.compacto .teclado-matematico {
+            padding: 5px 6px;
+            margin-top: 3px;
+            border-radius: 8px;
+        }
+        .campo-latex.compacto .teclado-matematico .fila-teclas {
+            gap: 3px;
+        }
+        .campo-latex.compacto .teclado-matematico .tecla {
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            min-width: 22px;
+        }
+        .campo-latex.compacto .campo-latex-preview {
+            padding: 4px 6px;
+            min-height: 18px;
+            font-size: 0.8rem;
+            margin-top: 3px;
+            border-radius: 6px;
+        }
+
+        /* ============================================================
+           CHIP DE "DÍA DE CLASE" (asistencia)
+           ============================================================ */
+        .dia-clase-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 6px 5px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--papel-linea);
+            background: #fff;
+            font-size: 0.78rem;
+            color: var(--tinta);
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+        .dia-clase-chip .dia-clase-fecha {
+            cursor: pointer;
+        }
+        .dia-clase-chip.seleccionado {
+            background: var(--geo-suave);
+            border-color: var(--geo);
+            color: var(--geo);
+            font-weight: 600;
+        }
+        .dia-clase-eliminar {
+            cursor: pointer;
+            border: none;
+            background: rgba(27, 36, 48, 0.08);
+            color: var(--tinta-suave);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            line-height: 1;
+            font-size: 0.72rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .dia-clase-chip.seleccionado .dia-clase-eliminar {
+            background: rgba(255, 255, 255, 0.6);
+            color: var(--geo);
+        }
+        .dia-clase-eliminar:hover {
+            background: var(--prob-suave);
+            color: var(--prob);
+        }
+
+        /* ============================================================
+           VISTA PREVIA DE PREGUNTA (editor de exámenes)
+           ============================================================ */
+        .vista-previa-pregunta {
+            margin-top: 14px;
+            padding: 12px;
+            border-radius: 10px;
+            background: var(--pizarra);
+        }
+        .vista-previa-etiqueta {
+            color: var(--tiza);
+            font-size: 0.72rem;
+            margin-bottom: 8px;
+            font-family: 'Space Mono', monospace;
+            opacity: 0.85;
+        }
+        .vista-previa-pregunta .tarjeta-plana {
+            background: #fff;
+            border-radius: 8px;
+            padding: 12px;
+        }
+
         /* ============================================================
            RESPONSIVE
            ============================================================ */
@@ -2758,9 +2874,9 @@
                         ${diasClase.length === 0 ? '<p style="color:var(--tinta-suave);font-size:0.85rem;">Todavía no has agregado días de clase para este curso.</p>' : `
                         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
                             ${diasClase.map(f => `
-                                <span style="padding:4px 4px 4px 10px;border-radius:999px;border:1px solid var(--papel-linea);font-size:0.78rem;display:inline-flex;align-items:center;gap:2px;${f === diaSel ? 'background:var(--acento);color:#fff;border-color:var(--acento);' : ''}">
-                                    <span onclick="seleccionarDiaAsistencia('${cursoId}','${f}')" style="cursor:pointer;">${formatearFecha(f)}</span>
-                                    <button type="button" onclick="eliminarDiaClase('${cursoId}','${f}')" title="Eliminar día" style="cursor:pointer;border:none;background:rgba(0,0,0,0.12);color:inherit;border-radius:50%;width:20px;height:20px;line-height:1;font-size:0.8rem;margin-left:4px;">✕</button>
+                                <span class="dia-clase-chip${f === diaSel ? ' seleccionado' : ''}">
+                                    <span class="dia-clase-fecha" onclick="seleccionarDiaAsistencia('${cursoId}','${f}')">${formatearFecha(f)}</span>
+                                    <button type="button" class="dia-clase-eliminar" onclick="eliminarDiaClase('${cursoId}','${f}')" title="Eliminar día">✕</button>
                                 </span>
                             `).join('')}
                         </div>`}
@@ -3208,10 +3324,10 @@
 
             const camposComunes = `
                 <div class="campo"><label>Enunciado</label>
-                    <div class="campo-latex"><input id="q_text_${q.id}" type="text" placeholder="Ej: Resuelve $2x+3=7$" value="${(q.text || '').replace(/"/g, '&quot;')}"></div>
+                    <div class="campo-latex"><input id="q_text_${q.id}" type="text" placeholder="Ej: Resuelve $2x+3=7$" value="${(q.text || '').replace(/"/g, '&quot;')}" oninput="actualizarVistaPreviaPregunta('${q.id}')"></div>
                     ${imagenHtml}
                 </div>
-                <div class="campo" style="max-width:140px;"><label>Puntos</label><input id="q_puntos_${q.id}" type="number" min="1" max="100" value="${q.puntos || 1}"></div>
+                <div class="campo" style="max-width:140px;"><label>Puntos</label><input id="q_puntos_${q.id}" type="number" min="1" max="100" value="${q.puntos || 1}" oninput="actualizarVistaPreviaPregunta('${q.id}')"></div>
             `;
 
             let camposTipo = '';
@@ -3221,34 +3337,36 @@
                         <p style="font-size:0.8rem;color:var(--tinta-suave);">Pregunta de desarrollo: el estudiante escribe su procedimiento y tú calificas al final. Aquí pones solo la RESPUESTA FINAL esperada (no el paso a paso). Si el estudiante llega a ese resultado, se le asignan los puntos de forma provisional, pero tú decides si dárselos o no cuando revises el examen.</p>
                     </div>
                     <div class="campo"><label>Respuesta final esperada</label>
-                        <div class="campo-latex"><input id="q_answer_${q.id}" type="text" placeholder="Ej: x=2" value="${(q.correctAnswer || '').replace(/"/g, '&quot;')}"></div>
+                        <div class="campo-latex"><input id="q_answer_${q.id}" type="text" placeholder="Ej: x=2" value="${(q.correctAnswer || '').replace(/"/g, '&quot;')}" oninput="actualizarVistaPreviaPregunta('${q.id}')"></div>
                     </div>
                 `;
             } else if (q.type === 'sa') {
                 camposTipo = `
-                    <div class="campo"><label>Respuesta correcta</label><div class="campo-latex"><input id="q_answer_${q.id}" type="text" placeholder="Ej: 2" value="${(q.correctAnswer || '').replace(/"/g, '&quot;')}"></div></div>
+                    <div class="campo"><label>Respuesta correcta</label><div class="campo-latex"><input id="q_answer_${q.id}" type="text" placeholder="Ej: 2" value="${(q.correctAnswer || '').replace(/"/g, '&quot;')}" oninput="actualizarVistaPreviaPregunta('${q.id}')"></div></div>
                     <div class="campo"><label>Palabras clave (separadas por coma)</label><input id="q_keywords_${q.id}" type="text" value="${(q.keywords || '').replace(/"/g, '&quot;')}" placeholder="Ej: función, lineal" style="font-size:0.9rem;"></div>
                 `;
             } else if (q.type === 'tf') {
                 camposTipo = `
                     <div style="display:flex;gap:12px;margin:6px 0;">
-                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><input type="radio" name="correct_${q.id}" value="0" ${q.correctIndex === 0 ? 'checked' : ''}> Verdadero</label>
-                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><input type="radio" name="correct_${q.id}" value="1" ${q.correctIndex === 1 ? 'checked' : ''}> Falso</label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><input type="radio" name="correct_${q.id}" value="0" ${q.correctIndex === 0 ? 'checked' : ''} onchange="actualizarVistaPreviaPregunta('${q.id}')"> Verdadero</label>
+                        <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;"><input type="radio" name="correct_${q.id}" value="1" ${q.correctIndex === 1 ? 'checked' : ''} onchange="actualizarVistaPreviaPregunta('${q.id}')"> Falso</label>
                     </div>
                 `;
             } else if (q.type === 'mc') {
                 camposTipo = `
                     <div id="opcionesMcContainer_${q.id}">
                         ${(q.options || []).map((op, o) => `
-                            <div class="option-row" style="display:flex;align-items:center;gap:8px;padding:3px 0;">
-                                <input type="radio" name="correct_${q.id}" value="${o}" ${o === q.correctIndex ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--amarillo);">
-                                <input id="q_opt_${q.id}_${o}" type="text" placeholder="Opción ${o + 1}" value="${(op || '').replace(/"/g, '&quot;')}" style="flex:1;padding:4px 8px;border:none;border-bottom:1px solid var(--papel-linea);outline:none;font-size:0.9rem;background:transparent;">
-                                ${q.options.length > 2 ? `<button type="button" class="btn-fantasma" onclick="eliminarOpcionMC('${q.id}', ${o})" style="font-size:0.68rem;padding:2px 8px;color:var(--prob);border-color:var(--prob);">Quitar</button>` : ''}
+                            <div class="option-row" style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid var(--papel-linea);">
+                                <input type="radio" name="correct_${q.id}" value="${o}" ${o === q.correctIndex ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--amarillo);margin-top:9px;flex-shrink:0;" onchange="actualizarVistaPreviaPregunta('${q.id}')">
+                                <div class="campo-latex compacto" style="flex:1;">
+                                    <input id="q_opt_${q.id}_${o}" type="text" placeholder="Opción ${o + 1} (puedes usar $...$ para matemática)" value="${(op || '').replace(/"/g, '&quot;')}" oninput="actualizarVistaPreviaPregunta('${q.id}')">
+                                </div>
+                                ${q.options.length > 2 ? `<button type="button" class="btn-fantasma" onclick="eliminarOpcionMC('${q.id}', ${o})" style="font-size:0.68rem;padding:2px 8px;color:var(--prob);border-color:var(--prob);margin-top:6px;flex-shrink:0;">Quitar</button>` : ''}
                             </div>
                         `).join('')}
                     </div>
                     ${q.options.length < 4 ? `<button type="button" class="btn-fantasma" onclick="agregarOpcionMC('${q.id}')" style="font-size:0.75rem;margin-top:6px;">+ Agregar opción</button>` : ''}
-                    <p style="color:var(--tinta-suave);font-size:0.75rem;margin-top:4px;">Mínimo 2 opciones, máximo 4.</p>
+                    <p style="color:var(--tinta-suave);font-size:0.75rem;margin-top:4px;">Mínimo 2 opciones, máximo 4. Puedes escribir fórmulas usando los botones del teclado matemático de cada opción, o escribiendo LaTeX entre signos de $ (ej: $x^2+1$). Mira la vista previa de abajo para ver cómo queda ya renderizado.</p>
                 `;
             } else if (q.type === 'grafica') {
                 camposTipo = `
@@ -3262,7 +3380,70 @@
                 `;
             }
 
-            return camposComunes + camposTipo;
+            const vistaPreviaHtml = `
+                <div class="vista-previa-pregunta">
+                    <p class="vista-previa-etiqueta">👁 Así se verá esta pregunta ya renderizada (lo que verá el estudiante, con las fórmulas ya "en limpio"):</p>
+                    <div id="vistaPreviaContenido_${q.id}"></div>
+                </div>
+            `;
+
+            return camposComunes + camposTipo + vistaPreviaHtml;
+        }
+
+        // Arma una versión de SOLO LECTURA de la pregunta (parecida a como la ve
+        // el estudiante en renderizarPreguntaToma, pero sin inputs funcionales)
+        // para que el profesor vea de un vistazo cómo queda el enunciado y las
+        // opciones YA renderizados con MathJax, en vez de tener que imaginarse
+        // cómo se ve el código LaTeX/$...$ que acaba de escribir.
+        function renderizarVistaPreviaPregunta(q) {
+            const puntos = q.puntos || 1;
+            const textoVacio = '<span style="color:var(--tinta-suave);font-style:italic;">(sin enunciado todavía)</span>';
+            const encabezado = `<p style="font-weight:600;margin-bottom:8px;">${q.text?.trim() ? q.text : textoVacio} <span style="font-weight:400;color:var(--tinta-suave);font-size:0.78rem;">(${puntos} pto${puntos === 1 ? '' : 's'})</span></p>`;
+            const imagen = q.imagenUrl ? `<img src="${q.imagenUrl}" alt="Imagen de la pregunta" class="pregunta-imagen-examen">` : '';
+
+            if (q.type === 'mc' || q.type === 'tf') {
+                const opciones = q.type === 'tf' ? ['Verdadero', 'Falso'] : (q.options || []);
+                return `<div class="tarjeta-plana">
+                    ${encabezado}${imagen}
+                    ${opciones.map((op, oi) => {
+                        const esCorrecta = oi === q.correctIndex;
+                        return `
+                        <div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.9rem;">
+                            <span style="width:15px;height:15px;border-radius:50%;border:2px solid ${esCorrecta ? 'var(--geo)' : 'var(--papel-linea)'};background:${esCorrecta ? 'var(--geo)' : 'transparent'};display:inline-block;flex-shrink:0;"></span>
+                            <span style="${esCorrecta ? 'font-weight:600;color:var(--geo);' : ''}">${op?.trim() ? op : `<span style="color:var(--tinta-suave);font-style:italic;">(opción ${oi + 1} vacía)</span>`}</span>
+                            ${esCorrecta ? '<span style="font-size:0.68rem;color:var(--geo);margin-left:auto;">✓ correcta (solo tú ves esta marca)</span>' : ''}
+                        </div>`;
+                    }).join('')}
+                </div>`;
+            }
+            if (q.type === 'sa' || q.type === 'desarrollo') {
+                return `<div class="tarjeta-plana">
+                    ${encabezado}${imagen}
+                    <p style="font-size:0.8rem;color:var(--tinta-suave);">${q.type === 'desarrollo' ? 'Aquí el estudiante escribirá su procedimiento y su respuesta final.' : 'Aquí el estudiante escribirá su respuesta.'}</p>
+                    ${q.correctAnswer?.trim() ? `<p style="font-size:0.85rem;margin-top:6px;padding-top:6px;border-top:1px dashed var(--papel-linea);"><strong>Respuesta esperada</strong> (solo la ves tú): ${q.correctAnswer}</p>` : ''}
+                </div>`;
+            }
+            if (q.type === 'grafica') {
+                return `<div class="tarjeta-plana">
+                    ${encabezado}${imagen}
+                    <p style="font-size:0.8rem;color:var(--tinta-suave);">El estudiante dibujará su respuesta en un plano cartesiano vacío. Usa la vista previa de más arriba (junto al criterio) para ver cómo luce tu función.</p>
+                </div>`;
+            }
+            return '';
+        }
+
+        // Vuelve a dibujar SOLO el panel de vista previa de una pregunta (sin
+        // tocar el resto del formulario, para no perder el foco/cursor mientras
+        // el profesor sigue escribiendo). Se llama en cada input/cambio relevante.
+        function actualizarVistaPreviaPregunta(id) {
+            const q = sincronizarPreguntaTempDesdeDOM(id);
+            if (!q) return;
+            const cont = document.getElementById(`vistaPreviaContenido_${id}`);
+            if (!cont) return;
+            cont.innerHTML = renderizarVistaPreviaPregunta(q);
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise([cont]).catch(() => {});
+            }
         }
 
         // Solo se puede tener UNA pregunta abierta para agregar/editar a la vez
@@ -3289,6 +3470,7 @@
                 configurarTeclados();
                 const qEdit = preguntasTemp.find(p => p.id === preguntaTempEnEdicionId);
                 if (qEdit && qEdit.type === 'grafica') actualizarPreviewGrafica(qEdit.id);
+                if (qEdit) actualizarVistaPreviaPregunta(qEdit.id);
             }, 200);
         }
 
