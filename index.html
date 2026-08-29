@@ -2018,7 +2018,7 @@
         <div class="modal" style="max-width:560px;">
             <button class="cerrar" onclick="cerrarRevision()">✕</button>
             <span class="eyebrow">Revisión</span>
-            <h3 style="margin-top:4px;font-size:1.2rem;">Revisar desarrollo de <span id="revisionEstudianteNombre">Estudiante</span></h3>
+            <h3 style="margin-top:4px;font-size:1.2rem;">Revisar respuestas de <span id="revisionEstudianteNombre">Estudiante</span></h3>
             <div id="revisionLista" style="margin-top:12px;"></div>
             <button class="btn-primario" onclick="guardarRevisionAttempt()" style="margin-top:10px;width:100%;">Guardar revisión</button>
         </div>
@@ -4070,8 +4070,24 @@
                     if (q.type === 'mc' || q.type === 'tf') {
                         if (resp !== undefined && parseInt(resp) === q.correctIndex) scoreBase += puntos;
                     } else if (q.type === 'sa') {
+                        // "Respuesta corta" se compara por texto exacto (normalizado), así que
+                        // una forma válida de escribirla que no esté en las palabras clave se
+                        // marcaría mal sin que nadie se dé cuenta. Por eso, igual que en
+                        // "desarrollo", esto es solo una nota PROVISIONAL: coincide/no-coincide
+                        // se usa como sugerencia inicial, pero el profesor siempre revisa y
+                        // confirma (o corrige) antes de que la nota cuente como definitiva.
                         const posibles = [q.correctAnswer, ...((q.keywords || '').split(','))].map(normalizar).filter(Boolean);
-                        if (posibles.includes(normalizar(resp))) scoreBase += puntos;
+                        const coincide = posibles.includes(normalizar(resp));
+                        pendiente = true;
+                        revisionDesarrollo.push({
+                            tipo: 'sa',
+                            preguntaId: q.id,
+                            enunciado: q.text,
+                            respuestaEstudiante: resp || '',
+                            respuestaEsperada: q.correctAnswer || '',
+                            puntosPosibles: puntos,
+                            otorgado: coincide
+                        });
                     } else if (q.type === 'grafica') {
                         const puntosEstudiante = Array.isArray(resp) ? resp : [];
                         if (puntosEstudiante.length >= 2 && typeof math !== 'undefined' && q.criterio) {
@@ -4102,6 +4118,7 @@
                         const coincide = normalizar(respuestaFinal) === normalizar(q.correctAnswer) && normalizar(respuestaFinal) !== '';
                         pendiente = true;
                         revisionDesarrollo.push({
+                            tipo: 'desarrollo',
                             preguntaId: q.id,
                             enunciado: q.text,
                             procedimiento: resp?.procedimiento || '',
@@ -4138,7 +4155,7 @@
                 respuestasTomaTemp = {};
                 if (esFinal) {
                     mostrarToast(pendiente
-                        ? `Examen definitivo entregado: ${scoreMostrado}/${total} en las preguntas ya calificables. Tu profesor revisará las de desarrollo.`
+                        ? `Examen definitivo entregado: ${scoreMostrado}/${total} en las preguntas ya calificables. Tu profesor revisará las de desarrollo y respuesta corta.`
                         : `¡Examen definitivo entregado! Obtuviste ${scoreMostrado}/${total}.`, 'success');
                 } else {
                     mostrarToast(`Práctica entregada: ${scoreMostrado}/${total}. Este intento no cuenta para tu nota; cuando quieras, presenta el definitivo con tiempo.`, 'info');
@@ -4169,11 +4186,15 @@
         const SIMBOLOS_LATEX = [
             { etiqueta: 'Fracción', insertar: '\\frac{}{}', cursorDesdeElFinal: 3 },
             { etiqueta: 'Raíz', insertar: '\\sqrt{}', cursorDesdeElFinal: 1 },
+            { etiqueta: 'Raíz (índice libre)', insertar: '\\sqrt[]{}', cursorDesdeElFinal: 3 },
             { etiqueta: 'Potencia', insertar: '^{}', cursorDesdeElFinal: 1 },
             { etiqueta: 'Subíndice', insertar: '_{}', cursorDesdeElFinal: 1 },
+            { etiqueta: '|x|', insertar: '\\left|\\right|', cursorDesdeElFinal: 7 },
             { etiqueta: 'sen', insertar: '\\sin()', cursorDesdeElFinal: 1 },
             { etiqueta: 'cos', insertar: '\\cos()', cursorDesdeElFinal: 1 },
             { etiqueta: 'tan', insertar: '\\tan()', cursorDesdeElFinal: 1 },
+            { etiqueta: 'ln', insertar: '\\ln()', cursorDesdeElFinal: 1 },
+            { etiqueta: 'log', insertar: '\\log()', cursorDesdeElFinal: 1 },
             { etiqueta: 'π', insertar: '\\pi', cursorDesdeElFinal: 0 },
             { etiqueta: 'θ', insertar: '\\theta', cursorDesdeElFinal: 0 },
             { etiqueta: '×', insertar: '\\times', cursorDesdeElFinal: 0 },
@@ -4184,7 +4205,18 @@
             { etiqueta: '≈', insertar: '\\approx', cursorDesdeElFinal: 0 },
             { etiqueta: '≠', insertar: '\\neq', cursorDesdeElFinal: 0 },
             { etiqueta: '°', insertar: '^{\\circ}', cursorDesdeElFinal: 0 },
-            { etiqueta: '∞', insertar: '\\infty', cursorDesdeElFinal: 0 }
+            { etiqueta: '∞', insertar: '\\infty', cursorDesdeElFinal: 0 },
+            { etiqueta: 'Δ (discriminante)', insertar: '\\Delta', cursorDesdeElFinal: 0 },
+            { etiqueta: 'Fórmula general', insertar: 'x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}', cursorDesdeElFinal: 0 },
+            { etiqueta: '∈', insertar: '\\in', cursorDesdeElFinal: 0 },
+            { etiqueta: '∉', insertar: '\\notin', cursorDesdeElFinal: 0 },
+            { etiqueta: '⊂', insertar: '\\subset', cursorDesdeElFinal: 0 },
+            { etiqueta: '∪', insertar: '\\cup', cursorDesdeElFinal: 0 },
+            { etiqueta: '∩', insertar: '\\cap', cursorDesdeElFinal: 0 },
+            { etiqueta: '∅', insertar: '\\emptyset', cursorDesdeElFinal: 0 },
+            { etiqueta: '→', insertar: '\\rightarrow', cursorDesdeElFinal: 0 },
+            { etiqueta: '∀', insertar: '\\forall', cursorDesdeElFinal: 0 },
+            { etiqueta: '∃', insertar: '\\exists', cursorDesdeElFinal: 0 }
         ];
 
         // Lista del ESTUDIANTE: símbolos que se insertan directo, sin pedir nada.
@@ -4199,7 +4231,18 @@
             { etiqueta: '≈', insertar: '\\approx' },
             { etiqueta: '≠', insertar: '\\neq' },
             { etiqueta: '°', insertar: '^{\\circ}' },
-            { etiqueta: '∞', insertar: '\\infty' }
+            { etiqueta: '∞', insertar: '\\infty' },
+            { etiqueta: 'Δ', insertar: '\\Delta' },
+            { etiqueta: 'Fórmula general', insertar: 'x=\\frac{-b\\pm\\sqrt{b^2-4ac}}{2a}' },
+            { etiqueta: '∈', insertar: '\\in' },
+            { etiqueta: '∉', insertar: '\\notin' },
+            { etiqueta: '⊂', insertar: '\\subset' },
+            { etiqueta: '∪', insertar: '\\cup' },
+            { etiqueta: '∩', insertar: '\\cap' },
+            { etiqueta: '∅', insertar: '\\emptyset' },
+            { etiqueta: '→', insertar: '\\rightarrow' },
+            { etiqueta: '∀', insertar: '\\forall' },
+            { etiqueta: '∃', insertar: '\\exists' }
         ];
 
         // Lista del ESTUDIANTE: símbolos que necesitan datos (abren un mini-formulario
@@ -4207,11 +4250,15 @@
         const SIMBOLOS_CON_DATOS_ESTUDIANTE = [
             { etiqueta: 'Fracción', tipo: 'fraccion' },
             { etiqueta: 'Raíz', tipo: 'raiz' },
+            { etiqueta: 'Raíz (índice libre)', tipo: 'raizIndice' },
             { etiqueta: 'Potencia', tipo: 'potencia' },
             { etiqueta: 'Subíndice', tipo: 'subindice' },
+            { etiqueta: '|x|', tipo: 'valorAbsoluto' },
             { etiqueta: 'sen', tipo: 'trig', funcion: '\\sin' },
             { etiqueta: 'cos', tipo: 'trig', funcion: '\\cos' },
-            { etiqueta: 'tan', tipo: 'trig', funcion: '\\tan' }
+            { etiqueta: 'tan', tipo: 'trig', funcion: '\\tan' },
+            { etiqueta: 'ln', tipo: 'funcion', funcion: '\\ln' },
+            { etiqueta: 'log', tipo: 'funcion', funcion: '\\log' }
         ];
 
         function configurarTeclados() {
@@ -4324,14 +4371,28 @@
             } else if (simbolo.tipo === 'raiz') {
                 titulo = '¿Qué va dentro de la raíz?';
                 camposHtml = `<input type="text" class="mini-input" data-campo="contenido" placeholder="Ej: 16 o x+1">`;
+            } else if (simbolo.tipo === 'raizIndice') {
+                titulo = 'Raíz con índice: elige tú el índice (2, 3, 4, n...) y qué va adentro';
+                camposHtml = `
+                    <input type="text" class="mini-input" data-campo="indice" placeholder="Índice (ej: 3, 4, n)">
+                    <input type="text" class="mini-input" data-campo="contenido" placeholder="Contenido (ej: 8 o x-1)">
+                `;
             } else if (simbolo.tipo === 'potencia') {
-                titulo = 'Potencia: escribe primero la base en tu respuesta y aquí solo el exponente';
-                camposHtml = `<input type="text" class="mini-input" data-campo="exp" placeholder="Exponente (ej: 2)">`;
+                titulo = 'Potencia: elige tú la base y el exponente (deja la base en blanco si ya la escribiste antes)';
+                camposHtml = `
+                    <input type="text" class="mini-input" data-campo="base" placeholder="Base (opcional, ej: x)">
+                    <input type="text" class="mini-input" data-campo="exp" placeholder="Exponente (ej: 2)">
+                `;
             } else if (simbolo.tipo === 'subindice') {
                 titulo = 'Subíndice: escribe primero la letra en tu respuesta y aquí solo el subíndice';
                 camposHtml = `<input type="text" class="mini-input" data-campo="sub" placeholder="Subíndice (ej: 1)">`;
-            } else if (simbolo.tipo === 'trig') {
-                titulo = `${simbolo.etiqueta}( ) — ¿cuál es el ángulo o argumento?`;
+            } else if (simbolo.tipo === 'valorAbsoluto') {
+                titulo = '¿Qué va dentro de las barras de valor absoluto?';
+                camposHtml = `<input type="text" class="mini-input" data-campo="contenido" placeholder="Ej: x-3">`;
+            } else if (simbolo.tipo === 'trig' || simbolo.tipo === 'funcion') {
+                titulo = simbolo.tipo === 'trig'
+                    ? `${simbolo.etiqueta}( ) — ¿cuál es el ángulo o argumento?`
+                    : `${simbolo.etiqueta}( ) — ¿qué va adentro?`;
                 camposHtml = `<input type="text" class="mini-input" data-campo="arg" placeholder="Ej: x o 30">`;
             }
             miniForm.innerHTML = `
@@ -4355,9 +4416,11 @@
                 let codigo = '';
                 if (simbolo.tipo === 'fraccion') codigo = `\\frac{${valores.num || ''}}{${valores.den || ''}}`;
                 else if (simbolo.tipo === 'raiz') codigo = `\\sqrt{${valores.contenido || ''}}`;
-                else if (simbolo.tipo === 'potencia') codigo = `^{${valores.exp || ''}}`;
+                else if (simbolo.tipo === 'raizIndice') codigo = `\\sqrt[${valores.indice || ''}]{${valores.contenido || ''}}`;
+                else if (simbolo.tipo === 'potencia') codigo = valores.base ? `{${valores.base}}^{${valores.exp || ''}}` : `^{${valores.exp || ''}}`;
                 else if (simbolo.tipo === 'subindice') codigo = `_{${valores.sub || ''}}`;
-                else if (simbolo.tipo === 'trig') codigo = `${simbolo.funcion}(${valores.arg || ''})`;
+                else if (simbolo.tipo === 'valorAbsoluto') codigo = `\\left|${valores.contenido || ''}\\right|`;
+                else if (simbolo.tipo === 'trig' || simbolo.tipo === 'funcion') codigo = `${simbolo.funcion}(${valores.arg || ''})`;
                 insertarEnCampo(codigo, 0);
                 miniForm.classList.add('oculto');
             });
@@ -5239,7 +5302,8 @@
         }
 
         // ============================================================
-        // REVISIÓN DE PREGUNTAS "DESARROLLO" (el profesor confirma los puntos)
+        // REVISIÓN DE PREGUNTAS "DESARROLLO" Y "RESPUESTA CORTA"
+        // (el profesor confirma los puntos que se dieron de forma provisional)
         // ============================================================
         async function abrirRevisionAttempt(attemptId) {
             try {
@@ -5259,20 +5323,31 @@
             const lista = revisionEnEdicion.revisionDesarrollo || [];
             document.getElementById('revisionEstudianteNombre').textContent = revisionEnEdicion.studentName || 'Estudiante';
             cont.innerHTML = lista.length === 0
-                ? '<p style="color:var(--tinta-suave);font-size:0.85rem;">Este intento no tiene preguntas de desarrollo pendientes.</p>'
-                : lista.map((r, i) => `
+                ? '<p style="color:var(--tinta-suave);font-size:0.85rem;">Este intento no tiene preguntas pendientes de revisión.</p>'
+                : lista.map((r, i) => {
+                    const esCorta = r.tipo === 'sa';
+                    const etiquetaTipo = esCorta ? 'Respuesta corta' : 'Desarrollo';
+                    const notaAuto = esCorta
+                        ? (r.otorgado
+                            ? '<p style="font-size:0.75rem;color:var(--geo);margin-top:4px;">✓ Coincide exactamente con la respuesta esperada (o una palabra clave) — se marcó correcta automáticamente, pero revísala por si acaso.</p>'
+                            : '<p style="font-size:0.75rem;color:var(--medidas);margin-top:4px;">⚠ No coincidió con el texto exacto esperado — puede que el estudiante la haya escrito bien mediante otra notación. Revisa antes de descartarla.</p>')
+                        : '';
+                    return `
                     <div class="tarjeta-plana" style="margin-bottom:8px;">
+                        <p style="font-size:0.7rem;color:var(--tinta-suave);text-transform:uppercase;letter-spacing:0.03em;margin-bottom:2px;">${etiquetaTipo}</p>
                         <p style="font-size:0.85rem;font-weight:600;">${r.enunciado}</p>
                         ${r.procedimiento ? `<p style="font-size:0.8rem;color:var(--tinta-suave);margin-top:6px;white-space:pre-wrap;"><strong>Procedimiento del estudiante:</strong><br>${r.procedimiento}</p>` : ''}
                         <p style="font-size:0.82rem;margin-top:6px;">Respuesta esperada: <strong>${r.respuestaEsperada || '(sin definir)'}</strong></p>
-                        <p style="font-size:0.82rem;margin-top:2px;">Respuesta final del estudiante: <strong>${r.respuestaEstudiante || '(sin responder)'}</strong></p>
+                        <p style="font-size:0.82rem;margin-top:2px;">Respuesta ${esCorta ? '' : 'final '}del estudiante: <strong>${r.respuestaEstudiante || '(sin responder)'}</strong></p>
+                        ${notaAuto}
                         <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;">
                             <span style="font-size:0.78rem;color:var(--tinta-suave);">${r.puntosPosibles} punto${r.puntosPosibles === 1 ? '' : 's'}:</span>
                             <button type="button" class="btn-fantasma revision-toggle ${r.otorgado ? 'activo-si' : ''}" onclick="cambiarOtorgadoRevision(${i}, true)">Otorgar puntos</button>
                             <button type="button" class="btn-fantasma revision-toggle ${!r.otorgado ? 'activo-no' : ''}" onclick="cambiarOtorgadoRevision(${i}, false)">No otorgar</button>
                         </div>
                     </div>
-                `).join('');
+                `;
+                }).join('');
         }
 
         function cambiarOtorgadoRevision(indice, valor) {
