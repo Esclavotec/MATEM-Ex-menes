@@ -2724,16 +2724,43 @@
                 return `
                     <div class="perfil-container">
                         <h4 style="margin-bottom:10px;font-size:1rem;">Días de clase</h4>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
                             <input type="date" id="inputNuevoDiaClase" style="flex:1;min-width:160px;padding:8px;border-radius:8px;border:1px solid var(--papel-linea);">
                             <button class="btn-primario" onclick="agregarDiaClase('${cursoId}')" style="padding:8px 16px;font-size:0.8rem;">Agregar día</button>
+                        </div>
+                        <div style="text-align:right;margin-bottom:10px;">
+                            <button class="btn-fantasma" onclick="togglePanelPeriodico()" id="botonTogglePeriodico" style="font-size:0.75rem;padding:4px 12px;">+ Agregar clases periódicas (semanal, quincenal, mensual...)</button>
+                        </div>
+                        <div id="panelDiasPeriodicos" class="oculto" style="background:var(--geo-suave);padding:12px;border-radius:8px;margin-bottom:14px;">
+                            <p style="font-size:0.78rem;color:var(--tinta-suave);margin-bottom:8px;">Genera varios días de clase de una vez, repitiendo desde una fecha inicial con la frecuencia que elijas.</p>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+                                <div style="flex:1;min-width:140px;">
+                                    <label style="font-size:0.72rem;display:block;margin-bottom:2px;">Desde</label>
+                                    <input type="date" id="inputInicioPeriodico" style="width:100%;padding:6px;border-radius:6px;border:1px solid var(--papel-linea);">
+                                </div>
+                                <div style="flex:1;min-width:140px;">
+                                    <label style="font-size:0.72rem;display:block;margin-bottom:2px;">Hasta</label>
+                                    <input type="date" id="inputFinPeriodico" style="width:100%;padding:6px;border-radius:6px;border:1px solid var(--papel-linea);">
+                                </div>
+                                <div style="flex:1;min-width:140px;">
+                                    <label style="font-size:0.72rem;display:block;margin-bottom:2px;">Frecuencia</label>
+                                    <select id="selectFrecuenciaPeriodico" style="width:100%;padding:6px;border-radius:6px;border:1px solid var(--papel-linea);">
+                                        <option value="semanal">Cada semana (7 días)</option>
+                                        <option value="quincenal">Cada 15 días</option>
+                                        <option value="mensual">Cada mes (mismo día)</option>
+                                        <option value="diaria">Todos los días</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn-primario" onclick="agregarDiasPeriodicos('${cursoId}')" style="font-size:0.8rem;padding:6px 16px;">Generar días</button>
+                            <p style="font-size:0.7rem;color:var(--tinta-suave);margin-top:6px;">Por seguridad, como máximo se generan 60 fechas de una vez.</p>
                         </div>
                         ${diasClase.length === 0 ? '<p style="color:var(--tinta-suave);font-size:0.85rem;">Todavía no has agregado días de clase para este curso.</p>' : `
                         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
                             ${diasClase.map(f => `
-                                <span onclick="seleccionarDiaAsistencia('${cursoId}','${f}')" style="cursor:pointer;padding:6px 10px;border-radius:999px;border:1px solid var(--papel-linea);font-size:0.78rem;display:inline-flex;align-items:center;gap:6px;${f === diaSel ? 'background:var(--acento);color:#fff;border-color:var(--acento);' : ''}">
-                                    ${formatearFecha(f)}
-                                    <span onclick="event.stopPropagation();eliminarDiaClase('${cursoId}','${f}')" title="Eliminar día" style="opacity:0.75;">✕</span>
+                                <span style="padding:4px 4px 4px 10px;border-radius:999px;border:1px solid var(--papel-linea);font-size:0.78rem;display:inline-flex;align-items:center;gap:2px;${f === diaSel ? 'background:var(--acento);color:#fff;border-color:var(--acento);' : ''}">
+                                    <span onclick="seleccionarDiaAsistencia('${cursoId}','${f}')" style="cursor:pointer;">${formatearFecha(f)}</span>
+                                    <button type="button" onclick="eliminarDiaClase('${cursoId}','${f}')" title="Eliminar día" style="cursor:pointer;border:none;background:rgba(0,0,0,0.12);color:inherit;border-radius:50%;width:20px;height:20px;line-height:1;font-size:0.8rem;margin-left:4px;">✕</button>
                                 </span>
                             `).join('')}
                         </div>`}
@@ -2777,14 +2804,23 @@
             `;
         }
 
+        // agregar/eliminar día usan arrayUnion/arrayRemove (operaciones ATÓMICAS del
+        // servidor) en vez de leer el arreglo completo y reescribirlo entero: antes,
+        // si "contenidoCursoActual" no estaba perfectamente al día en el navegador (por
+        // ejemplo justo después de abrir el curso, o con dos pestañas abiertas), el
+        // "eliminar" podía terminar reescribiendo el arreglo con datos desactualizados
+        // y el día borrado parecía "volver". arrayUnion/arrayRemove no tienen ese
+        // problema porque el servidor aplica el cambio directo sobre el valor real.
         async function agregarDiaClase(cursoId) {
             const input = document.getElementById('inputNuevoDiaClase');
             const fecha = input?.value;
             if (!fecha) return mostrarAdvertencia('Elige una fecha primero.');
             try {
+                await db.collection('courseContent').doc(cursoId).set({
+                    diasClase: firebase.firestore.FieldValue.arrayUnion(fecha)
+                }, { merge: true });
                 const contenido = mezclarContenidoCurso(CURSOS.find(c => c.id === cursoId));
                 const diasClase = Array.from(new Set([...(contenido.diasClase || []), fecha])).sort();
-                await db.collection('courseContent').doc(cursoId).set({ diasClase }, { merge: true });
                 contenidoCursoActual = { ...(contenidoCursoActual || {}), diasClase };
                 diaAsistenciaSeleccionado = fecha;
                 document.getElementById('contenidoCurso').innerHTML = renderizarAsistenciaCurso(cursoId);
@@ -2796,13 +2832,69 @@
 
         async function eliminarDiaClase(cursoId, fecha) {
             try {
+                await db.collection('courseContent').doc(cursoId).set({
+                    diasClase: firebase.firestore.FieldValue.arrayRemove(fecha)
+                }, { merge: true });
                 const contenido = mezclarContenidoCurso(CURSOS.find(c => c.id === cursoId));
                 const diasClase = (contenido.diasClase || []).filter(f => f !== fecha);
-                await db.collection('courseContent').doc(cursoId).set({ diasClase }, { merge: true });
                 contenidoCursoActual = { ...(contenidoCursoActual || {}), diasClase };
                 if (diaAsistenciaSeleccionado === fecha) diaAsistenciaSeleccionado = null;
                 document.getElementById('contenidoCurso').innerHTML = renderizarAsistenciaCurso(cursoId);
                 mostrarToast('Día de clase eliminado.', 'info');
+            } catch (error) {
+                mostrarAdvertencia(error);
+            }
+        }
+
+        function togglePanelPeriodico() {
+            document.getElementById('panelDiasPeriodicos')?.classList.toggle('oculto');
+        }
+
+        // Suma días/meses a una fecha 'YYYY-MM-DD' trabajando siempre en UTC, para
+        // que el resultado no cambie según la zona horaria del navegador (sumar en
+        // hora LOCAL puede saltarse o repetir un día cerca de medianoche).
+        function sumarDiasFechaUTC(fechaStr, dias) {
+            const [y, m, d] = fechaStr.split('-').map(Number);
+            const dt = new Date(Date.UTC(y, m - 1, d));
+            dt.setUTCDate(dt.getUTCDate() + dias);
+            return dt.toISOString().slice(0, 10);
+        }
+        function sumarMesesFechaUTC(fechaStr, meses) {
+            const [y, m, d] = fechaStr.split('-').map(Number);
+            const dt = new Date(Date.UTC(y, m - 1, d));
+            dt.setUTCMonth(dt.getUTCMonth() + meses);
+            return dt.toISOString().slice(0, 10);
+        }
+
+        async function agregarDiasPeriodicos(cursoId) {
+            const fechaInicio = document.getElementById('inputInicioPeriodico')?.value;
+            const fechaFin = document.getElementById('inputFinPeriodico')?.value;
+            const frecuencia = document.getElementById('selectFrecuenciaPeriodico')?.value || 'semanal';
+            if (!fechaInicio) return mostrarAdvertencia('Elige la fecha desde la que empiezan las clases periódicas.');
+            if (!fechaFin) return mostrarAdvertencia('Elige hasta qué fecha se repiten las clases.');
+            if (fechaFin < fechaInicio) return mostrarAdvertencia('La fecha "Hasta" debe ser igual o posterior a la fecha "Desde".');
+
+            const MAX_FECHAS = 60; // limite de seguridad: no generar cientos de fechas por un typo en las fechas
+            const fechas = [];
+            let actual = fechaInicio;
+            while (actual <= fechaFin && fechas.length < MAX_FECHAS) {
+                fechas.push(actual);
+                if (frecuencia === 'diaria') actual = sumarDiasFechaUTC(actual, 1);
+                else if (frecuencia === 'quincenal') actual = sumarDiasFechaUTC(actual, 15);
+                else if (frecuencia === 'mensual') actual = sumarMesesFechaUTC(actual, 1);
+                else actual = sumarDiasFechaUTC(actual, 7); // 'semanal' por defecto
+            }
+            if (fechas.length === 0) return mostrarAdvertencia('No se generó ninguna fecha con esos datos.');
+
+            try {
+                await db.collection('courseContent').doc(cursoId).set({
+                    diasClase: firebase.firestore.FieldValue.arrayUnion(...fechas)
+                }, { merge: true });
+                const contenido = mezclarContenidoCurso(CURSOS.find(c => c.id === cursoId));
+                const diasClase = Array.from(new Set([...(contenido.diasClase || []), ...fechas])).sort();
+                contenidoCursoActual = { ...(contenidoCursoActual || {}), diasClase };
+                document.getElementById('contenidoCurso').innerHTML = renderizarAsistenciaCurso(cursoId);
+                mostrarToast(`${fechas.length} día(s) de clase agregados.`, 'success');
             } catch (error) {
                 mostrarAdvertencia(error);
             }
@@ -3054,6 +3146,14 @@
                             <button class="btn-fantasma" onclick="agregarPreguntaTemp('${t.value}')" style="font-size:0.8rem;padding:6px 14px;">${t.label}</button>
                         `).join('')}
                     </div>
+                    <div style="text-align:right;margin-bottom:8px;">
+                        <button class="btn-fantasma" onclick="document.getElementById('panelImportarJSON').classList.toggle('oculto')" style="font-size:0.75rem;padding:4px 12px;">+ Importar preguntas desde JSON</button>
+                    </div>
+                    <div id="panelImportarJSON" class="oculto" style="background:var(--estadistica-suave);padding:12px;border-radius:8px;margin-bottom:14px;">
+                        <p style="font-size:0.78rem;color:var(--tinta-suave);margin-bottom:8px;">Pega aquí un examen ya preparado en formato JSON (por ejemplo, uno que te haya dado Claude al digitalizar un examen en PDF) para agregar varias preguntas de una sola vez, en vez de una por una.</p>
+                        <textarea id="inputImportarJSON" rows="5" placeholder='[{"type":"mc","text":"...","puntos":1,"options":["a","b","c","d"],"correctIndex":0}, ...]' style="width:100%;font-family:monospace;font-size:0.78rem;padding:8px;border-radius:6px;border:1px solid var(--papel-linea);"></textarea>
+                        <button class="btn-primario" onclick="importarPreguntasJSON()" style="margin-top:8px;font-size:0.8rem;padding:6px 16px;">Importar preguntas</button>
+                    </div>
                     <p style="color:var(--tinta-suave);font-size:0.8rem;">Puntaje total del examen: <strong>${puntajeTotal} punto${puntajeTotal === 1 ? '' : 's'}</strong></p>
                     <div id="preguntasContainer">
                         ${preguntasTemp.length === 0 ? '<p style="color:var(--tinta-suave);font-size:0.85rem;">No hay preguntas agregadas.</p>' : ''}
@@ -3203,6 +3303,68 @@
             preguntasTemp.push(q);
             preguntaTempEnEdicionId = q.id;
             rerenderFormExamenCompleto();
+        }
+
+        // Agrega muchas preguntas de una sola vez a partir de un JSON pegado por el
+        // profesor (por ejemplo, un examen digitalizado desde un PDF). Acepta un
+        // arreglo de preguntas directamente, o un objeto { title, questions: [...] }
+        // (en cuyo caso también rellena el título del examen si estaba vacío).
+        // Cada pregunta sigue la misma forma que ya usa internamente el examen:
+        // { type, text, puntos, options/correctIndex (mc y tf), correctAnswer/keywords
+        // (sa), correctAnswer (desarrollo), criterio/rango (grafica) }.
+        function importarPreguntasJSON() {
+            const campoTexto = document.getElementById('inputImportarJSON');
+            const texto = campoTexto?.value;
+            if (!texto || !texto.trim()) return mostrarAdvertencia('Pega el JSON con las preguntas antes de importar.');
+            let datos;
+            try {
+                datos = JSON.parse(texto);
+            } catch (e) {
+                return mostrarAdvertencia('Ese texto no es JSON válido. Revisa que esté bien formado (llaves, comillas y comas en los lugares correctos).');
+            }
+            const lista = Array.isArray(datos) ? datos : (Array.isArray(datos?.questions) ? datos.questions : null);
+            if (!lista) return mostrarAdvertencia('El JSON debe ser un arreglo de preguntas, o un objeto con una propiedad "questions" que sea un arreglo.');
+
+            const tiposValidos = TIPOS_PREGUNTA.map(t => t.value);
+            let agregadas = 0;
+            const errores = [];
+            lista.forEach((raw, i) => {
+                if (!raw || !tiposValidos.includes(raw.type)) {
+                    errores.push(`Pregunta ${i + 1}: tipo "${raw?.type}" no reconocido.`);
+                    return;
+                }
+                const q = {
+                    id: Date.now().toString() + '_' + i + '_' + Math.floor(Math.random() * 100000),
+                    type: raw.type,
+                    text: (raw.text || '').toString(),
+                    puntos: Math.max(1, parseInt(raw.puntos) || 1),
+                    imagenUrl: raw.imagenUrl || ''
+                };
+                if (raw.type === 'mc' || raw.type === 'tf') {
+                    q.options = Array.isArray(raw.options) && raw.options.length >= 2 ? raw.options.slice(0, 4).map(String) : ['Verdadero', 'Falso'];
+                    q.correctIndex = Number.isInteger(raw.correctIndex) ? raw.correctIndex : 0;
+                } else if (raw.type === 'sa') {
+                    q.correctAnswer = raw.correctAnswer || '';
+                    q.keywords = raw.keywords || '';
+                } else if (raw.type === 'desarrollo') {
+                    q.correctAnswer = raw.correctAnswer || '';
+                } else if (raw.type === 'grafica') {
+                    q.criterio = raw.criterio || '';
+                    q.rango = raw.rango && typeof raw.rango === 'object'
+                        ? { xMin: -10, xMax: 10, yMin: -10, yMax: 10, ...raw.rango }
+                        : { xMin: -10, xMax: 10, yMin: -10, yMax: 10 };
+                }
+                preguntasTemp.push(q);
+                agregadas++;
+            });
+
+            const campoTitulo = document.getElementById('examTitulo');
+            if (campoTitulo && !campoTitulo.value.trim() && datos?.title) campoTitulo.value = datos.title;
+
+            campoTexto.value = '';
+            rerenderFormExamenCompleto();
+            if (agregadas > 0) mostrarToast(`${agregadas} pregunta(s) importada(s). Revísalas antes de guardar el examen.`, 'success');
+            if (errores.length > 0) mostrarAdvertencia(errores.join('\n'), 'Algunas preguntas no se pudieron importar');
         }
 
         // Reabre una pregunta YA guardada (de este examen, sea nuevo o ya
